@@ -267,6 +267,5 @@ class BaseTool(ABC):
 ## References
 
 - mobile-mcp source: `/Users/byte/workspace/forks/mobile-mcp/src/`
-- u2wda-mcp source (old, for architecture reference): `/Users/byte/workspace/projects/u2wda-mcp/src/u2wda_mcp/`
 - pymobiledevice3 docs: https://doronz88.github.io/pymobiledevice3/
 - uiautomator2 docs: https://github.com/openatx/uiautomator2
