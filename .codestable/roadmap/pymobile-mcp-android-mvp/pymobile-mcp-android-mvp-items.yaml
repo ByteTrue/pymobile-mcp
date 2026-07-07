@@ -1,0 +1,59 @@
+roadmap: pymobile-mcp-android-mvp
+created: 2026-07-07
+
+items:
+  - slug: contract-registry-scaffold
+    description: 建立 Python 包骨架、MCP stdio server、mobile-mcp 源码中的 23 个常驻核心工具 registry、手写 schema parity fixture 和统一结构化错误；所有工具可被 list_tools 看到，未实现时稳定失败
+    depends_on: []
+    status: in-progress
+    feature: 2026-07-07-contract-registry-scaffold
+    minimal_loop: false
+    notes: 外部契约锚点；不要求真实设备成功；字段名、必填项、annotations 先被 contract test 固定
+
+  - slug: android-live-ui-slice
+    description: 用已连接 Android 真机跑通 list_devices、screen_size、screenshot、elements、tap、swipe、type 的最小 UI 自动化闭环，并留下最小 smoke 命令/README 当前状态
+    depends_on: [contract-registry-scaffold]
+    status: in-progress
+    feature: 2026-07-07-android-live-ui-slice
+    minimal_loop: true
+    notes: 首个可演示闭环；需要 live smoke 证据和可复跑步骤
+
+  - slug: android-app-system-tools
+    description: 补齐 Android app lifecycle、orientation、button、open_url、save_screenshot 等非 recording 系统工具
+    depends_on: [android-live-ui-slice]
+    status: in-progress
+    feature: 2026-07-07-android-app-system-tools
+    minimal_loop: false
+    notes: 优先复用 AndroidDriver，不新增工具层分支
+
+  - slug: android-recording-crash-tools
+    description: 实现或明确降级 Android screen recording 与 crash report 工具，并保证 unsupported 场景可解释
+    depends_on: [android-live-ui-slice]
+    status: in-progress
+    feature: 2026-07-07-android-recording-crash-tools
+    minimal_loop: false
+    notes: crash report 来源需在 feature-design 做最小验证；拿不到可靠来源就返回 unsupported_platform
+
+  - slug: ios-pmd3-wda-core
+    description: 用 pymobiledevice3 tunnel 和 WDA 打通 iOS discovery、screenshot、elements（内部可读取 WDA source）、tap、swipe、type、screen size/orientation
+    depends_on: [contract-registry-scaffold]
+    status: in-progress
+    feature: 2026-07-07-ios-pmd3-wda-core
+    minimal_loop: false
+    notes: 最高风险条目；需要先用最小 live/spike 证明 WDA client 调用路径
+
+  - slug: ios-app-recording-crash-parity
+    description: 在 iOS core driver 基础上补 app lifecycle、recording/crash 能力或稳定 unsupported 行为
+    depends_on: [ios-pmd3-wda-core]
+    status: in-progress
+    feature: 2026-07-07-ios-app-recording-crash-parity
+    minimal_loop: false
+    notes: 不引入 go-ios；pymobiledevice3 无直接能力时必须显式记录降级
+
+  - slug: parity-hardening-docs
+    description: 收口契约测试、live smoke 文档、README 能力状态表、安装/调试说明和已知限制
+    depends_on: [android-app-system-tools, android-recording-crash-tools, ios-app-recording-crash-parity]
+    status: in-progress
+    feature: 2026-07-07-parity-hardening-docs
+    minimal_loop: false
+    notes: 对照 mobile-mcp 源码工具 schema 和实际实现生成最终能力矩阵；KICKOFF 仅作技术栈背景，不作契约来源

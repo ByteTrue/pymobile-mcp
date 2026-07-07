@@ -1,0 +1,64 @@
+feature: 2026-07-07-contract-registry-scaffold
+created: 2026-07-07
+
+steps:
+  - action: "包骨架：创建 src/pymobile_mcp、CLI 入口和可导入 server 空壳"
+    exit_signal: "python can import pymobile_mcp.cli and pymobile_mcp.server without ImportError"
+    status: pending
+  - action: "契约 manifest：录入 mobile-mcp 23 个常驻 core tools 的 ToolSpec"
+    exit_signal: "contract test sees exactly 23 expected tool names and no remote/page_source extras"
+    status: pending
+  - action: "stub handler：为所有 core tools 接入可调用的 not_implemented handler"
+    exit_signal: "all 23 registered tools return structured JSON error with code not_implemented when called via stub handler"
+    status: pending
+  - action: "schema parity：补齐字段、枚举、必填/可选和 annotations fixture"
+    exit_signal: "schema parity test passes for all 23 core tools"
+    status: pending
+  - action: "错误转换：统一未知工具、未实现工具、已知业务异常到 MCP text content"
+    exit_signal: "pytest covers unknown tool, not_implemented, invalid_argument envelopes"
+    status: pending
+
+checks:
+  - item: "list_tools returns 23 mobile-mcp core tools only"
+    source: 验收场景
+    status: pending
+  - item: "tool registry does not expose mobile_get_page_source or remote fleet tools"
+    source: 范围守护
+    status: pending
+  - item: "ToolSpec manifest includes bundle_id, saveTo, submit, orientation, direction parity fields"
+    source: 名词契约
+    status: pending
+  - item: "schema parity fixture records mobile-mcp server.ts reference path and git revision/date"
+    source: 名词契约
+    status: pending
+    source: 名词契约
+    status: pending
+  - item: "unimplemented handlers return structured not_implemented JSON text"
+    source: 流程级约束
+    status: pending
+  - item: "tool registry layer does not import uiautomator2 or pymobiledevice3"
+    source: 范围守护
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-002
+      command: "python -m pip install -e ."
+      core: false
+      failure_handling: fix-or-block
+    - id: CMD-003
+      command: "python -c 'from pymobile_mcp.cli import main'"
+      core: true
+      failure_handling: fix-or-block
+      command: "python -m pip install -e ."
+      core: false
+      failure_handling: fix-or-block
+  evidence_required: [command_output, diff_summary, schema_fixture, schema_source_revision]
+  cleanliness:
+    debug_output: forbidden
+    temporary_todo: forbidden
+    unused_imports: forbidden

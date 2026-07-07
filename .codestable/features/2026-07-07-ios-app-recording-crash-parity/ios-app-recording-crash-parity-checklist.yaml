@@ -1,0 +1,59 @@
+feature: 2026-07-07-ios-app-recording-crash-parity
+created: 2026-07-07
+
+steps:
+  - action: "capability spikes：验证 PMD3 app lifecycle, recording, crash 能力"
+    exit_signal: "each capability has implemented-or-unsupported evidence"
+    status: pending
+  - action: "app lifecycle：实现 iOS app tools or stable unsupported"
+    exit_signal: "list/launch/terminate/install/uninstall behavior is tested or returns documented unsupported_platform"
+    status: pending
+  - action: "recording：实现 iOS recording tools or stable unsupported"
+    exit_signal: "start/stop recording state machine works or returns documented unsupported_platform"
+    status: pending
+  - action: "crash：实现 iOS crash tools or stable unsupported"
+    exit_signal: "list/get crash behavior has smoke/spike evidence and never fakes empty success"
+    status: pending
+  - action: "能力矩阵候选：记录 iOS app/recording/crash 支持状态和限制"
+    exit_signal: "parity-hardening can consume a clear support/unsupported matrix"
+    status: pending
+
+checks:
+  - item: "iOS app lifecycle preserves public schema and avoids go-ios/mobilecli"
+    source: 范围守护
+    status: pending
+  - item: "iOS recording follows ActiveRecording duplicate/no-active semantics or stable unsupported; if implemented, output path safety matches Android recording (cwd/temp, .mp4 extension)"
+    source: 流程级约束
+    status: pending
+    source: 流程级约束
+    status: pending
+  - item: "iOS crash list/get has real source or stable unsupported, not fake empty success"
+    source: 验收场景
+    status: pending
+  - item: "capability spike results are recorded for app, recording, and crash"
+    source: 验收场景
+    status: pending
+  - item: "public tool schema remains mobile-mcp compatible, including optional locale? on mobile_launch_app"
+    source: 名词契约
+    status: pending
+  - item: "no go-ios or mobilecli imports in iOS parity code"
+    source: 范围守护
+    status: pending
+    source: 名词契约
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-IOS-PARITY-001
+      command: "iOS app/recording/crash smoke or unsupported checks"
+      core: true
+      failure_handling: fix-or-block-or-document-unsupported
+  evidence_required: [command_output, ios_capability_spike_notes, ability_matrix]
+  cleanliness:
+    go_ios_dependency: forbidden
+    checked_in_device_private_data: forbidden
+    hardcoded_bundle_id: forbidden

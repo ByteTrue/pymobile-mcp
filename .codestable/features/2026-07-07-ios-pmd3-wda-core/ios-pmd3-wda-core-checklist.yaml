@@ -1,0 +1,57 @@
+feature: 2026-07-07-ios-pmd3-wda-core
+created: 2026-07-07
+
+prerequisite: "contract-registry-scaffold must be accepted; BaseDriver/DriverFactory must be available before core implementation (spike may proceed independently)"
+
+steps:
+  - action: "PMD3/WDA spike：验证 iOS device discovery and WDA screenshot or screen size"
+    exit_signal: "there is real iOS smoke evidence or a reproducible environment blocker"
+    status: pending
+  - action: "连接生命周期：实现 IOSDriver connect/disconnect/tunnel/WDA client management"
+    exit_signal: "repeated calls reuse or safely recreate the iOS WDA session"
+    status: pending
+  - action: "只读能力：实现 iOS screenshot, screen size, orientation"
+    exit_signal: "iOS live smoke returns valid screenshot or size/orientation data"
+    status: pending
+  - action: "元素列表：map WDA source tree to ScreenElement list"
+    exit_signal: "mobile_list_elements_on_screen returns iOS elements with coordinates without exposing raw source"
+    status: pending
+  - action: "交互能力：实现 iOS tap, double_tap, long_press, swipe, type_keys"
+    exit_signal: "safe iOS interaction smoke completes or returns actionable structured driver errors"
+    status: pending
+  - action: "证据与限制：记录 iOS 环境前置、复跑步骤和已知限制"
+    exit_signal: "QA/acceptance can cite iOS smoke evidence or blocker details"
+    status: pending
+
+checks:
+  - item: "IOSDriver does not depend on go-ios or mobilecli"
+    source: 范围守护
+    status: pending
+  - item: "iOS discovery returns DeviceInfo or explicit environment blocker"
+    source: 验收场景
+    status: pending
+  - item: "WDA source is only internal input for mobile_list_elements_on_screen"
+    source: 名词契约
+    status: pending
+  - item: "screenshot/screen size/orientation use same public tool schema as Android"
+    source: 编排骨架
+    status: pending
+  - item: "iOS app/recording/crash remains out of scope"
+    source: 范围守护
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-IOS-CORE-001
+      command: "iOS PMD3/WDA core live smoke: list_devices → screenshot → list_elements → tap via MCP client or pytest live test"
+      core: true
+      failure_handling: fix-or-block-or-document-environment-blocker
+  evidence_required: [command_output, ios_spike_notes, live_smoke_notes, environment_blocker_details]
+  cleanliness:
+    hardcoded_udid: forbidden
+    checked_in_credentials: forbidden
+    go_ios_dependency: forbidden

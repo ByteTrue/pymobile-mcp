@@ -1,0 +1,64 @@
+feature: 2026-07-07-android-recording-crash-tools
+created: 2026-07-07
+
+steps:
+  - action: "状态与校验：实现 ActiveRecording and output/timeLimit validation"
+    exit_signal: "pytest covers duplicate start, stop without active recording, safe output path, invalid extension"
+    status: pending
+  - action: "Recording start/stop：接入 Android recording backend"
+    exit_signal: "Android live smoke can start and stop recording and produce an MP4 or actionable backend error"
+    status: pending
+  - action: "清理路径：处理 stop/异常状态清理和设备端临时文件"
+    exit_signal: "duplicate start and repeated stop behavior are predictable and active state is cleared after stop/error"
+    status: pending
+  - action: "Crash spike：验证 Android crash report 来源可靠性"
+    exit_signal: "there is documented evidence to implement crash tools or return unsupported_platform"
+    status: pending
+  - action: "Crash handler：实现 list/get crash or stable unsupported"
+    exit_signal: "crash list/get behavior is covered by tests or QA evidence and never fakes empty success"
+    status: pending
+
+checks:
+  - item: "recording start validates .mp4 output and safe host path"
+    source: 流程级约束
+    status: pending
+  - item: "duplicate start and no-active stop return structured errors"
+    source: 验收场景
+    status: pending
+  - item: "stop recording clears ActiveRecording state; error/timeout paths also clean state and device temp files"
+    source: 编排骨架
+    status: pending
+  - item: "per-device asyncio.Lock protects concurrent start/stop recording calls"
+    source: 流程级约束
+    status: pending
+  - item: "invalid timeLimit (<=0, non-int) returns structured error"
+    source: 流程级约束
+    status: pending
+    source: 编排骨架
+    status: pending
+  - item: "Android crash tools have real source or stable unsupported_platform"
+    source: 验收场景
+    status: pending
+  - item: "iOS recording/crash remains out of scope"
+    source: 范围守护
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-ANDROID-REC-001
+      command: "Android recording smoke: start_recording → wait → stop_recording via MCP client, verify MP4 output"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-ANDROID-CRASH-001
+      command: "Android crash spike: call list_crashes and verify implemented or unsupported_platform"
+      core: true
+      failure_handling: document-or-block
+  evidence_required: [command_output, recording_file_or_error, crash_spike_notes]
+  cleanliness:
+    orphan_device_recordings: forbidden
+    unsafe_path_bypass: forbidden
+    swallowed_process_errors: forbidden
