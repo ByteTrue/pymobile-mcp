@@ -1,0 +1,38 @@
+{
+  "source": {
+    "path": "/Users/byte/workspace/forks/mobile-mcp/src/server.ts",
+    "git_revision": "c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7",
+    "captured_date": "2026-07-08"
+  },
+  "excluded_tools": [
+    "mobile_get_page_source",
+    "mobile_list_remote_devices",
+    "mobile_allocate_remote_device",
+    "mobile_release_remote_device"
+  ],
+  "tools": [
+    {"name": "mobile_list_available_devices", "required": [], "optional": [], "readOnlyHint": true},
+    {"name": "mobile_list_apps", "required": ["device"], "optional": [], "readOnlyHint": true},
+    {"name": "mobile_launch_app", "required": ["device", "packageName"], "optional": ["locale"], "destructiveHint": true},
+    {"name": "mobile_terminate_app", "required": ["device", "packageName"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_install_app", "required": ["device", "path"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_uninstall_app", "required": ["device", "bundle_id"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_get_screen_size", "required": ["device"], "optional": [], "readOnlyHint": true},
+    {"name": "mobile_click_on_screen_at_coordinates", "required": ["device", "x", "y"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_double_tap_on_screen", "required": ["device", "x", "y"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_long_press_on_screen_at_coordinates", "required": ["device", "x", "y"], "optional": ["duration"], "destructiveHint": true},
+    {"name": "mobile_list_elements_on_screen", "required": ["device"], "optional": [], "readOnlyHint": true},
+    {"name": "mobile_press_button", "required": ["device", "button"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_open_url", "required": ["device", "url"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_swipe_on_screen", "required": ["device", "direction"], "optional": ["x", "y", "distance"], "enum": {"direction": ["up", "down", "left", "right"]}, "destructiveHint": true},
+    {"name": "mobile_type_keys", "required": ["device", "text", "submit"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_save_screenshot", "required": ["device", "saveTo"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_take_screenshot", "required": ["device"], "optional": [], "readOnlyHint": true, "content_kind": "image"},
+    {"name": "mobile_set_orientation", "required": ["device", "orientation"], "optional": [], "enum": {"orientation": ["portrait", "landscape"]}, "destructiveHint": true},
+    {"name": "mobile_get_orientation", "required": ["device"], "optional": [], "readOnlyHint": true},
+    {"name": "mobile_start_screen_recording", "required": ["device"], "optional": ["output", "timeLimit"], "destructiveHint": true},
+    {"name": "mobile_stop_screen_recording", "required": ["device"], "optional": [], "destructiveHint": true},
+    {"name": "mobile_list_crashes", "required": ["device"], "optional": [], "readOnlyHint": true},
+    {"name": "mobile_get_crash", "required": ["device", "id"], "optional": [], "readOnlyHint": true}
+  ]
+}

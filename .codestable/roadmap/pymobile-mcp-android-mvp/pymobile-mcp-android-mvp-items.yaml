@@ -5,7 +5,7 @@ items:
   - slug: contract-registry-scaffold
     description: 建立 Python 包骨架、MCP stdio server、mobile-mcp 源码中的 23 个常驻核心工具 registry、手写 schema parity fixture 和统一结构化错误；所有工具可被 list_tools 看到，未实现时稳定失败
     depends_on: []
-    status: in-progress
+    status: done
     feature: 2026-07-07-contract-registry-scaffold
     minimal_loop: false
     notes: 外部契约锚点；不要求真实设备成功；字段名、必填项、annotations 先被 contract test 固定

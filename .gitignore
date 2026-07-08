@@ -1,0 +1,5 @@
+.venv/
+.pi-subagents/
+*.egg-info/
+__pycache__/
+*.pyc

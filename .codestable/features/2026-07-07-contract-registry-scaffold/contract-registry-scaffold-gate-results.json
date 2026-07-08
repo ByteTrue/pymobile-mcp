@@ -1,0 +1,30 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [
+    "archguard/meta-cc collection disabled in evidence pack; review and QA recorded this as non-blocking provider fallback",
+    "ocr llm test unavailable; independent Paseo review completed and is recorded in review report"
+  ],
+  "evidence": [
+    {
+      "scope_gate": ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-scope-gate-results.json",
+      "scope_gate_status": "passed",
+      "dod_results": ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-dod-results.json",
+      "dod_status": "passed",
+      "evidence_pack_results": ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-evidence-pack-results.json",
+      "evidence_pack_status": "passed",
+      "review": ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-review.md",
+      "review_status": "passed",
+      "qa": ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-qa.md",
+      "qa_status": "passed",
+      "checklist": ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-checklist.yaml",
+      "checklist_steps": "done",
+      "checklist_checks": "passed",
+      "roadmap_item": "contract-registry-scaffold",
+      "roadmap_item_status": "done"
+    }
+  ],
+  "providers": {}
+}

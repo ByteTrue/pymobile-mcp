@@ -346,8 +346,8 @@ active_recordings: dict[str, ActiveRecording]
 1. **contract-registry-scaffold** — 建立 Python 包骨架、MCP stdio server、23 个 mobile-mcp 常驻核心工具的 registry、手写 schema parity fixture 和统一结构化错误；所有工具可被 `list_tools` 看到，未实现时稳定失败。
    - 所属模块：MCP Server / Tool Registry、Tool Execution Layer、Driver Contract
    - 依赖：无
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：done
+   - 对应 feature：2026-07-07-contract-registry-scaffold
    - 备注：不要求真实设备成功；重点是外部契约不再漂移，字段名/必填项/annotations 先被 contract test 固定。
 
 2. **android-live-ui-slice** — 用已连接 Android 真机跑通 `list_devices → screen_size → screenshot → elements → tap/swipe/type`，形成首个真实闭环，并留下最小 smoke 命令/README 当前状态。

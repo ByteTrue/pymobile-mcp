@@ -1,0 +1,39 @@
+{
+  "gate_id": "scope-gate",
+  "stage": "implementation.before_review",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "changed_files": [
+        ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-checklist.yaml",
+        ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-evidence-pack.md",
+        ".gitignore",
+        "src/pymobile_mcp/__init__.py",
+        "src/pymobile_mcp/cli.py",
+        "src/pymobile_mcp/drivers/__init__.py",
+        "src/pymobile_mcp/drivers/base.py",
+        "src/pymobile_mcp/errors.py",
+        "src/pymobile_mcp/server.py",
+        "src/pymobile_mcp/tools/__init__.py",
+        "src/pymobile_mcp/tools/registry.py",
+        "src/pymobile_mcp/tools/specs.py",
+        "tests/fixtures/mobile_mcp_core_tools.json",
+        "tests/test_contract_registry.py"
+      ],
+      "ignored_machine_artifacts": [
+        ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-dod-results.json",
+        ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-evidence-pack-results.json",
+        ".codestable/features/2026-07-07-contract-registry-scaffold/contract-registry-scaffold-scope-gate-results.json"
+      ],
+      "allowed_prefixes": [
+        ".codestable/features/2026-07-07-contract-registry-scaffold",
+        ".gitignore",
+        "src",
+        "tests"
+      ]
+    }
+  ],
+  "providers": {}
+}

@@ -1,0 +1,37 @@
+{
+  "gate_id": "dod-runner",
+  "stage": "implementation.before_review",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "command": "python -m pytest",
+      "exit_code": 0,
+      "stdout": "============================= test session starts ==============================\nplatform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0\nrootdir: /Users/byte/workspace/projects/pymobile-mcp-android-mvp-goal\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, anyio-4.14.1, asyncio-1.4.0, xonsh-0.24.0\nasyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\ncollected 36 items\n\ntests/test_contract_registry.py ....................................     [100%]\n\n============================== 36 passed in 0.39s ==============================\n",
+      "stderr": "/Users/byte/workspace/projects/pymobile-mcp-android-mvp-goal/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:299: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n",
+      "id": "CMD-001",
+      "core": true,
+      "failure_handling": "fix-or-block"
+    },
+    {
+      "command": "python -m pip install -e .",
+      "exit_code": 0,
+      "stdout": "-py>=2.2.0->rich>=13.8.0->typer>=0.25->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (0.1.2)\nRequirement already satisfied: lxml in ./.venv/lib/python3.14/site-packages (from uiautomator2>=3.2.0->pymobile-mcp==0.1.0) (6.1.1)\nRequirement already satisfied: humanfriendly>=9.1 in ./.venv/lib/python3.14/site-packages (from coloredlogs->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (10.0)\nRequirement already satisfied: ipython-pygments-lexers>=1.0.0 in ./.venv/lib/python3.14/site-packages (from IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (1.1.1)\nRequirement already satisfied: jedi>=0.18.2 in ./.venv/lib/python3.14/site-packages (from IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (0.20.0)\nRequirement already satisfied: matplotlib-inline>=0.1.6 in ./.venv/lib/python3.14/site-packages (from IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (0.2.2)\nRequirement already satisfied: pexpect>4.6 in ./.venv/lib/python3.14/site-packages (from IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (4.9.0)\nRequirement already satisfied: stack_data>=0.6.0 in ./.venv/lib/python3.14/site-packages (from IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (0.6.3)\nRequirement already satisfied: traitlets>=5.13.0 in ./.venv/lib/python3.14/site-packages (from IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (5.15.1)\nRequirement already satisfied: parso<0.9.0,>=0.8.6 in ./.venv/lib/python3.14/site-packages (from jedi>=0.18.2->IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (0.8.7)\nRequirement already satisfied: ptyprocess>=0.5 in ./.venv/lib/python3.14/site-packages (from pexpect>4.6->IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (0.7.0)\nRequirement already satisfied: executing>=1.2.0 in ./.venv/lib/python3.14/site-packages (from stack_data>=0.6.0->IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (2.2.1)\nRequirement already satisfied: asttokens>=2.1.0 in ./.venv/lib/python3.14/site-packages (from stack_data>=0.6.0->IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (3.0.1)\nRequirement already satisfied: pure-eval in ./.venv/lib/python3.14/site-packages (from stack_data>=0.6.0->IPython->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (0.2.3)\nRequirement already satisfied: arrow in ./.venv/lib/python3.14/site-packages (from opack2->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (1.4.0)\nRequirement already satisfied: python-dateutil>=2.7.0 in ./.venv/lib/python3.14/site-packages (from arrow->opack2->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (2.9.0.post0)\nRequirement already satisfied: tzdata in ./.venv/lib/python3.14/site-packages (from arrow->opack2->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (2026.2)\nRequirement already satisfied: six>=1.5 in ./.venv/lib/python3.14/site-packages (from python-dateutil>=2.7.0->arrow->opack2->pymobiledevice3>=9.0.0->pymobile-mcp==0.1.0) (1.17.0)\nRequirement already satisfied: charset_normalizer<4,>=2 in ./.venv/lib/python3.14/site-packages (from requests->adbutils>=2.8.10->pymobile-mcp==0.1.0) (3.4.9)\nRequirement already satisfied: urllib3<3,>=1.26 in ./.venv/lib/python3.14/site-packages (from requests->adbutils>=2.8.10->pymobile-mcp==0.1.0) (2.7.0)\nBuilding wheels for collected packages: pymobile-mcp\n  Building editable for pymobile-mcp (pyproject.toml): started\n  Building editable for pymobile-mcp (pyproject.toml): finished with status 'done'\n  Created wheel for pymobile-mcp: filename=pymobile_mcp-0.1.0-0.editable-py3-none-any.whl size=2118 sha256=c15342283df1b56874ebaf40d644872641c24831f881398fb762de6fbd09f538\n  Stored in directory: /private/var/folders/yq/z6tlpk3s71n_rww1dxhy9lfc0000gn/T/pip-ephem-wheel-cache-ax1oq2l2/wheels/23/53/6a/04feb8106ce90533cd7c4ab35783681ac9b69aa5a993776777\nSuccessfully built pymobile-mcp\nInstalling collected packages: pymobile-mcp\n  Attempting uninstall: pymobile-mcp\n    Found existing installation: pymobile-mcp 0.1.0\n    Uninstalling pymobile-mcp-0.1.0:\n      Successfully uninstalled pymobile-mcp-0.1.0\nSuccessfully installed pymobile-mcp-0.1.0\n",
+      "stderr": "",
+      "id": "CMD-002",
+      "core": false,
+      "failure_handling": "fix-or-block"
+    },
+    {
+      "command": "python -c 'from pymobile_mcp.cli import main'",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "id": "CMD-003",
+      "core": true,
+      "failure_handling": "fix-or-block"
+    }
+  ],
+  "providers": {}
+}
