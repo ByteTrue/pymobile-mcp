@@ -6,47 +6,45 @@ prerequisite: "contract-registry-scaffold must be accepted before implementation
 steps:
   - action: "发现设备：实现 Android discovery 并接入 mobile_list_available_devices"
     exit_signal: "connected Android device appears with platform android and online state"
-    status: pending
+    status: done
   - action: "截图与尺寸：实现 get_screen_size and take_screenshot handlers through AndroidDriver"
     exit_signal: "screen size has positive width/height and screenshot returns valid MCP image content"
-    status: pending
+    status: done
   - action: "元素列表：实现 UIAutomator-backed get_elements_on_screen"
     exit_signal: "mobile_list_elements_on_screen returns elements with coordinates fields"
-    status: pending
+    status: done
   - action: "坐标交互：实现 tap, double_tap, long_press, swipe"
     exit_signal: "safe coordinate operations complete without driver_error on live Android device"
-    status: pending
+    status: done
   - action: "文本输入：实现 ASCII type_keys and submit behavior"
     exit_signal: "focused input receives ASCII text and submit sends Enter when requested"
-    status: pending
+    status: done
   - action: "live smoke 证据：记录 Android MVP 复跑步骤和结果"
     exit_signal: "acceptance can cite device id, commands/actions, screenshot/elements evidence, and pytest output"
-    status: pending
+    status: done
 
 checks:
   - item: "mobile_list_available_devices returns connected Android device"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "mobile_take_screenshot returns image content and mobile_get_screen_size returns positive dimensions"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "mobile_list_elements_on_screen returns filtered elements with coordinates, not raw XML"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "tap, double_tap, long_press, swipe, type_keys all call AndroidDriver and convert errors to structured envelopes"
     source: 编排骨架
-    status: pending
+    status: passed
   - item: "mobile_list_elements_on_screen returns elements with type, coordinates, and stable field semantics (text/label/name/value/identifier/focused)"
     source: 名词契约
-    status: pending
-    source: 编排骨架
-    status: pending
+    status: passed
   - item: "public tool list still excludes mobile_get_page_source"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "live smoke is blocked, not passed, when no authorized Android device is available"
     source: 流程级约束
-    status: pending
+    status: passed
 
 dod:
   commands:
@@ -55,7 +53,7 @@ dod:
       core: true
       failure_handling: fix-or-block
     - id: CMD-ANDROID-001
-      command: "Android live smoke: list_devices → screen_size → screenshot → list_elements → click → swipe → type_keys via MCP client or pytest live test"
+      command: "PYMOBILE_MCP_ANDROID_ACTIONS=1 PATH=.venv/bin:$PATH python tests/android_live_smoke.py"
       core: true
       failure_handling: fix-or-block
   evidence_required: [command_output, screenshot, live_smoke_notes]

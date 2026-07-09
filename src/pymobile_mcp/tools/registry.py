@@ -5,14 +5,15 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Sequence
 from typing import Any
 
-from mcp.types import TextContent
+from mcp.types import ImageContent, TextContent
 
 from pymobile_mcp.errors import DriverError, InvalidArgumentError, NotImplementedToolError, ToolError
 
 from .specs import CORE_TOOL_SPECS, ToolSpec
+from .android import register_android_handlers
 
 TOOLS_BY_NAME = {spec.name: spec for spec in CORE_TOOL_SPECS}
-ToolHandler = Callable[[dict[str, Any]], Awaitable[Sequence[TextContent]]]
+ToolHandler = Callable[[dict[str, Any]], Awaitable[Sequence[TextContent | ImageContent]]]
 TOOL_HANDLERS: dict[str, ToolHandler] = {}
 
 
@@ -36,6 +37,9 @@ def unregister_tool_handler(name: str) -> None:
     TOOL_HANDLERS.pop(name, None)
 
 
+register_android_handlers(register_tool_handler)
+
+
 def _validate_args(spec: ToolSpec, args: dict[str, Any]) -> None:
     schema = spec.input_schema
     properties = schema.get("properties", {})
@@ -54,7 +58,7 @@ def _validate_args(spec: ToolSpec, args: dict[str, Any]) -> None:
         if allowed is not None and value not in allowed:
             raise InvalidArgumentError(spec.name, f"Invalid value for {field}: {value}", {"field": field, "allowed": allowed})
 
-async def call_tool(name: str, args: dict[str, Any] | None = None) -> Sequence[TextContent]:
+async def call_tool(name: str, args: dict[str, Any] | None = None) -> Sequence[TextContent | ImageContent]:
     try:
         spec = get_tool_spec(name)
         arguments = args or {}

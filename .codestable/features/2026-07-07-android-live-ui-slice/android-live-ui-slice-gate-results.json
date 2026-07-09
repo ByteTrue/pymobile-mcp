@@ -1,0 +1,37 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [
+    "archguard/meta-cc collection disabled in evidence pack; review and QA recorded this as non-blocking provider fallback",
+    "ocr llm test unavailable; independent Paseo review completed and is recorded in review report",
+    "pytest_asyncio emitted a non-blocking default fixture loop-scope deprecation warning"
+  ],
+  "evidence": [
+    {
+      "scope_gate": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-scope-gate-results.json",
+      "scope_gate_status": "passed",
+      "dod_results": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-dod-results.json",
+      "dod_status": "passed",
+      "evidence_pack_results": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-evidence-pack-results.json",
+      "evidence_pack_status": "passed",
+      "dod_contract_results": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-dod-contract-results.json",
+      "dod_contract_status": "passed",
+      "review": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-review.md",
+      "review_status": "passed",
+      "qa": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-qa.md",
+      "qa_status": "passed",
+      "acceptance": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-acceptance.md",
+      "acceptance_status": "passed",
+      "live_smoke": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-live-smoke.md",
+      "live_smoke_status": "passed",
+      "checklist": ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-checklist.yaml",
+      "checklist_steps": "done",
+      "checklist_checks": "passed",
+      "roadmap_item": "android-live-ui-slice",
+      "roadmap_item_status": "done"
+    }
+  ],
+  "providers": {}
+}

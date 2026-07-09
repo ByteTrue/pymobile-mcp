@@ -353,8 +353,8 @@ active_recordings: dict[str, ActiveRecording]
 2. **android-live-ui-slice** — 用已连接 Android 真机跑通 `list_devices → screen_size → screenshot → elements → tap/swipe/type`，形成首个真实闭环，并留下最小 smoke 命令/README 当前状态。
    - 所属模块：Android Driver、Tool Execution Layer、Verification / Docs
    - 依赖：`contract-registry-scaffold`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：done
+   - 对应 feature：2026-07-07-android-live-ui-slice
    - 备注：本条是最小闭环；需要 live smoke 证据。
 
 3. **android-app-system-tools** — 补齐 Android app lifecycle、orientation、button、open_url、save_screenshot 等非 recording 系统工具。

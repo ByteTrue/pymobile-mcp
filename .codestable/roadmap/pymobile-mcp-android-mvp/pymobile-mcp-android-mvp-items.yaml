@@ -13,7 +13,7 @@ items:
   - slug: android-live-ui-slice
     description: 用已连接 Android 真机跑通 list_devices、screen_size、screenshot、elements、tap、swipe、type 的最小 UI 自动化闭环，并留下最小 smoke 命令/README 当前状态
     depends_on: [contract-registry-scaffold]
-    status: in-progress
+    status: done
     feature: 2026-07-07-android-live-ui-slice
     minimal_loop: true
     notes: 首个可演示闭环；需要 live smoke 证据和可复跑步骤

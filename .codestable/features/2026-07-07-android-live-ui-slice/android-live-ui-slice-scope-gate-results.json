@@ -1,0 +1,30 @@
+{
+  "gate_id": "scope-gate",
+  "stage": "implementation.before_review",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "changed_files": [
+        ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-checklist.yaml",
+        ".codestable/roadmap/pymobile-mcp-android-mvp/goal-state.yaml",
+        "src/pymobile_mcp/tools/registry.py",
+        "tests/test_contract_registry.py",
+        ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-implementation-blocked.md",
+        ".codestable/features/2026-07-07-android-live-ui-slice/android-live-ui-slice-live-smoke.md",
+        "src/pymobile_mcp/drivers/android.py",
+        "src/pymobile_mcp/tools/android.py",
+        "tests/android_live_smoke.py"
+      ],
+      "ignored_machine_artifacts": [],
+      "allowed_prefixes": [
+        ".codestable/features/2026-07-07-android-live-ui-slice",
+        "src",
+        "tests",
+        ".codestable/roadmap/pymobile-mcp-android-mvp/goal-state.yaml"
+      ]
+    }
+  ],
+  "providers": {}
+}

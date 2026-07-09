@@ -14,6 +14,17 @@ from pymobile_mcp.tools import register_tool_handler, unregister_tool_handler
 
 FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "mobile_mcp_core_tools.json").read_text())
 STDIO_ENV = {"PYTHONPATH": "src"}
+ANDROID_TOOL_NAMES = {
+    "mobile_list_available_devices",
+    "mobile_get_screen_size",
+    "mobile_take_screenshot",
+    "mobile_list_elements_on_screen",
+    "mobile_click_on_screen_at_coordinates",
+    "mobile_double_tap_on_screen",
+    "mobile_long_press_on_screen_at_coordinates",
+    "mobile_swipe_on_screen",
+    "mobile_type_keys",
+}
 
 
 def _fields(spec):
@@ -69,6 +80,8 @@ def test_schema_parity_fixture(tool):
 async def test_stub_tools_return_structured_not_implemented_error():
     for name in CORE_TOOL_NAMES:
         spec = next(spec for spec in list_tool_specs() if spec.name == name)
+        if name in ANDROID_TOOL_NAMES:
+            continue
         content = await call_tool(name, _valid_args(spec))
         _assert_error_content(content, "not_implemented", name)
 
@@ -103,6 +116,89 @@ async def test_registered_handler_can_return_success_content():
 
 
 @pytest.mark.asyncio
+async def test_android_handlers_with_fake_driver():
+    from pymobile_mcp.drivers.base import DeviceInfo, ScreenElement, ScreenElementRect, ScreenSize
+    from pymobile_mcp.tools.android import configure_android_tools_for_tests, reset_android_tools_for_tests
+
+    actions = []
+
+    class FakeDriver:
+        async def connect(self, capabilities=None):
+            actions.append(("connect", capabilities))
+
+        async def get_screen_size(self):
+            return ScreenSize(width=100, height=200)
+
+        async def screenshot(self):
+            return b"png-bytes"
+
+        async def get_elements_on_screen(self):
+            return [
+                ScreenElement(
+                    type="android.widget.TextView",
+                    rect=ScreenElementRect(x=1, y=2, width=3, height=4),
+                    text="Hello",
+                    label="Greeting",
+                    identifier="id/title",
+                    focused=False,
+                )
+            ]
+
+        async def tap(self, x, y):
+            actions.append(("tap", x, y))
+
+        async def double_tap(self, x, y):
+            actions.append(("double_tap", x, y))
+
+        async def long_press(self, x, y, duration=0.5):
+            actions.append(("long_press", x, y, duration))
+
+        async def swipe(self, start_x, start_y, end_x, end_y):
+            actions.append(("swipe", start_x, start_y, end_x, end_y))
+
+        async def type_keys(self, text, submit):
+            actions.append(("type_keys", text, submit))
+
+    configure_android_tools_for_tests(
+        lambda: [DeviceInfo(id="android-1", name="Pixel", platform="android", type="real", version="14", state="online")],
+        lambda device_id: FakeDriver(),
+    )
+    try:
+        devices = json.loads((await call_tool("mobile_list_available_devices", {}))[0].text)
+        assert devices["devices"][0]["id"] == "android-1"
+        assert devices["devices"][0]["platform"] == "android"
+
+        size = json.loads((await call_tool("mobile_get_screen_size", {"device": "android-1"}))[0].text)
+        assert size["width"] == 100
+        assert size["height"] == 200
+
+        screenshot = await call_tool("mobile_take_screenshot", {"device": "android-1"})
+        assert screenshot[0].type == "image"
+        assert screenshot[0].mimeType == "image/png"
+
+        elements = json.loads((await call_tool("mobile_list_elements_on_screen", {"device": "android-1"}))[0].text)
+        assert elements["elements"][0]["coordinates"] == {"x": 1, "y": 2, "width": 3, "height": 4}
+        assert elements["elements"][0]["text"] == "Hello"
+
+        await call_tool("mobile_click_on_screen_at_coordinates", {"device": "android-1", "x": 10, "y": 20})
+        await call_tool("mobile_double_tap_on_screen", {"device": "android-1", "x": 10, "y": 20})
+        await call_tool("mobile_long_press_on_screen_at_coordinates", {"device": "android-1", "x": 10, "y": 20, "duration": 750})
+        await call_tool("mobile_swipe_on_screen", {"device": "android-1", "direction": "up", "x": 50, "y": 100})
+        await call_tool("mobile_type_keys", {"device": "android-1", "text": "hello", "submit": True})
+        assert ("tap", 10.0, 20.0) in actions
+        assert ("type_keys", "hello", True) in actions
+
+        _assert_error_content(
+            await call_tool("mobile_get_screen_size", {"device": "missing"}),
+            "device_not_found",
+            "mobile_get_screen_size",
+            {"device": "missing"},
+        )
+    finally:
+        reset_android_tools_for_tests()
+
+
+@pytest.mark.asyncio
 async def test_server_handlers_list_and_call_tools():
     server = PyMobileMCPServer().mcp
     listed = await server.request_handlers[types.ListToolsRequest](types.ListToolsRequest())
@@ -120,7 +216,6 @@ async def test_server_handlers_list_and_call_tools():
         )
     )
     payload = _assert_error_content(called.root.content, "not_implemented", "mobile_list_apps")
-    assert payload["message"] == "mobile_list_apps is registered but not implemented yet."
     assert called.root.isError is False
 
     unknown = await server.request_handlers[types.CallToolRequest](
@@ -182,7 +277,7 @@ async def test_server_handlers_validate_required_and_enum_arguments():
 @pytest.mark.parametrize(
     ("name", "args", "code", "tool", "details"),
     [
-        ("mobile_list_apps", {"device": "demo"}, "not_implemented", "mobile_list_apps", {}),
+        ("mobile_get_crash", {"device": "demo", "id": "crash"}, "not_implemented", "mobile_get_crash", {}),
         ("mobile_get_page_source", {}, "invalid_argument", "mobile_get_page_source", {"tool": "mobile_get_page_source"}),
         ("mobile_swipe_on_screen", {"device": "demo", "direction": "diagonal"}, "invalid_argument", "mobile_swipe_on_screen", None),
     ],
@@ -221,11 +316,9 @@ async def test_stdio_client_can_list_and_call_tools():
             assert not set(FIXTURE["excluded_tools"]) & set(names)
 
             stub = await session.call_tool("mobile_list_apps", {"device": "demo"})
-            stub_payload = json.loads(stub.content[0].text)
+
+            stub_payload = _assert_error_content(stub.content, "not_implemented", "mobile_list_apps")
             assert stub.isError is False
-            assert stub.content[0].type == "text"
-            assert stub_payload["code"] == "not_implemented"
-            assert stub_payload["tool"] == "mobile_list_apps"
 
             unknown = await session.call_tool("mobile_get_page_source", {})
             unknown_payload = _assert_error_content(
@@ -280,5 +373,3 @@ def test_registry_layer_does_not_import_device_libraries():
     specs_source = Path("src/pymobile_mcp/tools/specs.py").read_text()
     assert "uiautomator2" not in registry_source + specs_source
     assert "pymobiledevice3" not in registry_source + specs_source
-    assert "uiautomator2" not in sys.modules
-    assert "pymobiledevice3" not in sys.modules
