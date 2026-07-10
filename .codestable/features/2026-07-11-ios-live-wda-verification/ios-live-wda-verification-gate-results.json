@@ -1,0 +1,9 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": ["DTX channel cancel noise during XCUITest startup is benign"],
+  "evidence": [{"pytest":"42 passed","live_smoke":"passed","review":"passed","qa":"passed","acceptance":"passed"}],
+  "providers": {}
+}

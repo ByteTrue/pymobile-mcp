@@ -5,10 +5,10 @@ items:
   - slug: ios-live-wda-verification
     description: 用配对 iOS 设备 + 可达 WDA 把 core UI live smoke 从 blocked-by-env 推进到 passed，并固化复跑步骤
     depends_on: []
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-07-11-ios-live-wda-verification
     minimal_loop: true
-    notes: 前置条件是用户提供已信任 iPhone 与 WDA(host/port)；无设备则 handoff，不算通过
+    notes: pure pmd3 UserspaceRsdTunnel + WdaServiceClient; process-wide tunnel singleton
 
   - slug: ios-system-helpers-parity
     description: 补齐 iOS press_button、open_url、save_screenshot 的实现或 stable unsupported 证据

@@ -1,273 +1,321 @@
-"""iOS driver via pymobiledevice3 discovery + WebDriverAgent HTTP client."""
+"""iOS driver via pure pymobiledevice3 (userspace tunnel + WDA service client).
+
+No external iOS CLI runtime dependency. For iOS 17+, connects with
+`establish_userspace_rsd` (no root). Talks to WebDriverAgent through
+`WdaServiceClient` over the service connection, not localhost:8100.
+"""
 
 from __future__ import annotations
 
 import asyncio
-import base64
-import json
 import os
+from contextlib import suppress
 from typing import Any
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from xml.etree import ElementTree as ET
 
 from pymobile_mcp.errors import DriverError, UnsupportedPlatformError
 
 from .base import BaseDriver, DeviceInfo, ScreenElement, ScreenElementRect, ScreenSize
 
-DEFAULT_WDA_HOST = os.environ.get("PYMOBILE_MCP_WDA_HOST", "127.0.0.1")
 DEFAULT_WDA_PORT = int(os.environ.get("PYMOBILE_MCP_WDA_PORT", "8100"))
+DEFAULT_XCTRUNNER = os.environ.get(
+    "PYMOBILE_MCP_WDA_XCTRUNNER",
+    "com.byte.WebDriverAgentRunner.xctrunner",
+)
+
+# Process-wide userspace tunnel: PyTCP allows only one active tunnel per process.
+_PROCESS_TUNNEL: Any | None = None
+_PROCESS_RSD: Any | None = None
+_PROCESS_TUNNEL_DEVICE: str | None = None
+_PROCESS_TUNNEL_LOCK = asyncio.Lock()
+
+
+async def _shared_userspace_rsd(device_id: str) -> Any:
+    global _PROCESS_TUNNEL, _PROCESS_RSD, _PROCESS_TUNNEL_DEVICE
+    async with _PROCESS_TUNNEL_LOCK:
+        if _PROCESS_RSD is not None and _PROCESS_TUNNEL_DEVICE == device_id:
+            return _PROCESS_RSD
+        if _PROCESS_TUNNEL is not None and _PROCESS_TUNNEL_DEVICE != device_id:
+            with suppress(Exception):
+                await _PROCESS_TUNNEL.aclose()
+            _PROCESS_TUNNEL = None
+            _PROCESS_RSD = None
+            _PROCESS_TUNNEL_DEVICE = None
+        from pymobiledevice3.remote.userspace_tunnel import UserspaceRsdTunnel
+
+        tunnel = UserspaceRsdTunnel(serial=device_id)
+        rsd = await tunnel.aopen()
+        _PROCESS_TUNNEL = tunnel
+        _PROCESS_RSD = rsd
+        _PROCESS_TUNNEL_DEVICE = device_id
+        return rsd
 
 
 def list_ios_devices() -> list[DeviceInfo]:
+    """Best-effort usbmux discovery. Safe from sync contexts."""
     try:
-        return asyncio.run(_list_ios_devices_async())
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(_list_ios_devices_async())
+        # Already inside an event loop (MCP handlers). Use a worker thread.
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(lambda: asyncio.run(_list_ios_devices_async())).result(timeout=15)
     except Exception:
-        # usbmux/lockdown unavailable or not paired — discovery stays empty, not a hard crash
         return []
 
 
 async def _list_ios_devices_async() -> list[DeviceInfo]:
+    from pymobiledevice3.lockdown import create_using_usbmux
     from pymobiledevice3.usbmux import list_devices
 
     devices: list[DeviceInfo] = []
     for device in await list_devices():
-        serial = getattr(device, "serial", None) or getattr(device, "udid", None) or str(device)
-        connection_type = str(getattr(device, "connection_type", "") or "").lower()
-        is_network = "network" in connection_type
+        serial = str(getattr(device, "serial", None) or getattr(device, "udid", None) or device)
+        name = serial
+        version = "unknown"
+        try:
+            lockdown = await create_using_usbmux(serial=serial)
+            vals = getattr(lockdown, "all_values", {}) or {}
+            name = str(vals.get("DeviceName") or serial)
+            version = str(vals.get("ProductVersion") or "unknown")
+        except Exception:
+            pass
         devices.append(
             DeviceInfo(
-                id=str(serial),
-                name=str(serial),
+                id=serial,
+                name=name,
                 platform="ios",
-                type="simulator" if "simulator" in str(serial).lower() else "real",
-                version="unknown",
+                type="simulator" if "simulator" in serial.lower() else "real",
+                version=version,
                 state="online",
             )
         )
-        if is_network:
-            # keep name as serial; type already real
-            pass
     return devices
 
 
-class WdaClient:
-    def __init__(self, host: str = DEFAULT_WDA_HOST, port: int = DEFAULT_WDA_PORT) -> None:
-        self.host = host
-        self.port = port
-
-    @property
-    def base(self) -> str:
-        return f"http://{self.host}:{self.port}"
-
-    def _request(self, method: str, path: str, body: dict[str, Any] | None = None) -> Any:
-        data = None if body is None else json.dumps(body).encode("utf-8")
-        req = Request(
-            f"{self.base}{path}",
-            data=data,
-            method=method,
-            headers={"Content-Type": "application/json"} if body is not None else {},
-        )
-        try:
-            with urlopen(req, timeout=30) as response:
-                raw = response.read().decode("utf-8")
-                return json.loads(raw) if raw else {}
-        except HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise DriverError("ios", f"WDA {method} {path} failed: HTTP {exc.code} {detail}") from exc
-        except URLError as exc:
-            raise DriverError(
-                "ios",
-                f"WDA not reachable at {self.base}: {exc.reason}. "
-                "Start WebDriverAgent and set PYMOBILE_MCP_WDA_HOST/PORT if needed.",
-            ) from exc
-
-    def is_running(self) -> bool:
-        try:
-            payload = self._request("GET", "/status")
-        except DriverError:
-            return False
-        value = payload.get("value") or {}
-        return bool(value.get("ready") is True or payload.get("sessionId") or value.get("message"))
-
-    def create_session(self) -> str:
-        payload = self._request(
-            "POST",
-            "/session",
-            {"capabilities": {"alwaysMatch": {"platformName": "iOS"}}},
-        )
-        value = payload.get("value") or {}
-        session_id = value.get("sessionId") or payload.get("sessionId")
-        if not session_id:
-            raise DriverError("ios", f"Invalid WDA session response: {payload}")
-        return str(session_id)
-
-    def delete_session(self, session_id: str) -> None:
-        try:
-            self._request("DELETE", f"/session/{session_id}")
-        except DriverError:
-            pass
-
-    def screenshot_png(self) -> bytes:
-        payload = self._request("GET", "/screenshot")
-        value = payload.get("value")
-        if not value:
-            raise DriverError("ios", "WDA screenshot returned empty value")
-        return base64.b64decode(value)
-
-    def screen_size(self) -> ScreenSize:
-        session_id = self.create_session()
-        try:
-            payload = self._request("GET", f"/session/{session_id}/wda/screen")
-            value = payload.get("value") or {}
-            size = value.get("screenSize") or value
-            return ScreenSize(
-                width=int(size["width"]),
-                height=int(size["height"]),
-                scale=float(value.get("scale") or 1.0),
+def parse_wda_source(node: dict[str, Any] | None, elements: list[ScreenElement] | None = None) -> list[ScreenElement]:
+    if elements is None:
+        elements = []
+    if not isinstance(node, dict):
+        return elements
+    rect = node.get("rect") or {}
+    try:
+        x = float(rect.get("x", 0))
+        y = float(rect.get("y", 0))
+        width = float(rect.get("width", 0))
+        height = float(rect.get("height", 0))
+    except (TypeError, ValueError):
+        x = y = width = height = 0.0
+    if width > 0 and height > 0:
+        label = node.get("label")
+        name = node.get("name")
+        value = None if node.get("value") is None else str(node.get("value"))
+        identifier = node.get("rawIdentifier") or name
+        # Skip pure containers without identity (keeps matrix elements useful).
+        if label or name or value or identifier:
+            elements.append(
+                ScreenElement(
+                    type=str(node.get("type") or node.get("class") or "unknown"),
+                    rect=ScreenElementRect(x=x, y=y, width=width, height=height),
+                    label=label,
+                    name=name,
+                    value=value,
+                    text=label or name or value,
+                    identifier=identifier,
+                    focused=bool(node.get("focused") or False),
+                )
             )
-        finally:
-            self.delete_session(session_id)
+    for child in node.get("children") or []:
+        parse_wda_source(child, elements)
+    return elements
 
-    def page_source_tree(self) -> dict[str, Any]:
-        payload = self._request("GET", "/source/?format=json")
-        return payload
 
-    def orientation(self) -> str:
-        session_id = self.create_session()
+def parse_wda_source_xml(xml_text: str) -> list[ScreenElement]:
+    """Parse WDA /source XML into ScreenElement list."""
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError:
+        return []
+    elements: list[ScreenElement] = []
+
+    def walk(el: ET.Element) -> None:
+        attrib = el.attrib
         try:
-            payload = self._request("GET", f"/session/{session_id}/orientation")
-            value = str(payload.get("value") or "").upper()
-            return "landscape" if "LANDSCAPE" in value else "portrait"
-        finally:
-            self.delete_session(session_id)
-
-    def set_orientation(self, orientation: str) -> None:
-        session_id = self.create_session()
-        try:
-            value = "LANDSCAPE" if orientation == "landscape" else "PORTRAIT"
-            self._request("POST", f"/session/{session_id}/orientation", {"orientation": value})
-        finally:
-            self.delete_session(session_id)
-
-    def tap(self, x: float, y: float) -> None:
-        session_id = self.create_session()
-        try:
-            self._request("POST", f"/session/{session_id}/actions", _pointer_tap(x, y))
-        finally:
-            self.delete_session(session_id)
-
-    def double_tap(self, x: float, y: float) -> None:
-        session_id = self.create_session()
-        try:
-            self._request("POST", f"/session/{session_id}/wda/doubleTap", {"x": x, "y": y})
-        finally:
-            self.delete_session(session_id)
-
-    def long_press(self, x: float, y: float, duration: float) -> None:
-        session_id = self.create_session()
-        try:
-            self._request(
-                "POST",
-                f"/session/{session_id}/wda/touchAndHold",
-                {"x": x, "y": y, "duration": duration},
+            x = float(attrib.get("x", 0))
+            y = float(attrib.get("y", 0))
+            width = float(attrib.get("width", 0))
+            height = float(attrib.get("height", 0))
+        except ValueError:
+            x = y = width = height = 0.0
+        if width > 0 and height > 0:
+            label = attrib.get("label")
+            name = attrib.get("name")
+            value = attrib.get("value")
+            elements.append(
+                ScreenElement(
+                    type=el.tag or attrib.get("type") or "unknown",
+                    rect=ScreenElementRect(x=x, y=y, width=width, height=height),
+                    label=label,
+                    name=name,
+                    value=value,
+                    text=label or name or value,
+                    identifier=name or attrib.get("rawIdentifier"),
+                    focused=str(attrib.get("focused", "false")).lower() == "true",
+                )
             )
-        finally:
-            self.delete_session(session_id)
+        for child in list(el):
+            walk(child)
 
-    def swipe(self, start_x: float, start_y: float, end_x: float, end_y: float) -> None:
-        session_id = self.create_session()
-        try:
-            self._request(
-                "POST",
-                f"/session/{session_id}/actions",
-                _pointer_swipe(start_x, start_y, end_x, end_y),
-            )
-        finally:
-            self.delete_session(session_id)
-
-    def type_keys(self, text: str) -> None:
-        session_id = self.create_session()
-        try:
-            self._request("POST", f"/session/{session_id}/wda/keys", {"value": [text]})
-        finally:
-            self.delete_session(session_id)
+    walk(root)
+    return elements
 
 
 class IOSDriver(BaseDriver):
     platform = "ios"
 
-    def __init__(self, device_id: str, wda: WdaClient | None = None) -> None:
+    def __init__(self, device_id: str, wda: Any | None = None) -> None:
+        # `wda` is accepted for tests (fake object with is_running / methods).
         self.device_id = device_id
-        self._wda = wda or WdaClient()
+        self._fake_wda = wda
+        self._rsd: Any | None = None
+        self._tunnel: Any | None = None
+        self._client: Any | None = None
+        self._session_id: str | None = None
+        self._xct_task: asyncio.Task[Any] | None = None
         self._connected = False
+        self._lock = asyncio.Lock()
 
     async def connect(self, capabilities: dict[str, Any] | None = None) -> None:
         del capabilities
-        running = await asyncio.to_thread(self._wda.is_running)
-        if not running:
-            raise DriverError(
-                "ios",
-                f'WDA is not ready for device "{self.device_id}" at {self._wda.base}. '
-                "Install/start WebDriverAgent, ensure pymobiledevice3 tunnel/forward if needed, "
-                "and set PYMOBILE_MCP_WDA_HOST/PORT.",
-                {"device": self.device_id, "wda": self._wda.base},
-            )
-        self._connected = True
+        if self._fake_wda is not None:
+            running = self._fake_wda.is_running() if callable(getattr(self._fake_wda, "is_running", None)) else True
+            if not running:
+                raise DriverError("ios", f'Fake WDA not ready for device "{self.device_id}"')
+            self._connected = True
+            return
+        async with self._lock:
+            await self._ensure_runtime_locked()
+            self._connected = True
 
     async def disconnect(self) -> None:
-        self._connected = False
+        async with self._lock:
+            await self._teardown_locked()
+            self._connected = False
 
     async def screenshot(self) -> bytes:
+        if self._fake_wda is not None:
+            return await self._fake_call("screenshot", b"")
         await self._ensure_connected()
-        return await asyncio.to_thread(self._wda.screenshot_png)
+        assert self._client is not None
+        return await self._client.get_screenshot(session_id=await self._session())
 
     async def get_elements_on_screen(self) -> list[ScreenElement]:
+        if self._fake_wda is not None:
+            return await self._fake_call("get_elements_on_screen", [])
         await self._ensure_connected()
-        tree = await asyncio.to_thread(self._wda.page_source_tree)
-        root = tree.get("value") if isinstance(tree, dict) else None
-        if not isinstance(root, dict):
-            return []
-        return parse_wda_source(root)
+        assert self._client is not None
+        source = await self._client.get_source(session_id=await self._session())
+        if isinstance(source, dict):
+            root = source.get("value") if isinstance(source.get("value"), dict) else source
+            return parse_wda_source(root if isinstance(root, dict) else None)
+        return parse_wda_source_xml(str(source))
 
     async def get_screen_size(self) -> ScreenSize:
+        if self._fake_wda is not None:
+            return await self._fake_call("get_screen_size", ScreenSize(width=0, height=0))
         await self._ensure_connected()
-        return await asyncio.to_thread(self._wda.screen_size)
+        assert self._client is not None
+        value = await self._client.get_window_size(session_id=await self._session())
+        return ScreenSize(width=float(value.get("width", 0)), height=float(value.get("height", 0)), scale=1.0)
 
     async def tap(self, x: float, y: float) -> None:
+        if self._fake_wda is not None:
+            await self._fake_call("tap", None, x, y)
+            return
         await self._ensure_connected()
-        await asyncio.to_thread(self._wda.tap, x, y)
+        assert self._client is not None
+        sid = await self._session()
+        # prefer wda/tap; fall back to short swipe
+        try:
+            await self._client._request_json("POST", f"/session/{sid}/wda/tap", {"x": x, "y": y})
+        except Exception:
+            await self._client.swipe(int(x), int(y), int(x), int(y), duration=0.05, session_id=sid)
 
     async def double_tap(self, x: float, y: float) -> None:
+        if self._fake_wda is not None:
+            await self._fake_call("double_tap", None, x, y)
+            return
         await self._ensure_connected()
-        await asyncio.to_thread(self._wda.double_tap, x, y)
+        assert self._client is not None
+        sid = await self._session()
+        try:
+            await self._client._request_json("POST", f"/session/{sid}/wda/doubleTap", {"x": x, "y": y})
+        except Exception:
+            await self.tap(x, y)
+            await self.tap(x, y)
 
     async def long_press(self, x: float, y: float, duration: float = 0.5) -> None:
+        if self._fake_wda is not None:
+            await self._fake_call("long_press", None, x, y, duration)
+            return
         await self._ensure_connected()
-        await asyncio.to_thread(self._wda.long_press, x, y, duration)
+        assert self._client is not None
+        sid = await self._session()
+        try:
+            await self._client._request_json(
+                "POST",
+                f"/session/{sid}/wda/touchAndHold",
+                {"x": x, "y": y, "duration": duration},
+            )
+        except Exception:
+            await self._client.swipe(int(x), int(y), int(x), int(y), duration=duration, session_id=sid)
 
     async def swipe(self, start_x: float, start_y: float, end_x: float, end_y: float) -> None:
+        if self._fake_wda is not None:
+            await self._fake_call("swipe", None, start_x, start_y, end_x, end_y)
+            return
         await self._ensure_connected()
-        await asyncio.to_thread(self._wda.swipe, start_x, start_y, end_x, end_y)
+        assert self._client is not None
+        await self._client.swipe(int(start_x), int(start_y), int(end_x), int(end_y), session_id=await self._session())
 
     async def type_keys(self, text: str, submit: bool) -> None:
+        if self._fake_wda is not None:
+            await self._fake_call("type_keys", None, text, submit)
+            return
         await self._ensure_connected()
-        await asyncio.to_thread(self._wda.type_keys, text)
+        assert self._client is not None
+        sid = await self._session()
+        await self._client.send_keys(text, session_id=sid)
         if submit:
-            await asyncio.to_thread(self._wda.type_keys, "\n")
+            await self._client.send_keys("\n", session_id=sid)
 
     async def get_orientation(self) -> str:
+        if self._fake_wda is not None:
+            return await self._fake_call("get_orientation", "portrait")
         await self._ensure_connected()
-        return await asyncio.to_thread(self._wda.orientation)
+        assert self._client is not None
+        sid = await self._session()
+        data = await self._client._request_json("GET", f"/session/{sid}/orientation", None)
+        value = str(data.get("value") or "PORTRAIT").upper()
+        return "landscape" if "LANDSCAPE" in value else "portrait"
 
     async def set_orientation(self, orientation: str) -> None:
+        if self._fake_wda is not None:
+            await self._fake_call("set_orientation", None, orientation)
+            return
         await self._ensure_connected()
-        await asyncio.to_thread(self._wda.set_orientation, orientation)
-
+        assert self._client is not None
+        sid = await self._session()
+        value = "LANDSCAPE" if orientation == "landscape" else "PORTRAIT"
+        await self._client._request_json("POST", f"/session/{sid}/orientation", {"orientation": value})
 
     async def list_apps(self):
         raise UnsupportedPlatformError(
             "mobile_list_apps",
-            "iOS app listing via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            "iOS app listing via pure pymobiledevice3/WDA is not implemented yet.",
             {"platform": "ios"},
         )
 
@@ -275,7 +323,7 @@ class IOSDriver(BaseDriver):
         del package_name, locale
         raise UnsupportedPlatformError(
             "mobile_launch_app",
-            "iOS app launch via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            "iOS app launch via pure pymobiledevice3/WDA is not implemented yet.",
             {"platform": "ios"},
         )
 
@@ -283,7 +331,7 @@ class IOSDriver(BaseDriver):
         del package_name
         raise UnsupportedPlatformError(
             "mobile_terminate_app",
-            "iOS app terminate via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            "iOS app terminate via pure pymobiledevice3/WDA is not implemented yet.",
             {"platform": "ios"},
         )
 
@@ -291,7 +339,7 @@ class IOSDriver(BaseDriver):
         del path
         raise UnsupportedPlatformError(
             "mobile_install_app",
-            "iOS app install via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            "iOS app install via pure pymobiledevice3/WDA is not implemented yet.",
             {"platform": "ios"},
         )
 
@@ -299,7 +347,7 @@ class IOSDriver(BaseDriver):
         del package_name
         raise UnsupportedPlatformError(
             "mobile_uninstall_app",
-            "iOS app uninstall via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            "iOS app uninstall via pure pymobiledevice3/WDA is not implemented yet.",
             {"platform": "ios"},
         )
 
@@ -307,22 +355,22 @@ class IOSDriver(BaseDriver):
         del remote_path, time_limit
         raise UnsupportedPlatformError(
             "mobile_start_screen_recording",
-            "iOS screen recording is not available through pure pymobiledevice3/WDA in this MVP.",
+            "iOS screen recording is not available through pure pymobiledevice3/WDA yet.",
             {"platform": "ios"},
         )
 
-    async def stop_recording(self, process, remote_path: str, local_path) -> int:
+    async def stop_recording(self, process: Any, remote_path: str, local_path: Any) -> int:
         del process, remote_path, local_path
         raise UnsupportedPlatformError(
             "mobile_stop_screen_recording",
-            "iOS screen recording is not available through pure pymobiledevice3/WDA in this MVP.",
+            "iOS screen recording is not available through pure pymobiledevice3/WDA yet.",
             {"platform": "ios"},
         )
 
     async def list_crashes(self):
         raise UnsupportedPlatformError(
             "mobile_list_crashes",
-            "iOS crash report listing is not available through pure pymobiledevice3/WDA in this MVP.",
+            "iOS crash report listing is not available through pure pymobiledevice3/WDA yet.",
             {"platform": "ios"},
         )
 
@@ -330,87 +378,105 @@ class IOSDriver(BaseDriver):
         del crash_id
         raise UnsupportedPlatformError(
             "mobile_get_crash",
-            "iOS crash report reading is not available through pure pymobiledevice3/WDA in this MVP.",
+            "iOS crash report reading is not available through pure pymobiledevice3/WDA yet.",
             {"platform": "ios"},
         )
 
     async def _ensure_connected(self) -> None:
-        if not self._connected:
+        if self._fake_wda is not None:
+            if not self._connected:
+                await self.connect()
+            return
+        if not self._connected or self._client is None or self._rsd is None:
             await self.connect()
 
+    async def _session(self) -> str:
+        assert self._client is not None
+        if self._session_id:
+            return self._session_id
+        self._session_id = await self._client.start_session()
+        return self._session_id
 
-def parse_wda_source(node: dict[str, Any]) -> list[ScreenElement]:
-    elements: list[ScreenElement] = []
-    _collect_wda_elements(node, elements)
-    return elements
+    async def _ensure_runtime_locked(self) -> None:
+        from pymobiledevice3.services.wda import WdaServiceClient
 
+        if self._rsd is None:
+            try:
+                self._rsd = await _shared_userspace_rsd(self.device_id)
+            except Exception as exc:
+                raise DriverError(
+                    "ios",
+                    f'Failed to establish pymobiledevice3 userspace tunnel for "{self.device_id}": {exc}',
+                    {"device": self.device_id},
+                ) from exc
+        if self._client is None:
+            self._client = WdaServiceClient(service_provider=self._rsd, port=DEFAULT_WDA_PORT, timeout=20.0)
+        if not await self._wda_ready():
+            await self._start_xctrunner_locked()
+            if not await self._wait_wda_ready(timeout=45.0):
+                raise DriverError(
+                    "ios",
+                    f'WDA is not ready for device "{self.device_id}". '
+                    f"Install WebDriverAgent runner ({DEFAULT_XCTRUNNER}) and ensure Developer Mode is enabled. "
+                    "Uses pure pymobiledevice3 userspace tunnel (no go-ios, no root).",
+                    {"device": self.device_id, "xctrunner": DEFAULT_XCTRUNNER, "wda_port": DEFAULT_WDA_PORT},
+                )
 
-def _collect_wda_elements(node: dict[str, Any], out: list[ScreenElement]) -> None:
-    rect = node.get("rect") or {}
-    try:
-        element_rect = ScreenElementRect(
-            x=int(rect.get("x", 0)),
-            y=int(rect.get("y", 0)),
-            width=int(rect.get("width", 0)),
-            height=int(rect.get("height", 0)),
-        )
-    except (TypeError, ValueError):
-        element_rect = None
+    async def _wda_ready(self) -> bool:
+        if self._client is None:
+            return False
+        try:
+            status = await self._client.get_status()
+            value = status.get("value") or {}
+            return bool(value.get("ready") is True or value.get("message") or status.get("sessionId"))
+        except Exception:
+            return False
 
-    label = node.get("label")
-    name = node.get("name")
-    value = node.get("value")
-    identifier = node.get("rawIdentifier") or node.get("identifier")
-    visible = str(node.get("isVisible", "1")) != "0"
-    if element_rect is not None and visible and (label or name or value or identifier):
-        out.append(
-            ScreenElement(
-                type=str(node.get("type") or "XCUIElement"),
-                rect=element_rect,
-                label=None if label is None else str(label),
-                text=None if value is None else str(value),
-                name=None if name is None else str(name),
-                value=None if value is None else str(value),
-                identifier=None if identifier is None else str(identifier),
-                focused=None,
-            )
-        )
+    async def _wait_wda_ready(self, timeout: float) -> bool:
+        deadline = asyncio.get_running_loop().time() + timeout
+        while asyncio.get_running_loop().time() < deadline:
+            if await self._wda_ready():
+                return True
+            if self._xct_task is not None and self._xct_task.done():
+                exc = self._xct_task.exception()
+                if exc is not None:
+                    raise DriverError("ios", f"WDA XCUITest runner failed: {exc}", {"device": self.device_id}) from exc
+            await asyncio.sleep(0.4)
+        return False
 
-    for child in node.get("children") or []:
-        if isinstance(child, dict):
-            _collect_wda_elements(child, out)
+    async def _start_xctrunner_locked(self) -> None:
+        if self._xct_task is not None and not self._xct_task.done():
+            return
+        assert self._rsd is not None
+        from pymobiledevice3.services.dvt.testmanaged.xcuitest import TestConfig, XCUITestService
 
+        try:
+            cfg = await TestConfig.create_for(self._rsd, runner_bundle_id=DEFAULT_XCTRUNNER)
+            service = XCUITestService(self._rsd)
+            self._xct_task = asyncio.create_task(service.run(cfg), name=f"wda-xctrunner-{self.device_id}")
+        except Exception as exc:
+            raise DriverError(
+                "ios",
+                f"Failed to start WDA XCUITest runner {DEFAULT_XCTRUNNER}: {exc}",
+                {"device": self.device_id, "xctrunner": DEFAULT_XCTRUNNER},
+            ) from exc
 
-def _pointer_tap(x: float, y: float) -> dict[str, Any]:
-    return {
-        "actions": [
-            {
-                "type": "pointer",
-                "id": "finger1",
-                "parameters": {"pointerType": "touch"},
-                "actions": [
-                    {"type": "pointerMove", "duration": 0, "x": x, "y": y},
-                    {"type": "pointerDown", "button": 0},
-                    {"type": "pointerUp", "button": 0},
-                ],
-            }
-        ]
-    }
+    async def _teardown_locked(self) -> None:
+        if self._xct_task is not None:
+            self._xct_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await self._xct_task
+            self._xct_task = None
+        self._session_id = None
+        # Keep process-wide userspace tunnel alive for subsequent MCP calls.
+        self._client = None
+        self._rsd = None
 
-
-def _pointer_swipe(start_x: float, start_y: float, end_x: float, end_y: float) -> dict[str, Any]:
-    return {
-        "actions": [
-            {
-                "type": "pointer",
-                "id": "finger1",
-                "parameters": {"pointerType": "touch"},
-                "actions": [
-                    {"type": "pointerMove", "duration": 0, "x": start_x, "y": start_y},
-                    {"type": "pointerDown", "button": 0},
-                    {"type": "pointerMove", "duration": 500, "x": end_x, "y": end_y},
-                    {"type": "pointerUp", "button": 0},
-                ],
-            }
-        ]
-    }
+    async def _fake_call(self, name: str, default: Any, *args: Any) -> Any:
+        method = getattr(self._fake_wda, name, None)
+        if method is None:
+            return default
+        result = method(*args)
+        if asyncio.iscoroutine(result):
+            return await result
+        return result

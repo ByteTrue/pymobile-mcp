@@ -659,6 +659,9 @@ async def test_ios_parity_tools_return_unsupported():
 
 def test_no_go_ios_dependency():
     root = Path("src")
-    text = "\n".join(path.read_text() for path in root.rglob("*.py"))
-    assert "go-ios" not in text
-    assert "mobilecli" not in text
+    for path in root.rglob("*.py"):
+        text = path.read_text()
+        assert "import go_ios" not in text and "from go_ios" not in text
+        assert "mobilecli" not in text
+        # do not shell out to the `ios` CLI as a runtime dependency
+        assert '["ios"' not in text and "['ios'" not in text

@@ -69,13 +69,18 @@ PATH=.venv/bin:$PATH python tests/android_recording_crash_live_smoke.py
 
 ### iOS core / parity
 
+iOS uses pure `pymobiledevice3` userspace tunnel + in-process WDA service client.
+No go-ios runtime and no root. Requires installed WDA runner
+(`PYMOBILE_MCP_WDA_XCTRUNNER`, default `com.byte.WebDriverAgentRunner.xctrunner`).
+
 ```bash
 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
+PYMOBILE_MCP_IOS_ACTIONS=1 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 # optional:
 # PYMOBILE_MCP_IOS_DEVICE=<udid>
-# PYMOBILE_MCP_WDA_HOST=127.0.0.1 PYMOBILE_MCP_WDA_PORT=8100
-# PYMOBILE_MCP_IOS_ACTIONS=1
+# PYMOBILE_MCP_WDA_PORT=8100
+# PYMOBILE_MCP_WDA_XCTRUNNER=com.byte.WebDriverAgentRunner.xctrunner
 ```
 
 No authorized device/WDA ⇒ scripts exit `2` with `status=blocked` (not pass).
@@ -106,19 +111,19 @@ Legend:
 | mobile_terminate_app | supported | unsupported |
 | mobile_install_app | supported (destructive) | unsupported |
 | mobile_uninstall_app | supported (destructive) | unsupported |
-| mobile_get_screen_size | supported | supported (needs WDA) |
-| mobile_click_on_screen_at_coordinates | supported | supported (needs WDA) |
-| mobile_double_tap_on_screen | supported | supported (needs WDA) |
-| mobile_long_press_on_screen_at_coordinates | supported | supported (needs WDA) |
+| mobile_get_screen_size | supported | supported |
+| mobile_click_on_screen_at_coordinates | supported | supported |
+| mobile_double_tap_on_screen | supported | supported |
+| mobile_long_press_on_screen_at_coordinates | supported | supported |
 | mobile_list_elements_on_screen | supported | supported (WDA source internal only) |
 | mobile_press_button | supported | unsupported* |
 | mobile_open_url | supported (http/https default) | unsupported* |
-| mobile_swipe_on_screen | supported | supported (needs WDA) |
-| mobile_type_keys | supported | supported (needs WDA) |
+| mobile_swipe_on_screen | supported | supported |
+| mobile_type_keys | supported | supported |
 | mobile_save_screenshot | supported | unsupported* |
-| mobile_take_screenshot | supported | supported (needs WDA) |
-| mobile_set_orientation | supported | supported (needs WDA) |
-| mobile_get_orientation | supported | supported (needs WDA) |
+| mobile_take_screenshot | supported | supported |
+| mobile_set_orientation | supported | supported |
+| mobile_get_orientation | supported | supported |
 | mobile_start_screen_recording | supported | unsupported |
 | mobile_stop_screen_recording | supported | unsupported |
 | mobile_list_crashes | unsupported | unsupported |
@@ -141,7 +146,7 @@ python -m pytest
 ## Known limits
 
 - Android crash tools unsupported without root/reliable tombstone source.
-- iOS app/recording/crash tools intentionally unsupported without go-ios; core UI needs paired device + reachable WDA.
+- iOS core UI uses pure pymobiledevice3 userspace tunnel + installed WDA runner; app/recording/crash remain unsupported for now.
 - Recording is process-local (`ActiveRecording`); no cross-process resume.
 - `mobile_open_url` rejects custom schemes unless `MOBILEMCP_ALLOW_UNSAFE_URLS=1`.
 - Screenshot/recording host paths must resolve under cwd or system temp.

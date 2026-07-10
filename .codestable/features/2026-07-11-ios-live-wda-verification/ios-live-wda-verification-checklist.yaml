@@ -1,0 +1,38 @@
+feature: 2026-07-11-ios-live-wda-verification
+created: 2026-07-11
+
+steps:
+  - action: "纯 pmd3 userspace tunnel + WDA 连通"
+    exit_signal: "IOSDriver connect works without go-ios and without root"
+    status: done
+  - action: "修复 process 内 tunnel 单例复用"
+    exit_signal: "MCP multi-call screen_size/screenshot/elements all succeed in one process"
+    status: done
+  - action: "live smoke passed"
+    exit_signal: "tests/ios_pmd3_wda_live_smoke.py returns status=passed"
+    status: done
+
+checks:
+  - item: "no go-ios/mobilecli runtime dependency"
+    source: 范围守护
+    status: passed
+  - item: "iOS discovery lists paired USB device with name/version"
+    source: 验收场景
+    status: passed
+  - item: "screen_size/screenshot/elements live on real iPhone"
+    source: 验收场景
+    status: passed
+  - item: "optional PYMOBILE_MCP_IOS_ACTIONS=1 tap path works"
+    source: 验收场景
+    status: passed
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-IOS-LIVE-001
+      command: "PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py"
+      core: true
+      failure_handling: fix-or-block
