@@ -37,7 +37,7 @@ items:
   - slug: ios-pmd3-wda-core
     description: 用 pymobiledevice3 tunnel 和 WDA 打通 iOS discovery、screenshot、elements（内部可读取 WDA source）、tap、swipe、type、screen size/orientation
     depends_on: [contract-registry-scaffold]
-    status: in-progress
+    status: done
     feature: 2026-07-07-ios-pmd3-wda-core
     minimal_loop: false
     notes: 最高风险条目；需要先用最小 live/spike 证明 WDA client 调用路径

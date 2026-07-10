@@ -1,7 +1,7 @@
 roadmap: "pymobile-mcp-android-mvp"
 status: active
 baseline_ref: "eee169e26b6be2c8616cbe1d5719cb076893ece9"
-current_feature_index: 4
+current_feature_index: 5
 features:
   - slug: "contract-registry-scaffold"
     roadmap_item: "contract-registry-scaffold"
@@ -47,7 +47,7 @@ features:
     review: ".codestable/features/2026-07-07-ios-pmd3-wda-core/ios-pmd3-wda-core-review.md"
     qa: ".codestable/features/2026-07-07-ios-pmd3-wda-core/ios-pmd3-wda-core-qa.md"
     acceptance: ".codestable/features/2026-07-07-ios-pmd3-wda-core/ios-pmd3-wda-core-acceptance.md"
-    status: pending
+    status: accepted
   - slug: "ios-app-recording-crash-parity"
     roadmap_item: "ios-app-recording-crash-parity"
     feature_dir: ".codestable/features/2026-07-07-ios-app-recording-crash-parity"

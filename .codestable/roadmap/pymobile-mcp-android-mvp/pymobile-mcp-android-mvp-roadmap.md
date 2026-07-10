@@ -374,8 +374,8 @@ active_recordings: dict[str, ActiveRecording]
 5. **ios-pmd3-wda-core** — 用 `pymobiledevice3` tunnel + WDA 打通 iOS device discovery、screenshot、elements/source、tap/swipe/type、screen size/orientation。
    - 所属模块：iOS Driver、Driver Contract、Tool Execution Layer
    - 依赖：`contract-registry-scaffold`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：done
+   - 对应 feature：2026-07-07-ios-pmd3-wda-core
    - 备注：这是最高风险条目；需要先用最小 live/spike 证明 WDA client 调用路径。
 
 6. **ios-app-recording-crash-parity** — 在 iOS core driver 基础上补 app lifecycle、recording/crash 能力或稳定 unsupported 行为。

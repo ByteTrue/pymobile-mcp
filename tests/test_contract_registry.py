@@ -529,3 +529,97 @@ def test_url_and_path_validation_helpers(tmp_path, monkeypatch):
         raise AssertionError("expected invalid timeLimit")
     except InvalidArgumentError:
         pass
+
+
+@pytest.mark.asyncio
+async def test_ios_handlers_with_fake_driver():
+    from pymobile_mcp.drivers.base import DeviceInfo, ScreenElement, ScreenElementRect, ScreenSize
+    from pymobile_mcp.tools.android import configure_android_tools_for_tests, reset_android_tools_for_tests
+
+    actions = []
+
+    class FakeIOSDriver:
+        async def connect(self, capabilities=None):
+            actions.append(("connect", capabilities))
+
+        async def get_screen_size(self):
+            return ScreenSize(width=390, height=844, scale=3.0)
+
+        async def screenshot(self):
+            return b"ios-png"
+
+        async def get_elements_on_screen(self):
+            return [
+                ScreenElement(
+                    type="XCUIElementTypeButton",
+                    rect=ScreenElementRect(x=10, y=20, width=30, height=40),
+                    label="OK",
+                    name="ok",
+                    identifier="ok-id",
+                )
+            ]
+
+        async def tap(self, x, y):
+            actions.append(("tap", x, y))
+
+        async def double_tap(self, x, y):
+            actions.append(("double_tap", x, y))
+
+        async def long_press(self, x, y, duration=0.5):
+            actions.append(("long_press", x, y, duration))
+
+        async def swipe(self, start_x, start_y, end_x, end_y):
+            actions.append(("swipe", start_x, start_y, end_x, end_y))
+
+        async def type_keys(self, text, submit):
+            actions.append(("type_keys", text, submit))
+
+        async def get_orientation(self):
+            return "portrait"
+
+        async def set_orientation(self, orientation):
+            actions.append(("set_orientation", orientation))
+
+    configure_android_tools_for_tests(
+        lambda: [DeviceInfo(id="ios-1", name="iPhone", platform="ios", type="real", version="17", state="online")],
+        lambda device_id: FakeIOSDriver(),
+    )
+    try:
+        devices = json.loads((await call_tool("mobile_list_available_devices", {}))[0].text)
+        assert devices["devices"][0]["platform"] == "ios"
+        size = json.loads((await call_tool("mobile_get_screen_size", {"device": "ios-1"}))[0].text)
+        assert size["width"] == 390
+        screenshot = await call_tool("mobile_take_screenshot", {"device": "ios-1"})
+        assert screenshot[0].type == "image"
+        elements = json.loads((await call_tool("mobile_list_elements_on_screen", {"device": "ios-1"}))[0].text)
+        assert elements["elements"][0]["coordinates"]["width"] == 30
+        await call_tool("mobile_click_on_screen_at_coordinates", {"device": "ios-1", "x": 1, "y": 2})
+        assert ("tap", 1.0, 2.0) in actions
+    finally:
+        reset_android_tools_for_tests()
+
+
+def test_parse_wda_source_maps_elements():
+    from pymobile_mcp.drivers.ios import parse_wda_source
+
+    elements = parse_wda_source(
+        {
+            "type": "XCUIElementTypeApplication",
+            "rect": {"x": 0, "y": 0, "width": 390, "height": 844},
+            "children": [
+                {
+                    "type": "XCUIElementTypeButton",
+                    "label": "Continue",
+                    "name": "continue",
+                    "rawIdentifier": "btn.continue",
+                    "isVisible": "1",
+                    "rect": {"x": 5, "y": 6, "width": 7, "height": 8},
+                    "children": [],
+                }
+            ],
+        }
+    )
+    assert len(elements) == 1
+    assert elements[0].label == "Continue"
+    assert elements[0].identifier == "btn.continue"
+    assert elements[0].rect.width == 7

@@ -289,13 +289,22 @@ def _discover_devices() -> list[DeviceInfo]:
     if _device_discovery is not None:
         return _device_discovery()
     from pymobile_mcp.drivers.android import list_android_devices
+    from pymobile_mcp.drivers.ios import list_ios_devices
 
-    return list_android_devices()
+    return list_android_devices() + list_ios_devices()
 
 
 def _make_driver(device_id: str) -> AndroidDriverLike:
     if _driver_factory is not None:
         return _driver_factory(device_id)
+
+    devices = {device.id: device for device in _discover_devices()}
+    device = devices.get(device_id)
+    platform = device.platform if device is not None else "android"
+    if platform == "ios":
+        from pymobile_mcp.drivers.ios import IOSDriver
+
+        return IOSDriver(device_id)
     from pymobile_mcp.drivers.android import AndroidDriver
 
     return AndroidDriver(device_id)

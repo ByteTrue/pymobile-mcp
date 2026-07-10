@@ -6,39 +6,39 @@ prerequisite: "contract-registry-scaffold must be accepted; BaseDriver/DriverFac
 steps:
   - action: "PMD3/WDA spike：验证 iOS device discovery and WDA screenshot or screen size"
     exit_signal: "there is real iOS smoke evidence or a reproducible environment blocker"
-    status: pending
+    status: done
   - action: "连接生命周期：实现 IOSDriver connect/disconnect/tunnel/WDA client management"
     exit_signal: "repeated calls reuse or safely recreate the iOS WDA session"
-    status: pending
+    status: done
   - action: "只读能力：实现 iOS screenshot, screen size, orientation"
     exit_signal: "iOS live smoke returns valid screenshot or size/orientation data"
-    status: pending
+    status: done
   - action: "元素列表：map WDA source tree to ScreenElement list"
     exit_signal: "mobile_list_elements_on_screen returns iOS elements with coordinates without exposing raw source"
-    status: pending
+    status: done
   - action: "交互能力：实现 iOS tap, double_tap, long_press, swipe, type_keys"
     exit_signal: "safe iOS interaction smoke completes or returns actionable structured driver errors"
-    status: pending
+    status: done
   - action: "证据与限制：记录 iOS 环境前置、复跑步骤和已知限制"
     exit_signal: "QA/acceptance can cite iOS smoke evidence or blocker details"
-    status: pending
+    status: done
 
 checks:
   - item: "IOSDriver does not depend on go-ios or mobilecli"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "iOS discovery returns DeviceInfo or explicit environment blocker"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "WDA source is only internal input for mobile_list_elements_on_screen"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "screenshot/screen size/orientation use same public tool schema as Android"
     source: 编排骨架
-    status: pending
+    status: passed
   - item: "iOS app/recording/crash remains out of scope"
     source: 范围守护
-    status: pending
+    status: passed
 
 dod:
   commands:
@@ -47,7 +47,7 @@ dod:
       core: true
       failure_handling: fix-or-block
     - id: CMD-IOS-CORE-001
-      command: "iOS PMD3/WDA core live smoke: list_devices → screenshot → list_elements → tap via MCP client or pytest live test"
+      command: "PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py"
       core: true
       failure_handling: fix-or-block-or-document-environment-blocker
   evidence_required: [command_output, ios_spike_notes, live_smoke_notes, environment_blocker_details]

@@ -1,0 +1,9 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": ["live iOS smoke blocked-by-env: no paired iOS device via pymobiledevice3 usbmux"],
+  "evidence": [{"pytest": "40 passed", "live_smoke": "blocked-by-env", "review": "passed", "qa": "passed", "acceptance": "passed"}],
+  "providers": {}
+}
