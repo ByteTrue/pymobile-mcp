@@ -34,6 +34,10 @@ ANDROID_TOOL_NAMES = {
     "mobile_get_orientation",
     "mobile_set_orientation",
     "mobile_save_screenshot",
+    "mobile_start_screen_recording",
+    "mobile_stop_screen_recording",
+    "mobile_list_crashes",
+    "mobile_get_crash",
 }
 
 
@@ -114,6 +118,8 @@ async def test_registry_validates_invalid_arguments_before_stub():
 
 @pytest.mark.asyncio
 async def test_registered_handler_can_return_success_content():
+    from pymobile_mcp.tools.android import get_crash
+
     async def handler(args):
         return []
 
@@ -122,7 +128,7 @@ async def test_registered_handler_can_return_success_content():
         content = await call_tool("mobile_get_crash", {"device": "demo", "id": "crash"})
         assert content == []
     finally:
-        unregister_tool_handler("mobile_get_crash")
+        register_tool_handler("mobile_get_crash", get_crash)
 
 
 @pytest.mark.asyncio
@@ -197,6 +203,16 @@ async def test_android_handlers_with_fake_driver():
         async def set_orientation(self, orientation):
             actions.append(("set_orientation", orientation))
 
+        async def start_recording(self, remote_path, time_limit=None):
+            actions.append(("start_recording", remote_path, time_limit))
+            return {"remote": remote_path, "time_limit": time_limit}
+
+        async def stop_recording(self, process, remote_path, local_path):
+            from pathlib import Path
+            Path(local_path).write_bytes(b"fake-mp4")
+            actions.append(("stop_recording", remote_path, str(local_path)))
+            return 8
+
     configure_android_tools_for_tests(
         lambda: [DeviceInfo(id="android-1", name="Pixel", platform="android", type="real", version="14", state="online")],
         lambda device_id: FakeDriver(),
@@ -245,6 +261,20 @@ async def test_android_handlers_with_fake_driver():
         assert ("open_url", "https://example.com") in actions
         assert ("set_orientation", "landscape") in actions
 
+        from pymobile_mcp.tools.recording import reset_recording_state_for_tests
+        reset_recording_state_for_tests()
+        started = json.loads((await call_tool("mobile_start_screen_recording", {"device": "android-1", "output": "tmp-rec.mp4"}))[0].text)
+        assert started["status"] == "started"
+        dup = _assert_error_content(await call_tool("mobile_start_screen_recording", {"device": "android-1", "output": "tmp-rec2.mp4"}), "already_recording", "mobile_start_screen_recording")
+        stopped = json.loads((await call_tool("mobile_stop_screen_recording", {"device": "android-1"}))[0].text)
+        assert stopped["status"] == "stopped"
+        assert Path(stopped["output"]).exists()
+        Path(stopped["output"]).unlink(missing_ok=True)
+        _assert_error_content(await call_tool("mobile_stop_screen_recording", {"device": "android-1"}), "no_active_recording", "mobile_stop_screen_recording")
+        _assert_error_content(await call_tool("mobile_list_crashes", {"device": "android-1"}), "unsupported_platform", "mobile_list_crashes")
+        _assert_error_content(await call_tool("mobile_get_crash", {"device": "android-1", "id": "x"}), "unsupported_platform", "mobile_get_crash")
+        reset_recording_state_for_tests()
+
         _assert_error_content(
             await call_tool("mobile_open_url", {"device": "android-1", "url": "myapp://home"}),
             "invalid_argument",
@@ -268,6 +298,8 @@ async def test_android_handlers_with_fake_driver():
             {"device": "missing"},
         )
     finally:
+        from pymobile_mcp.tools.recording import reset_recording_state_for_tests
+        reset_recording_state_for_tests()
         reset_android_tools_for_tests()
 
 
@@ -288,7 +320,7 @@ async def test_server_handlers_list_and_call_tools():
             )
         )
     )
-    payload = _assert_error_content(called.root.content, "not_implemented", "mobile_get_crash")
+    payload = _assert_error_content(called.root.content, "device_not_found", "mobile_get_crash", {"device": "demo"})
     assert called.root.isError is False
 
     unknown = await server.request_handlers[types.CallToolRequest](
@@ -350,7 +382,7 @@ async def test_server_handlers_validate_required_and_enum_arguments():
 @pytest.mark.parametrize(
     ("name", "args", "code", "tool", "details"),
     [
-        ("mobile_get_crash", {"device": "demo", "id": "crash"}, "not_implemented", "mobile_get_crash", {}),
+        ("mobile_get_crash", {"device": "demo", "id": "crash"}, "device_not_found", "mobile_get_crash", {"device": "demo"}),
         ("mobile_get_page_source", {}, "invalid_argument", "mobile_get_page_source", {"tool": "mobile_get_page_source"}),
         ("mobile_swipe_on_screen", {"device": "demo", "direction": "diagonal"}, "invalid_argument", "mobile_swipe_on_screen", None),
     ],
@@ -390,7 +422,7 @@ async def test_stdio_client_can_list_and_call_tools():
 
             stub = await session.call_tool("mobile_get_crash", {"device": "demo", "id": "crash"})
 
-            stub_payload = _assert_error_content(stub.content, "not_implemented", "mobile_get_crash")
+            stub_payload = _assert_error_content(stub.content, "device_not_found", "mobile_get_crash", {"device": "demo"})
             assert stub.isError is False
 
             unknown = await session.call_tool("mobile_get_page_source", {})
@@ -450,7 +482,14 @@ def test_registry_layer_does_not_import_device_libraries():
 
 def test_url_and_path_validation_helpers(tmp_path, monkeypatch):
     from pymobile_mcp.errors import InvalidArgumentError
-    from pymobile_mcp.tools.validation import validate_button, validate_orientation, validate_output_path, validate_url
+    from pymobile_mcp.tools.validation import (
+        validate_button,
+        validate_orientation,
+        validate_output_path,
+        validate_recording_output,
+        validate_time_limit,
+        validate_url,
+    )
 
     assert validate_url("mobile_open_url", "https://example.com") == "https://example.com"
     try:
@@ -475,5 +514,18 @@ def test_url_and_path_validation_helpers(tmp_path, monkeypatch):
     try:
         validate_output_path("mobile_save_screenshot", "/etc/passwd.png")
         raise AssertionError("expected unsafe path")
+    except InvalidArgumentError:
+        pass
+    rec = validate_recording_output("mobile_start_screen_recording", str(tmp_path / "clip.mp4"))
+    assert rec.suffix == ".mp4"
+    try:
+        validate_recording_output("mobile_start_screen_recording", str(tmp_path / "clip.mov"))
+        raise AssertionError("expected invalid recording extension")
+    except InvalidArgumentError:
+        pass
+    assert validate_time_limit("mobile_start_screen_recording", 5) == 5
+    try:
+        validate_time_limit("mobile_start_screen_recording", 0)
+        raise AssertionError("expected invalid timeLimit")
     except InvalidArgumentError:
         pass

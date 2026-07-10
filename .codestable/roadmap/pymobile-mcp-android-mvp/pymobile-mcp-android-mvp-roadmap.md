@@ -367,8 +367,8 @@ active_recordings: dict[str, ActiveRecording]
 4. **android-recording-crash-tools** — 实现或明确降级 Android screen recording 与 crash report 工具，并保证 unsupported 场景可解释。
    - 所属模块：Android Driver、Tool Execution Layer、Verification / Docs
    - 依赖：`android-live-ui-slice`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：done
+   - 对应 feature：2026-07-07-android-recording-crash-tools
    - 备注：crash report 的真实来源需在 feature-design 做最小验证；拿不到可靠来源就返回 `unsupported_platform` 并记录。
 
 5. **ios-pmd3-wda-core** — 用 `pymobiledevice3` tunnel + WDA 打通 iOS device discovery、screenshot、elements/source、tap/swipe/type、screen size/orientation。

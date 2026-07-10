@@ -29,7 +29,7 @@ items:
   - slug: android-recording-crash-tools
     description: 实现或明确降级 Android screen recording 与 crash report 工具，并保证 unsupported 场景可解释
     depends_on: [android-live-ui-slice]
-    status: in-progress
+    status: done
     feature: 2026-07-07-android-recording-crash-tools
     minimal_loop: false
     notes: crash report 来源需在 feature-design 做最小验证；拿不到可靠来源就返回 unsupported_platform

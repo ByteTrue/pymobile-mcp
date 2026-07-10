@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import io
+from pathlib import Path
 from typing import Any
 
 import adbutils
@@ -177,6 +178,72 @@ class AndroidDriver(BaseDriver):
                 f"value:i:{value}",
             ]
         )
+
+
+    async def start_recording(self, remote_path: str, time_limit: int | None = None) -> Any:
+        return await asyncio.to_thread(self._start_recording_sync, remote_path, time_limit)
+
+    async def stop_recording(self, process: Any, remote_path: str, local_path: Path) -> int:
+        return await asyncio.to_thread(self._stop_recording_sync, process, remote_path, local_path)
+
+    def _start_recording_sync(self, remote_path: str, time_limit: int | None) -> Any:
+        import subprocess
+
+        cmd = ["adb", "-s", self.device_id, "shell", "screenrecord"]
+        if time_limit is not None:
+            cmd.extend(["--time-limit", str(time_limit)])
+        cmd.append(remote_path)
+        try:
+            self._adb().shell(["rm", "-f", remote_path])
+        except Exception:
+            pass
+        return subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+    def _stop_recording_sync(self, process: Any, remote_path: str, local_path: Path) -> int:
+        import signal
+        import time
+
+        # Prefer stopping the on-device screenrecord process; local adb may not
+        # forward SIGINT reliably and can hang if stdout pipes fill.
+        try:
+            self._adb().shell(["pkill", "-l", "INT", "screenrecord"])
+        except Exception:
+            try:
+                self._adb().shell(["killall", "-2", "screenrecord"])
+            except Exception:
+                pass
+        if process.poll() is None:
+            process.send_signal(signal.SIGINT)
+            try:
+                process.wait(timeout=5)
+            except Exception:
+                process.kill()
+                try:
+                    process.wait(timeout=3)
+                except Exception:
+                    pass
+        # pull file
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        if local_path.exists():
+            local_path.unlink()
+        # give filesystem a moment
+        for _ in range(20):
+            listing = str(self._adb().shell(["ls", "-l", remote_path]))
+            if "No such file" not in listing and remote_path.split("/")[-1] in listing:
+                break
+            time.sleep(0.1)
+        self._adb().sync.pull(remote_path, str(local_path))
+        try:
+            self._adb().shell(["rm", "-f", remote_path])
+        except Exception:
+            pass
+        if not local_path.exists() or local_path.stat().st_size <= 0:
+            raise DriverError("android", f"Recording file was not produced at {local_path}")
+        return local_path.stat().st_size
 
     async def _connected(self) -> Any:
         if self._device is None:

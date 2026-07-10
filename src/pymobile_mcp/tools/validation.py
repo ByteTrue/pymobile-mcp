@@ -5,11 +5,13 @@ from __future__ import annotations
 import os
 import tempfile
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 from pymobile_mcp.errors import InvalidArgumentError
 
 SAFE_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
+SAFE_VIDEO_EXTENSIONS = {".mp4"}
 BUTTON_KEYCODES = {
     "BACK": "KEYCODE_BACK",
     "HOME": "KEYCODE_HOME",
@@ -54,13 +56,14 @@ def validate_orientation(tool: str, orientation: str) -> str:
     return orientation
 
 
-def validate_output_path(tool: str, save_to: str) -> Path:
+def validate_output_path(tool: str, save_to: str, *, allowed_extensions: set[str] | None = None, field: str = "saveTo") -> Path:
     path = Path(save_to).expanduser()
-    if path.suffix.lower() not in SAFE_IMAGE_EXTENSIONS:
+    extensions = allowed_extensions or SAFE_IMAGE_EXTENSIONS
+    if path.suffix.lower() not in extensions:
         raise InvalidArgumentError(
             tool,
-            "Filename must end with .png, .jpg, or .jpeg",
-            {"saveTo": save_to, "allowed_extensions": sorted(SAFE_IMAGE_EXTENSIONS)},
+            f"Filename must end with one of: {', '.join(sorted(extensions))}",
+            {field: save_to, "allowed_extensions": sorted(extensions)},
         )
 
     # Resolve relative paths against cwd. Reject absolute paths outside cwd/temp.
@@ -70,10 +73,27 @@ def validate_output_path(tool: str, save_to: str) -> Path:
     if not any(_is_within(resolved, root) for root in allowed_roots):
         raise InvalidArgumentError(
             tool,
-            "saveTo must resolve under the current working directory or system temp directory",
-            {"saveTo": save_to, "resolved": str(resolved)},
+            f"{field} must resolve under the current working directory or system temp directory",
+            {field: save_to, "resolved": str(resolved)},
         )
     return resolved
+
+
+def validate_recording_output(tool: str, output: str | None) -> Path:
+    if output is None:
+        return Path(tempfile.gettempdir()).resolve() / f"pymobile-mcp-{os.getpid()}-{int(__import__('time').time())}.mp4"
+    return validate_output_path(tool, output, allowed_extensions=SAFE_VIDEO_EXTENSIONS, field="output")
+
+
+def validate_time_limit(tool: str, time_limit: Any | None) -> int | None:
+    if time_limit is None:
+        return None
+    if isinstance(time_limit, bool) or not isinstance(time_limit, (int, float)):
+        raise InvalidArgumentError(tool, "timeLimit must be a positive number", {"timeLimit": time_limit})
+    value = int(time_limit)
+    if value <= 0:
+        raise InvalidArgumentError(tool, "timeLimit must be > 0", {"timeLimit": time_limit})
+    return value
 
 
 def _is_within(path: Path, root: Path) -> bool:

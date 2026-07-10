@@ -12,7 +12,16 @@ from mcp.types import ImageContent, TextContent
 
 from pymobile_mcp.drivers.base import AppInfo, DeviceInfo, ScreenElement, ScreenSize
 from pymobile_mcp.errors import DeviceNotFoundError
-from pymobile_mcp.tools.validation import validate_button, validate_orientation, validate_output_path, validate_url
+from pymobile_mcp.tools.validation import (
+    validate_button,
+    validate_orientation,
+    validate_output_path,
+    validate_recording_output,
+    validate_time_limit,
+    validate_url,
+)
+from pymobile_mcp.tools import recording as recording_state
+from pymobile_mcp.errors import UnsupportedPlatformError
 
 
 class AndroidDriverLike(Protocol):
@@ -34,6 +43,8 @@ class AndroidDriverLike(Protocol):
     async def open_url(self, url: str) -> None: ...
     async def get_orientation(self) -> str: ...
     async def set_orientation(self, orientation: str) -> None: ...
+    async def start_recording(self, remote_path: str, time_limit: int | None = None) -> Any: ...
+    async def stop_recording(self, process: Any, remote_path: str, local_path: Any) -> int: ...
 
 
 DeviceDiscovery = Callable[[], list[DeviceInfo]]
@@ -76,6 +87,10 @@ def register_android_handlers(register: Register) -> None:
     register("mobile_get_orientation", get_orientation)
     register("mobile_set_orientation", set_orientation)
     register("mobile_save_screenshot", save_screenshot)
+    register("mobile_start_screen_recording", start_screen_recording)
+    register("mobile_stop_screen_recording", stop_screen_recording)
+    register("mobile_list_crashes", list_crashes)
+    register("mobile_get_crash", get_crash)
 
 
 async def list_available_devices(args: dict[str, Any]) -> list[TextContent]:
@@ -208,6 +223,57 @@ async def save_screenshot(args: dict[str, Any]) -> list[TextContent]:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     return [_text({"status": "ok", "tool": "mobile_save_screenshot", "saveTo": str(path)})]
+
+
+
+
+async def start_screen_recording(args: dict[str, Any]) -> list[TextContent]:
+    device_id = str(args["device"])
+    driver = await _driver_for("mobile_start_screen_recording", device_id)
+    output = validate_recording_output("mobile_start_screen_recording", None if args.get("output") is None else str(args.get("output")))
+    time_limit = validate_time_limit("mobile_start_screen_recording", args.get("timeLimit"))
+    remote_path = f"/sdcard/pymobile-mcp-{device_id.replace(':', '_')}.mp4"
+    process = await driver.start_recording(remote_path, time_limit)
+    recording = await recording_state.start_recording(device_id, output, process, remote_path)
+    return [_text({"status": "started", "tool": "mobile_start_screen_recording", "device": device_id, "output": str(recording.output_path)})]
+
+
+async def stop_screen_recording(args: dict[str, Any]) -> list[TextContent]:
+    device_id = str(args["device"])
+    driver = await _driver_for("mobile_stop_screen_recording", device_id)
+    recording = await recording_state.pop_recording(device_id)
+    try:
+        size = await driver.stop_recording(recording.process, recording.remote_path, recording.output_path)
+    except Exception:
+        # ensure no orphan process / remote file best-effort already handled in driver
+        raise
+    duration = max(0, int(__import__('time').time() - recording.started_at))
+    return [_text({
+        "status": "stopped",
+        "tool": "mobile_stop_screen_recording",
+        "device": device_id,
+        "output": str(recording.output_path),
+        "size": size,
+        "duration_seconds": duration,
+    })]
+
+
+async def list_crashes(args: dict[str, Any]) -> list[TextContent]:
+    await _driver_for("mobile_list_crashes", str(args["device"]))
+    raise UnsupportedPlatformError(
+        "mobile_list_crashes",
+        "Android crash reports are not exposed through a reliable pure-Python/ADB source in this MVP.",
+        {"platform": "android"},
+    )
+
+
+async def get_crash(args: dict[str, Any]) -> list[TextContent]:
+    await _driver_for("mobile_get_crash", str(args["device"]))
+    raise UnsupportedPlatformError(
+        "mobile_get_crash",
+        "Android crash reports are not exposed through a reliable pure-Python/ADB source in this MVP.",
+        {"platform": "android", "id": str(args["id"])},
+    )
 
 
 async def _driver_for(tool: str, device_id: str) -> AndroidDriverLike:

@@ -1,0 +1,9 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": ["Android crash tools unsupported by design after spike"],
+  "evidence": [{"pytest": "38 passed", "live_smoke": "passed", "review": "passed", "qa": "passed", "acceptance": "passed"}],
+  "providers": {}
+}
