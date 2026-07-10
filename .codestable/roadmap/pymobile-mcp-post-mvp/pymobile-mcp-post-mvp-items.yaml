@@ -1,0 +1,35 @@
+roadmap: pymobile-mcp-post-mvp
+created: 2026-07-11
+
+items:
+  - slug: ios-live-wda-verification
+    description: 用配对 iOS 设备 + 可达 WDA 把 core UI live smoke 从 blocked-by-env 推进到 passed，并固化复跑步骤
+    depends_on: []
+    status: planned
+    feature: null
+    minimal_loop: true
+    notes: 前置条件是用户提供已信任 iPhone 与 WDA(host/port)；无设备则 handoff，不算通过
+
+  - slug: ios-system-helpers-parity
+    description: 补齐 iOS press_button、open_url、save_screenshot 的实现或 stable unsupported 证据
+    depends_on: [ios-live-wda-verification]
+    status: planned
+    feature: null
+    minimal_loop: false
+    notes: 优先复用现有 WDA/driver 方法做薄封装，不改 public schema
+
+  - slug: ios-app-lifecycle-pmd3
+    description: 用 pure pymobiledevice3/WDA 实现 iOS app list/launch/terminate/install/uninstall，或留下更新后的 unsupported 证据
+    depends_on: [ios-live-wda-verification]
+    status: planned
+    feature: null
+    minimal_loop: false
+    notes: 禁止 go-ios/mobilecli；spike 失败则保持 unsupported_platform
+
+  - slug: crash-tools-real-source
+    description: 为 Android/iOS mobile_list_crashes/mobile_get_crash 找到可靠来源并实现，或记录仍不可行的可复现 spike
+    depends_on: []
+    status: planned
+    feature: null
+    minimal_loop: false
+    notes: 永远不返回假成功空列表；实现后更新 README 能力矩阵
