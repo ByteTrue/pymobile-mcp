@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-
 import base64
 import json
 from dataclasses import asdict
@@ -11,8 +10,9 @@ from typing import Any, Callable, Protocol
 
 from mcp.types import ImageContent, TextContent
 
-from pymobile_mcp.drivers.base import DeviceInfo, ScreenElement, ScreenSize
+from pymobile_mcp.drivers.base import AppInfo, DeviceInfo, ScreenElement, ScreenSize
 from pymobile_mcp.errors import DeviceNotFoundError
+from pymobile_mcp.tools.validation import validate_button, validate_orientation, validate_output_path, validate_url
 
 
 class AndroidDriverLike(Protocol):
@@ -25,6 +25,15 @@ class AndroidDriverLike(Protocol):
     async def long_press(self, x: float, y: float, duration: float = 0.5) -> None: ...
     async def swipe(self, start_x: float, start_y: float, end_x: float, end_y: float) -> None: ...
     async def type_keys(self, text: str, submit: bool) -> None: ...
+    async def list_apps(self) -> list[AppInfo]: ...
+    async def launch_app(self, package_name: str, locale: str | None = None) -> None: ...
+    async def terminate_app(self, package_name: str) -> None: ...
+    async def install_app(self, path: str) -> None: ...
+    async def uninstall_app(self, package_name: str) -> None: ...
+    async def press_button(self, button: str) -> None: ...
+    async def open_url(self, url: str) -> None: ...
+    async def get_orientation(self) -> str: ...
+    async def set_orientation(self, orientation: str) -> None: ...
 
 
 DeviceDiscovery = Callable[[], list[DeviceInfo]]
@@ -57,6 +66,16 @@ def register_android_handlers(register: Register) -> None:
     register("mobile_long_press_on_screen_at_coordinates", long_press)
     register("mobile_swipe_on_screen", swipe)
     register("mobile_type_keys", type_keys)
+    register("mobile_list_apps", list_apps)
+    register("mobile_launch_app", launch_app)
+    register("mobile_terminate_app", terminate_app)
+    register("mobile_install_app", install_app)
+    register("mobile_uninstall_app", uninstall_app)
+    register("mobile_press_button", press_button)
+    register("mobile_open_url", open_url)
+    register("mobile_get_orientation", get_orientation)
+    register("mobile_set_orientation", set_orientation)
+    register("mobile_save_screenshot", save_screenshot)
 
 
 async def list_available_devices(args: dict[str, Any]) -> list[TextContent]:
@@ -120,6 +139,77 @@ async def type_keys(args: dict[str, Any]) -> list[TextContent]:
     return [_ok("mobile_type_keys")]
 
 
+async def list_apps(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_list_apps", str(args["device"]))
+    apps = await driver.list_apps()
+    return [_text({"apps": [_app_to_dict(app) for app in apps]})]
+
+
+async def launch_app(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_launch_app", str(args["device"]))
+    package_name = str(args["packageName"])
+    locale = args.get("locale")
+    await driver.launch_app(package_name, None if locale is None else str(locale))
+    return [_text({"status": "ok", "tool": "mobile_launch_app", "packageName": package_name})]
+
+
+async def terminate_app(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_terminate_app", str(args["device"]))
+    package_name = str(args["packageName"])
+    await driver.terminate_app(package_name)
+    return [_text({"status": "ok", "tool": "mobile_terminate_app", "packageName": package_name})]
+
+
+async def install_app(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_install_app", str(args["device"]))
+    path = str(args["path"])
+    await driver.install_app(path)
+    return [_text({"status": "ok", "tool": "mobile_install_app", "path": path})]
+
+
+async def uninstall_app(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_uninstall_app", str(args["device"]))
+    bundle_id = str(args["bundle_id"])
+    await driver.uninstall_app(bundle_id)
+    return [_text({"status": "ok", "tool": "mobile_uninstall_app", "bundle_id": bundle_id})]
+
+
+async def press_button(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_press_button", str(args["device"]))
+    keycode = validate_button("mobile_press_button", str(args["button"]))
+    await driver.press_button(keycode)
+    return [_text({"status": "ok", "tool": "mobile_press_button", "button": args["button"]})]
+
+
+async def open_url(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_open_url", str(args["device"]))
+    url = validate_url("mobile_open_url", str(args["url"]))
+    await driver.open_url(url)
+    return [_text({"status": "ok", "tool": "mobile_open_url", "url": url})]
+
+
+async def get_orientation(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_get_orientation", str(args["device"]))
+    orientation = await driver.get_orientation()
+    return [_text({"orientation": orientation})]
+
+
+async def set_orientation(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_set_orientation", str(args["device"]))
+    orientation = validate_orientation("mobile_set_orientation", str(args["orientation"]))
+    await driver.set_orientation(orientation)
+    return [_text({"status": "ok", "tool": "mobile_set_orientation", "orientation": orientation})]
+
+
+async def save_screenshot(args: dict[str, Any]) -> list[TextContent]:
+    driver = await _driver_for("mobile_save_screenshot", str(args["device"]))
+    path = validate_output_path("mobile_save_screenshot", str(args["saveTo"]))
+    data = await driver.screenshot()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return [_text({"status": "ok", "tool": "mobile_save_screenshot", "saveTo": str(path)})]
+
+
 async def _driver_for(tool: str, device_id: str) -> AndroidDriverLike:
     devices = await asyncio.to_thread(_discover_devices)
     if device_id not in {device.id for device in devices if device.state == "online"}:
@@ -160,6 +250,13 @@ def _element_to_dict(element: ScreenElement) -> dict[str, Any]:
         "focused": element.focused,
         "coordinates": asdict(element.rect),
     }
+
+
+def _app_to_dict(app: AppInfo) -> dict[str, Any]:
+    payload = {"packageName": app.package_name, "appName": app.app_name}
+    if app.version is not None:
+        payload["version"] = app.version
+    return payload
 
 
 def _swipe_end(start_x: float, start_y: float, direction: str, distance: float, size: ScreenSize) -> tuple[float, float]:

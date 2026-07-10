@@ -1,7 +1,7 @@
 roadmap: "pymobile-mcp-android-mvp"
 status: active
 baseline_ref: "eee169e26b6be2c8616cbe1d5719cb076893ece9"
-current_feature_index: 2
+current_feature_index: 3
 features:
   - slug: "contract-registry-scaffold"
     roadmap_item: "contract-registry-scaffold"
@@ -29,7 +29,7 @@ features:
     review: ".codestable/features/2026-07-07-android-app-system-tools/android-app-system-tools-review.md"
     qa: ".codestable/features/2026-07-07-android-app-system-tools/android-app-system-tools-qa.md"
     acceptance: ".codestable/features/2026-07-07-android-app-system-tools/android-app-system-tools-acceptance.md"
-    status: pending
+    status: accepted
   - slug: "android-recording-crash-tools"
     roadmap_item: "android-recording-crash-tools"
     feature_dir: ".codestable/features/2026-07-07-android-recording-crash-tools"

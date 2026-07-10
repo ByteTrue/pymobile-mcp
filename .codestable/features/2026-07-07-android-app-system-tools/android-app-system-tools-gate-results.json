@@ -1,0 +1,20 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [
+    "install/uninstall live validation intentionally blocked without APK env",
+    "pytest_asyncio loop-scope deprecation warning non-blocking"
+  ],
+  "evidence": [
+    {
+      "pytest": "38 passed",
+      "live_smoke": "android-app-system-tools-live-smoke.md",
+      "review": "passed",
+      "qa": "passed",
+      "acceptance": "passed"
+    }
+  ],
+  "providers": {}
+}

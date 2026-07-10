@@ -24,6 +24,16 @@ ANDROID_TOOL_NAMES = {
     "mobile_long_press_on_screen_at_coordinates",
     "mobile_swipe_on_screen",
     "mobile_type_keys",
+    "mobile_list_apps",
+    "mobile_launch_app",
+    "mobile_terminate_app",
+    "mobile_install_app",
+    "mobile_uninstall_app",
+    "mobile_press_button",
+    "mobile_open_url",
+    "mobile_get_orientation",
+    "mobile_set_orientation",
+    "mobile_save_screenshot",
 }
 
 
@@ -107,12 +117,12 @@ async def test_registered_handler_can_return_success_content():
     async def handler(args):
         return []
 
-    register_tool_handler("mobile_list_apps", handler)
+    register_tool_handler("mobile_get_crash", handler)
     try:
-        content = await call_tool("mobile_list_apps", {"device": "demo"})
+        content = await call_tool("mobile_get_crash", {"device": "demo", "id": "crash"})
         assert content == []
     finally:
-        unregister_tool_handler("mobile_list_apps")
+        unregister_tool_handler("mobile_get_crash")
 
 
 @pytest.mark.asyncio
@@ -159,6 +169,34 @@ async def test_android_handlers_with_fake_driver():
         async def type_keys(self, text, submit):
             actions.append(("type_keys", text, submit))
 
+        async def list_apps(self):
+            from pymobile_mcp.drivers.base import AppInfo
+            return [AppInfo(package_name="com.example.app", app_name="Example")]
+
+        async def launch_app(self, package_name, locale=None):
+            actions.append(("launch_app", package_name, locale))
+
+        async def terminate_app(self, package_name):
+            actions.append(("terminate_app", package_name))
+
+        async def install_app(self, path):
+            actions.append(("install_app", path))
+
+        async def uninstall_app(self, package_name):
+            actions.append(("uninstall_app", package_name))
+
+        async def press_button(self, button):
+            actions.append(("press_button", button))
+
+        async def open_url(self, url):
+            actions.append(("open_url", url))
+
+        async def get_orientation(self):
+            return "portrait"
+
+        async def set_orientation(self, orientation):
+            actions.append(("set_orientation", orientation))
+
     configure_android_tools_for_tests(
         lambda: [DeviceInfo(id="android-1", name="Pixel", platform="android", type="real", version="14", state="online")],
         lambda device_id: FakeDriver(),
@@ -188,6 +226,41 @@ async def test_android_handlers_with_fake_driver():
         assert ("tap", 10.0, 20.0) in actions
         assert ("type_keys", "hello", True) in actions
 
+        apps = json.loads((await call_tool("mobile_list_apps", {"device": "android-1"}))[0].text)
+        assert apps["apps"][0]["packageName"] == "com.example.app"
+        await call_tool("mobile_launch_app", {"device": "android-1", "packageName": "com.example.app"})
+        await call_tool("mobile_terminate_app", {"device": "android-1", "packageName": "com.example.app"})
+        await call_tool("mobile_install_app", {"device": "android-1", "path": "/tmp/demo.apk"})
+        await call_tool("mobile_uninstall_app", {"device": "android-1", "bundle_id": "com.example.app"})
+        await call_tool("mobile_press_button", {"device": "android-1", "button": "HOME"})
+        await call_tool("mobile_open_url", {"device": "android-1", "url": "https://example.com"})
+        orientation = json.loads((await call_tool("mobile_get_orientation", {"device": "android-1"}))[0].text)
+        assert orientation["orientation"] == "portrait"
+        await call_tool("mobile_set_orientation", {"device": "android-1", "orientation": "landscape"})
+        saved = json.loads((await call_tool("mobile_save_screenshot", {"device": "android-1", "saveTo": "tmp-android-app.png"}))[0].text)
+        assert Path(saved["saveTo"]).exists()
+        Path(saved["saveTo"]).unlink(missing_ok=True)
+        assert ("launch_app", "com.example.app", None) in actions
+        assert ("press_button", "KEYCODE_HOME") in actions
+        assert ("open_url", "https://example.com") in actions
+        assert ("set_orientation", "landscape") in actions
+
+        _assert_error_content(
+            await call_tool("mobile_open_url", {"device": "android-1", "url": "myapp://home"}),
+            "invalid_argument",
+            "mobile_open_url",
+        )
+        _assert_error_content(
+            await call_tool("mobile_save_screenshot", {"device": "android-1", "saveTo": "shot.txt"}),
+            "invalid_argument",
+            "mobile_save_screenshot",
+        )
+        _assert_error_content(
+            await call_tool("mobile_save_screenshot", {"device": "android-1", "saveTo": "/etc/passwd.png"}),
+            "invalid_argument",
+            "mobile_save_screenshot",
+        )
+
         _assert_error_content(
             await call_tool("mobile_get_screen_size", {"device": "missing"}),
             "device_not_found",
@@ -210,12 +283,12 @@ async def test_server_handlers_list_and_call_tools():
     called = await server.request_handlers[types.CallToolRequest](
         types.CallToolRequest(
             params=types.CallToolRequestParams(
-                name="mobile_list_apps",
-                arguments={"device": "demo"},
+                name="mobile_get_crash",
+                arguments={"device": "demo", "id": "crash"},
             )
         )
     )
-    payload = _assert_error_content(called.root.content, "not_implemented", "mobile_list_apps")
+    payload = _assert_error_content(called.root.content, "not_implemented", "mobile_get_crash")
     assert called.root.isError is False
 
     unknown = await server.request_handlers[types.CallToolRequest](
@@ -315,9 +388,9 @@ async def test_stdio_client_can_list_and_call_tools():
             assert "mobile_get_page_source" not in names
             assert not set(FIXTURE["excluded_tools"]) & set(names)
 
-            stub = await session.call_tool("mobile_list_apps", {"device": "demo"})
+            stub = await session.call_tool("mobile_get_crash", {"device": "demo", "id": "crash"})
 
-            stub_payload = _assert_error_content(stub.content, "not_implemented", "mobile_list_apps")
+            stub_payload = _assert_error_content(stub.content, "not_implemented", "mobile_get_crash")
             assert stub.isError is False
 
             unknown = await session.call_tool("mobile_get_page_source", {})
@@ -373,3 +446,34 @@ def test_registry_layer_does_not_import_device_libraries():
     specs_source = Path("src/pymobile_mcp/tools/specs.py").read_text()
     assert "uiautomator2" not in registry_source + specs_source
     assert "pymobiledevice3" not in registry_source + specs_source
+
+
+def test_url_and_path_validation_helpers(tmp_path, monkeypatch):
+    from pymobile_mcp.errors import InvalidArgumentError
+    from pymobile_mcp.tools.validation import validate_button, validate_orientation, validate_output_path, validate_url
+
+    assert validate_url("mobile_open_url", "https://example.com") == "https://example.com"
+    try:
+        validate_url("mobile_open_url", "myapp://home")
+        raise AssertionError("expected invalid url")
+    except InvalidArgumentError as exc:
+        assert "http" in exc.message
+
+    monkeypatch.setenv("MOBILEMCP_ALLOW_UNSAFE_URLS", "1")
+    assert validate_url("mobile_open_url", "myapp://home") == "myapp://home"
+
+    assert validate_button("mobile_press_button", "HOME") == "KEYCODE_HOME"
+    assert validate_orientation("mobile_set_orientation", "portrait") == "portrait"
+
+    safe = validate_output_path("mobile_save_screenshot", str(tmp_path / "shot.png"))
+    assert safe.suffix == ".png"
+    try:
+        validate_output_path("mobile_save_screenshot", str(tmp_path / "shot.txt"))
+        raise AssertionError("expected invalid extension")
+    except InvalidArgumentError:
+        pass
+    try:
+        validate_output_path("mobile_save_screenshot", "/etc/passwd.png")
+        raise AssertionError("expected unsafe path")
+    except InvalidArgumentError:
+        pass

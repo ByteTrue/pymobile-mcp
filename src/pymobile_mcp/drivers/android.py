@@ -11,8 +11,7 @@ import uiautomator2 as u2
 
 from pymobile_mcp.errors import DriverError
 
-
-from .base import BaseDriver, DeviceInfo, ScreenElement, ScreenElementRect, ScreenSize
+from .base import AppInfo, BaseDriver, DeviceInfo, ScreenElement, ScreenElementRect, ScreenSize
 
 
 def list_android_devices() -> list[DeviceInfo]:
@@ -83,6 +82,101 @@ class AndroidDriver(BaseDriver):
         await asyncio.to_thread(device.send_keys, text)
         if submit:
             await asyncio.to_thread(device.press, "enter")
+
+    async def list_apps(self) -> list[AppInfo]:
+        return await asyncio.to_thread(self._list_apps_sync)
+
+    async def launch_app(self, package_name: str, locale: str | None = None) -> None:
+        await asyncio.to_thread(self._launch_app_sync, package_name, locale)
+
+    async def terminate_app(self, package_name: str) -> None:
+        await asyncio.to_thread(self._adb().app_stop, package_name)
+
+    async def install_app(self, path: str) -> None:
+        await asyncio.to_thread(self._adb().install, path, True, False, True)
+
+    async def uninstall_app(self, package_name: str) -> None:
+        await asyncio.to_thread(self._adb().uninstall, package_name)
+
+    async def press_button(self, button: str) -> None:
+        # button is already mapped to KEYCODE_* by tool validation
+        await asyncio.to_thread(self._adb().keyevent, button)
+
+    async def open_url(self, url: str) -> None:
+        device = await self._connected()
+        await asyncio.to_thread(device.open_url, url)
+
+    async def get_orientation(self) -> str:
+        return await asyncio.to_thread(self._get_orientation_sync)
+
+    async def set_orientation(self, orientation: str) -> None:
+        await asyncio.to_thread(self._set_orientation_sync, orientation)
+
+    def _adb(self) -> Any:
+        return adbutils.adb.device(self.device_id)
+
+    def _list_apps_sync(self) -> list[AppInfo]:
+        output = self._adb().shell(
+            [
+                "cmd",
+                "package",
+                "query-activities",
+                "-a",
+                "android.intent.action.MAIN",
+                "-c",
+                "android.intent.category.LAUNCHER",
+            ]
+        )
+        packages: list[str] = []
+        seen: set[str] = set()
+        for line in str(output).splitlines():
+            text = line.strip()
+            if not text.startswith("packageName="):
+                continue
+            package = text.split("=", 1)[1]
+            if package in seen:
+                continue
+            seen.add(package)
+            packages.append(package)
+        return [AppInfo(package_name=package, app_name=package) for package in packages]
+
+    def _launch_app_sync(self, package_name: str, locale: str | None) -> None:
+        adb = self._adb()
+        if locale:
+            try:
+                adb.shell(["cmd", "locale", "set-app-locales", package_name, "--locales", locale])
+            except Exception:
+                # Android < 13 has no set-app-locales; ignore like mobile-mcp.
+                pass
+        try:
+            adb.shell(["monkey", "-p", package_name, "-c", "android.intent.category.LAUNCHER", "1"])
+        except Exception as exc:
+            raise DriverError(
+                "android",
+                f'Failed launching app with package name "{package_name}", please make sure it exists',
+                {"packageName": package_name},
+            ) from exc
+
+    def _get_orientation_sync(self) -> str:
+        rotation = str(self._adb().shell(["settings", "get", "system", "user_rotation"])).strip()
+        return "portrait" if rotation in {"0", "null", ""} else "landscape"
+
+    def _set_orientation_sync(self, orientation: str) -> None:
+        value = "0" if orientation == "portrait" else "1"
+        adb = self._adb()
+        adb.shell(["settings", "put", "system", "accelerometer_rotation", "0"])
+        adb.shell(
+            [
+                "content",
+                "insert",
+                "--uri",
+                "content://settings/system",
+                "--bind",
+                "name:s:user_rotation",
+                "--bind",
+                f"value:i:{value}",
+            ]
+        )
 
     async def _connected(self) -> Any:
         if self._device is None:

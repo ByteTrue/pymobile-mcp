@@ -360,8 +360,8 @@ active_recordings: dict[str, ActiveRecording]
 3. **android-app-system-tools** — 补齐 Android app lifecycle、orientation、button、open_url、save_screenshot 等非 recording 系统工具。
    - 所属模块：Android Driver、Tool Execution Layer
    - 依赖：`android-live-ui-slice`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：done
+   - 对应 feature：2026-07-07-android-app-system-tools
    - 备注：优先复用 AndroidDriver，不新增工具层分支。
 
 4. **android-recording-crash-tools** — 实现或明确降级 Android screen recording 与 crash report 工具，并保证 unsupported 场景可解释。

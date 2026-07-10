@@ -21,7 +21,7 @@ items:
   - slug: android-app-system-tools
     description: 补齐 Android app lifecycle、orientation、button、open_url、save_screenshot 等非 recording 系统工具
     depends_on: [android-live-ui-slice]
-    status: in-progress
+    status: done
     feature: 2026-07-07-android-app-system-tools
     minimal_loop: false
     notes: 优先复用 AndroidDriver，不新增工具层分支

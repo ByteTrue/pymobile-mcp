@@ -6,46 +6,42 @@ prerequisite: "android-live-ui-slice must be accepted before implementation star
 steps:
   - action: "安全校验：补 package/button/orientation/url/output path validation"
     exit_signal: "pytest covers invalid url, unsafe saveTo, invalid extension, invalid button/orientation"
-    status: pending
+    status: done
   - action: "app lifecycle：实现 Android list/launch/terminate/install/uninstall handlers"
     exit_signal: "list_apps live smoke succeeds and destructive tools have guarded validation/error behavior"
-    status: pending
+    status: done
   - action: "system actions：实现 press_button, open_url, get_orientation, set_orientation"
     exit_signal: "safe Android system live smoke completes without driver_error"
-    status: pending
+    status: done
   - action: "save_screenshot：复用 screenshot bytes 并写入安全 host path"
     exit_signal: "safe path creates an image file and unsafe path/extension fails with structured error"
-    status: pending
+    status: done
   - action: "证据与说明：记录 Android app/system smoke 复跑步骤和限制"
     exit_signal: "QA/acceptance can cite smoke steps, outputs, and any blocked destructive cases"
-    status: pending
+    status: done
 
 checks:
   - item: "mobile_list_apps returns Android app list"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "mobile_open_url defaults to http/https only; custom schemes require MOBILEMCP_ALLOW_UNSAFE_URLS=1 env var, not a schema flag"
     source: 流程级约束
-    status: pending
-    source: 流程级约束
-    status: pending
+    status: passed
   - item: "mobile_save_screenshot enforces .png/.jpg/.jpeg extension and safe output path (resolve/realpath within cwd or temp, reject .. traversal and symlink escape)"
     source: 流程级约束
-    status: pending
+    status: passed
   - item: "mobile_install_app and mobile_uninstall_app ToolSpec annotations include destructive=true"
     source: 名词契约
-    status: pending
-    source: 流程级约束
-    status: pending
+    status: passed
   - item: "packageName, bundle_id, saveTo field names remain schema-compatible"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "recording/crash remains not implemented by this feature"
     source: 范围守护
-    status: pending
+    status: passed
   - item: "destructive install/uninstall live validation is guarded or explicitly blocked"
     source: 验收场景
-    status: pending
+    status: passed
 
 dod:
   commands:
@@ -54,7 +50,7 @@ dod:
       core: true
       failure_handling: fix-or-block
     - id: CMD-ANDROID-APP-001
-      command: "Android app/system live smoke via MCP tools"
+      command: "PATH=.venv/bin:$PATH python tests/android_app_system_live_smoke.py"
       core: true
       failure_handling: fix-or-block
   evidence_required: [command_output, live_smoke_notes, saved_screenshot_path]
