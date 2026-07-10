@@ -1,0 +1,23 @@
+{
+  "gate_id": "evidence-pack",
+  "stage": "implementation.before_review",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [
+    "archguard/meta-cc collection disabled"
+  ],
+  "evidence": [
+    {
+      "out": ".codestable/features/2026-07-07-android-recording-crash-tools/android-recording-crash-tools-evidence-pack.md",
+      "providers": {
+        "archguard": {
+          "status": "skipped"
+        },
+        "meta_cc": {
+          "status": "skipped"
+        }
+      }
+    }
+  ],
+  "providers": {}
+}

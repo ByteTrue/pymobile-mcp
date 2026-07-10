@@ -1,0 +1,23 @@
+{
+  "gate_id": "evidence-pack",
+  "stage": "implementation.before_review",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [
+    "archguard/meta-cc collection disabled"
+  ],
+  "evidence": [
+    {
+      "out": ".codestable/features/2026-07-07-ios-pmd3-wda-core/ios-pmd3-wda-core-evidence-pack.md",
+      "providers": {
+        "archguard": {
+          "status": "skipped"
+        },
+        "meta_cc": {
+          "status": "skipped"
+        }
+      }
+    }
+  ],
+  "providers": {}
+}

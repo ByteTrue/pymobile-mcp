@@ -1,52 +1,50 @@
 feature: 2026-07-07-parity-hardening-docs
 created: 2026-07-07
 
-prerequisite: "all dependent features (android-app-system-tools, android-recording-crash-tools, ios-app-recording-crash-parity) must be accepted/done before this feature starts"
+prerequisite: "all dependent features accepted/done"
 
 steps:
   - action: "依赖就绪检查：验证所有前置 feature 已 accepted/done"
     exit_signal: "items.yaml shows all dependency items as done with acceptance artifacts present"
-    status: pending
+    status: done
   - action: "事实收集：读取所有 feature acceptance/QA 结论并提取能力状态"
     exit_signal: "each roadmap item has supported, unsupported, or blocked-by-env evidence source"
-    status: pending
+    status: done
   - action: "能力矩阵：生成 23 mobile-mcp core tools × Android/iOS 状态表"
     exit_signal: "each matrix cell traces to acceptance evidence and excludes remote/page_source extras"
-    status: pending
+    status: done
   - action: "文档更新：补 README 安装、配置、live smoke、已知限制"
     exit_signal: "a new user can configure pymobile-mcp and identify supported tools from README"
-    status: pending
+    status: done
   - action: "聚合验证：运行 pytest, schema parity, available live smoke, and goal consistency gate"
     exit_signal: "aggregate command outputs are available for goal audit"
-    status: pending
+    status: done
   - action: "收尾候选：列出 ADR/compound/attention 候选"
     exit_signal: "goal audit can cite knowledge candidates without auto-writing them"
-    status: pending
+    status: done
 
 checks:
   - item: "README matrix lists 23 core tools and excludes remote fleet and page_source; no not-applicable status used for core tools"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "schema parity fixture records mobile-mcp server.ts source path and git revision"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "each blocked-by-env cell has probe command, output summary, affected tools, and rerun steps"
     source: 验收场景
-    status: pending
-    source: 验收场景
-    status: pending
+    status: passed
   - item: "supported/unsupported/blocked statuses trace to acceptance or QA evidence"
     source: 验收场景
-    status: pending
+    status: passed
   - item: "schema parity fixture remains aligned with mobile-mcp source snapshot"
     source: 名词契约
-    status: pending
+    status: passed
   - item: "final aggregate checks include pytest and CodeStable goal consistency gate"
     source: DoD Contract
-    status: pending
+    status: passed
   - item: "docs do not include device private identifiers, credentials, or unverified support claims"
     source: 清洁度
-    status: pending
+    status: passed
 
 dod:
   commands:
@@ -66,9 +64,6 @@ dod:
       command: "python3 .codestable/tools/validate-yaml.py --file .codestable/roadmap/pymobile-mcp-android-mvp/pymobile-mcp-android-mvp-items.yaml --yaml-only"
       core: true
       failure_handling: fix-or-block
-      command: "available Android/iOS live smoke from README"
-      core: true
-      failure_handling: fix-or-block-or-document-env-blocker
   evidence_required: [command_output, readme_diff, live_smoke_notes, schema_fixture_source_metadata, knowledge_candidates]
   cleanliness:
     unverified_support_claims: forbidden

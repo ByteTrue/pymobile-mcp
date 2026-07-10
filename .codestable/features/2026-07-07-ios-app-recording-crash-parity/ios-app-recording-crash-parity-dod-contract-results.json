@@ -1,0 +1,14 @@
+{
+  "gate_id": "dod-contract-gate",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "checked_block": "DoD Contract",
+      "status": "passed"
+    }
+  ],
+  "providers": {}
+}

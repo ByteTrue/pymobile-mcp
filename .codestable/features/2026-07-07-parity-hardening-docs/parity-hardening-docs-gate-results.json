@@ -1,0 +1,9 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": ["iOS live smoke remains blocked-by-env on this host"],
+  "evidence": [{"pytest":"42 passed","readme":"updated","review":"passed","qa":"passed","acceptance":"passed"}],
+  "providers": {}
+}

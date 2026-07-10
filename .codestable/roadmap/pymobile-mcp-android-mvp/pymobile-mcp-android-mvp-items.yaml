@@ -53,7 +53,7 @@ items:
   - slug: parity-hardening-docs
     description: 收口契约测试、live smoke 文档、README 能力状态表、安装/调试说明和已知限制
     depends_on: [android-app-system-tools, android-recording-crash-tools, ios-app-recording-crash-parity]
-    status: in-progress
+    status: done
     feature: 2026-07-07-parity-hardening-docs
     minimal_loop: false
     notes: 对照 mobile-mcp 源码工具 schema 和实际实现生成最终能力矩阵；KICKOFF 仅作技术栈背景，不作契约来源

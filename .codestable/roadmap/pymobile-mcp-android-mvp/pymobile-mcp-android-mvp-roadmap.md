@@ -388,8 +388,8 @@ active_recordings: dict[str, ActiveRecording]
 7. **parity-hardening-docs** — 收口契约测试、live smoke 文档、README 能力状态表、安装/调试说明和已知限制。
    - 所属模块：Verification / Docs、MCP Server / Tool Registry
    - 依赖：`android-app-system-tools`, `android-recording-crash-tools`, `ios-app-recording-crash-parity`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：done
+   - 对应 feature：2026-07-07-parity-hardening-docs
    - 备注：验收时对照 mobile-mcp 源码工具 schema 和实际实现生成最终能力矩阵。
 
 **最小闭环**：第 2 条 `android-live-ui-slice` 做完后，可以在用户已连接 Android 真机上通过 MCP 工具完成 `list_devices → screen_size → screenshot → elements → tap/swipe/type`，这是本 roadmap 的第一条可演示端到端路径。
