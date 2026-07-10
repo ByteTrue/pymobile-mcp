@@ -10,7 +10,7 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from pymobile_mcp.errors import DriverError
+from pymobile_mcp.errors import DriverError, UnsupportedPlatformError
 
 from .base import BaseDriver, DeviceInfo, ScreenElement, ScreenElementRect, ScreenSize
 
@@ -262,6 +262,77 @@ class IOSDriver(BaseDriver):
     async def set_orientation(self, orientation: str) -> None:
         await self._ensure_connected()
         await asyncio.to_thread(self._wda.set_orientation, orientation)
+
+
+    async def list_apps(self):
+        raise UnsupportedPlatformError(
+            "mobile_list_apps",
+            "iOS app listing via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def launch_app(self, package_name: str, locale: str | None = None) -> None:
+        del package_name, locale
+        raise UnsupportedPlatformError(
+            "mobile_launch_app",
+            "iOS app launch via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def terminate_app(self, package_name: str) -> None:
+        del package_name
+        raise UnsupportedPlatformError(
+            "mobile_terminate_app",
+            "iOS app terminate via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def install_app(self, path: str) -> None:
+        del path
+        raise UnsupportedPlatformError(
+            "mobile_install_app",
+            "iOS app install via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def uninstall_app(self, package_name: str) -> None:
+        del package_name
+        raise UnsupportedPlatformError(
+            "mobile_uninstall_app",
+            "iOS app uninstall via pure pymobiledevice3/WDA is not implemented in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def start_recording(self, remote_path: str, time_limit: int | None = None):
+        del remote_path, time_limit
+        raise UnsupportedPlatformError(
+            "mobile_start_screen_recording",
+            "iOS screen recording is not available through pure pymobiledevice3/WDA in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def stop_recording(self, process, remote_path: str, local_path) -> int:
+        del process, remote_path, local_path
+        raise UnsupportedPlatformError(
+            "mobile_stop_screen_recording",
+            "iOS screen recording is not available through pure pymobiledevice3/WDA in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def list_crashes(self):
+        raise UnsupportedPlatformError(
+            "mobile_list_crashes",
+            "iOS crash report listing is not available through pure pymobiledevice3/WDA in this MVP.",
+            {"platform": "ios"},
+        )
+
+    async def get_crash(self, crash_id: str) -> str:
+        del crash_id
+        raise UnsupportedPlatformError(
+            "mobile_get_crash",
+            "iOS crash report reading is not available through pure pymobiledevice3/WDA in this MVP.",
+            {"platform": "ios"},
+        )
 
     async def _ensure_connected(self) -> None:
         if not self._connected:

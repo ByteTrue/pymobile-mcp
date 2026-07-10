@@ -623,3 +623,42 @@ def test_parse_wda_source_maps_elements():
     assert elements[0].label == "Continue"
     assert elements[0].identifier == "btn.continue"
     assert elements[0].rect.width == 7
+
+
+@pytest.mark.asyncio
+async def test_ios_parity_tools_return_unsupported():
+    from pymobile_mcp.drivers.base import DeviceInfo
+    from pymobile_mcp.drivers.ios import IOSDriver
+    from pymobile_mcp.tools.android import configure_android_tools_for_tests, reset_android_tools_for_tests
+
+    class FakeWda:
+        def is_running(self):
+            return True
+
+    configure_android_tools_for_tests(
+        lambda: [DeviceInfo(id="ios-1", name="iPhone", platform="ios", type="real", version="17", state="online")],
+        lambda device_id: IOSDriver(device_id, wda=FakeWda()),  # type: ignore[arg-type]
+    )
+    try:
+        for name, args in [
+            ("mobile_list_apps", {"device": "ios-1"}),
+            ("mobile_launch_app", {"device": "ios-1", "packageName": "com.example"}),
+            ("mobile_terminate_app", {"device": "ios-1", "packageName": "com.example"}),
+            ("mobile_install_app", {"device": "ios-1", "path": "/tmp/app.ipa"}),
+            ("mobile_uninstall_app", {"device": "ios-1", "bundle_id": "com.example"}),
+            ("mobile_start_screen_recording", {"device": "ios-1", "output": "tmp.mp4"}),
+            ("mobile_list_crashes", {"device": "ios-1"}),
+            ("mobile_get_crash", {"device": "ios-1", "id": "c1"}),
+        ]:
+            _assert_error_content(await call_tool(name, args), "unsupported_platform", name)
+        # stop without active still no_active for state machine before driver call? start fails unsupported first
+        _assert_error_content(await call_tool("mobile_stop_screen_recording", {"device": "ios-1"}), "no_active_recording", "mobile_stop_screen_recording")
+    finally:
+        reset_android_tools_for_tests()
+
+
+def test_no_go_ios_dependency():
+    root = Path("src")
+    text = "\n".join(path.read_text() for path in root.rglob("*.py"))
+    assert "go-ios" not in text
+    assert "mobilecli" not in text

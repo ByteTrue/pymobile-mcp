@@ -259,7 +259,10 @@ async def stop_screen_recording(args: dict[str, Any]) -> list[TextContent]:
 
 
 async def list_crashes(args: dict[str, Any]) -> list[TextContent]:
-    await _driver_for("mobile_list_crashes", str(args["device"]))
+    driver = await _driver_for("mobile_list_crashes", str(args["device"]))
+    if hasattr(driver, "list_crashes"):
+        crashes = await driver.list_crashes()  # type: ignore[attr-defined]
+        return [_text({"crashes": crashes})]
     raise UnsupportedPlatformError(
         "mobile_list_crashes",
         "Android crash reports are not exposed through a reliable pure-Python/ADB source in this MVP.",
@@ -268,7 +271,10 @@ async def list_crashes(args: dict[str, Any]) -> list[TextContent]:
 
 
 async def get_crash(args: dict[str, Any]) -> list[TextContent]:
-    await _driver_for("mobile_get_crash", str(args["device"]))
+    driver = await _driver_for("mobile_get_crash", str(args["device"]))
+    if hasattr(driver, "get_crash"):
+        content = await driver.get_crash(str(args["id"]))  # type: ignore[attr-defined]
+        return [_text({"id": str(args["id"]), "content": content})]
     raise UnsupportedPlatformError(
         "mobile_get_crash",
         "Android crash reports are not exposed through a reliable pure-Python/ADB source in this MVP.",

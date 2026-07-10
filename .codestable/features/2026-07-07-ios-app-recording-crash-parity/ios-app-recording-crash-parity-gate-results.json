@@ -1,0 +1,9 @@
+{
+  "gate_id": "feature-gate-summary",
+  "stage": "acceptance.before_done",
+  "status": "passed",
+  "blocking": [],
+  "warnings": ["live iOS parity smoke blocked-by-env; unit proves unsupported envelopes"],
+  "evidence": [{"pytest":"42 passed","live_smoke":"blocked-by-env","review":"passed","qa":"passed","acceptance":"passed"}],
+  "providers": {}
+}

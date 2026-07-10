@@ -1,7 +1,7 @@
 roadmap: "pymobile-mcp-android-mvp"
 status: active
 baseline_ref: "eee169e26b6be2c8616cbe1d5719cb076893ece9"
-current_feature_index: 5
+current_feature_index: 6
 features:
   - slug: "contract-registry-scaffold"
     roadmap_item: "contract-registry-scaffold"
@@ -56,7 +56,7 @@ features:
     review: ".codestable/features/2026-07-07-ios-app-recording-crash-parity/ios-app-recording-crash-parity-review.md"
     qa: ".codestable/features/2026-07-07-ios-app-recording-crash-parity/ios-app-recording-crash-parity-qa.md"
     acceptance: ".codestable/features/2026-07-07-ios-app-recording-crash-parity/ios-app-recording-crash-parity-acceptance.md"
-    status: pending
+    status: accepted
   - slug: "parity-hardening-docs"
     roadmap_item: "parity-hardening-docs"
     feature_dir: ".codestable/features/2026-07-07-parity-hardening-docs"

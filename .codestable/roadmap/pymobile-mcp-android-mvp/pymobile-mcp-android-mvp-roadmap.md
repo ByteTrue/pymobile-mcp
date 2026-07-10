@@ -381,8 +381,8 @@ active_recordings: dict[str, ActiveRecording]
 6. **ios-app-recording-crash-parity** — 在 iOS core driver 基础上补 app lifecycle、recording/crash 能力或稳定 unsupported 行为。
    - 所属模块：iOS Driver、Tool Execution Layer
    - 依赖：`ios-pmd3-wda-core`
-   - 状态：planned
-   - 对应 feature：未启动
+   - 状态：done
+   - 对应 feature：2026-07-07-ios-app-recording-crash-parity
    - 备注：不引入 go-ios；如果 `pymobiledevice3` 无直接能力，必须显式记录降级。
 
 7. **parity-hardening-docs** — 收口契约测试、live smoke 文档、README 能力状态表、安装/调试说明和已知限制。
