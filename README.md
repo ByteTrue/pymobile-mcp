@@ -77,6 +77,7 @@ No go-ios runtime and no root. Requires installed WDA runner
 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
 PYMOBILE_MCP_IOS_ACTIONS=1 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_system_helpers_live_smoke.py
+PATH=.venv/bin:$PATH python tests/ios_app_lifecycle_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 # optional:
 # PYMOBILE_MCP_IOS_DEVICE=<udid>
@@ -107,11 +108,11 @@ Legend:
 | Tool | Android | iOS |
 |---|---|---|
 | mobile_list_available_devices | supported | supported (usbmux discovery; empty when none) |
-| mobile_list_apps | supported | unsupported |
-| mobile_launch_app | supported | unsupported |
-| mobile_terminate_app | supported | unsupported |
-| mobile_install_app | supported (destructive) | unsupported |
-| mobile_uninstall_app | supported (destructive) | unsupported |
+| mobile_list_apps | supported | supported |
+| mobile_launch_app | supported | supported |
+| mobile_terminate_app | supported | supported |
+| mobile_install_app | supported (destructive) | supported (destructive, guarded) |
+| mobile_uninstall_app | supported (destructive) | supported (destructive, guarded) |
 | mobile_get_screen_size | supported | supported |
 | mobile_click_on_screen_at_coordinates | supported | supported |
 | mobile_double_tap_on_screen | supported | supported |

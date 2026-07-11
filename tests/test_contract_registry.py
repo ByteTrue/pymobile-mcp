@@ -641,11 +641,6 @@ async def test_ios_parity_tools_return_unsupported():
     )
     try:
         for name, args in [
-            ("mobile_list_apps", {"device": "ios-1"}),
-            ("mobile_launch_app", {"device": "ios-1", "packageName": "com.example"}),
-            ("mobile_terminate_app", {"device": "ios-1", "packageName": "com.example"}),
-            ("mobile_install_app", {"device": "ios-1", "path": "/tmp/app.ipa"}),
-            ("mobile_uninstall_app", {"device": "ios-1", "bundle_id": "com.example"}),
             ("mobile_start_screen_recording", {"device": "ios-1", "output": "tmp.mp4"}),
             ("mobile_list_crashes", {"device": "ios-1"}),
             ("mobile_get_crash", {"device": "ios-1", "id": "c1"}),
@@ -703,5 +698,45 @@ async def test_ios_system_helpers_with_fake_driver():
         Path(saved["saveTo"]).unlink(missing_ok=True)
         assert ("press_button", "KEYCODE_HOME") in actions or ("press_button", "home") in actions or any(a[0]=="press_button" for a in actions)
         assert ("open_url", "https://example.com") in actions
+    finally:
+        reset_android_tools_for_tests()
+
+
+@pytest.mark.asyncio
+async def test_ios_app_lifecycle_with_fake_driver():
+    from pymobile_mcp.drivers.base import AppInfo, DeviceInfo
+    from pymobile_mcp.tools.android import configure_android_tools_for_tests, reset_android_tools_for_tests
+
+    actions = []
+
+    class FakeIOS:
+        async def connect(self, capabilities=None):
+            return None
+        async def list_apps(self):
+            return [AppInfo(package_name="com.example.app", app_name="Example", version="1.0")]
+        async def launch_app(self, package_name, locale=None):
+            actions.append(("launch_app", package_name, locale))
+        async def terminate_app(self, package_name):
+            actions.append(("terminate_app", package_name))
+        async def install_app(self, path):
+            actions.append(("install_app", path))
+        async def uninstall_app(self, package_name):
+            actions.append(("uninstall_app", package_name))
+
+    configure_android_tools_for_tests(
+        lambda: [DeviceInfo(id="ios-1", name="iPhone", platform="ios", type="real", version="17", state="online")],
+        lambda device_id: FakeIOS(),
+    )
+    try:
+        apps = json.loads((await call_tool("mobile_list_apps", {"device": "ios-1"}))[0].text)
+        assert apps["apps"][0]["packageName"] == "com.example.app"
+        await call_tool("mobile_launch_app", {"device": "ios-1", "packageName": "com.example.app"})
+        await call_tool("mobile_terminate_app", {"device": "ios-1", "packageName": "com.example.app"})
+        await call_tool("mobile_install_app", {"device": "ios-1", "path": "/tmp/demo.ipa"})
+        await call_tool("mobile_uninstall_app", {"device": "ios-1", "bundle_id": "com.example.app"})
+        assert ("launch_app", "com.example.app", None) in actions
+        assert ("terminate_app", "com.example.app") in actions
+        assert ("install_app", "/tmp/demo.ipa") in actions
+        assert ("uninstall_app", "com.example.app") in actions
     finally:
         reset_android_tools_for_tests()

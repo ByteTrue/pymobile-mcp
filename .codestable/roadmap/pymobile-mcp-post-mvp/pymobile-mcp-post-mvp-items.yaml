@@ -21,10 +21,10 @@ items:
   - slug: ios-app-lifecycle-pmd3
     description: 用 pure pymobiledevice3/WDA 实现 iOS app list/launch/terminate/install/uninstall，或留下更新后的 unsupported 证据
     depends_on: [ios-live-wda-verification]
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-07-11-ios-app-lifecycle-pmd3
     minimal_loop: false
-    notes: 禁止 go-ios/mobilecli；spike 失败则保持 unsupported_platform
+    notes: list via InstallationProxy; launch/terminate via WDA session; install/uninstall via install_from_local/uninstall guarded
 
   - slug: crash-tools-real-source
     description: 为 Android/iOS mobile_list_crashes/mobile_get_crash 找到可靠来源并实现，或记录仍不可行的可复现 spike

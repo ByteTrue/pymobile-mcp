@@ -1,0 +1,1 @@
+{"gate_id":"feature-gate-summary","status":"passed","blocking":[],"warnings":[],"evidence":[{"pytest":"44 passed","live":"passed"}],"providers":{}}

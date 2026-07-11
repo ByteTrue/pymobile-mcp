@@ -393,44 +393,83 @@ class IOSDriver(BaseDriver):
                 ) from exc
         raise DriverError("ios", f"Failed to open url via WDA: {last_exc}", {"url": url}) from last_exc
 
+
     async def list_apps(self):
-        raise UnsupportedPlatformError(
-            "mobile_list_apps",
-            "iOS app listing via pure pymobiledevice3/WDA is not implemented yet.",
-            {"platform": "ios"},
-        )
+        from pymobiledevice3.lockdown import create_using_usbmux
+        from pymobiledevice3.services.installation_proxy import InstallationProxyService
+        from pymobile_mcp.drivers.base import AppInfo
+
+        lockdown = await create_using_usbmux(serial=self.device_id)
+        apps = await InstallationProxyService(lockdown=lockdown).get_apps(application_type="User")
+        result: list[AppInfo] = []
+        for bid, meta in apps.items():
+            if not isinstance(meta, dict):
+                continue
+            name = meta.get("CFBundleDisplayName") or meta.get("CFBundleName") or bid
+            version = meta.get("CFBundleShortVersionString") or meta.get("CFBundleVersion")
+            result.append(AppInfo(package_name=str(bid), app_name=str(name), version=None if version is None else str(version)))
+        result.sort(key=lambda item: item.package_name.lower())
+        return result
 
     async def launch_app(self, package_name: str, locale: str | None = None) -> None:
-        del package_name, locale
-        raise UnsupportedPlatformError(
-            "mobile_launch_app",
-            "iOS app launch via pure pymobiledevice3/WDA is not implemented yet.",
-            {"platform": "ios"},
-        )
+        del locale  # iOS path does not apply Android-style app locales here
+        if self._fake_wda is not None:
+            await self._fake_call("launch_app", None, package_name, locale)
+            return
+        await self._ensure_connected()
+        assert self._client is not None
+        caps = {"bundleId": package_name, "shouldWaitForQuiescence": False}
+        payload = {"capabilities": {"alwaysMatch": caps}, "desiredCapabilities": caps}
+        try:
+            data = await self._client._request_json("POST", "/session", payload)
+        except Exception as exc:
+            msg = str(exc)
+            if "Locked" in msg or "could not be, unlocked" in msg:
+                raise DriverError("ios", "iPhone is locked; unlock it to launch apps.", {"packageName": package_name}) from exc
+            raise DriverError("ios", f'Failed launching app "{package_name}": {exc}', {"packageName": package_name}) from exc
+        session_id = data.get("sessionId")
+        if not session_id:
+            value = data.get("value")
+            if isinstance(value, dict):
+                session_id = value.get("sessionId")
+        if session_id:
+            self._session_id = str(session_id)
 
     async def terminate_app(self, package_name: str) -> None:
-        del package_name
-        raise UnsupportedPlatformError(
-            "mobile_terminate_app",
-            "iOS app terminate via pure pymobiledevice3/WDA is not implemented yet.",
-            {"platform": "ios"},
-        )
+        if self._fake_wda is not None:
+            await self._fake_call("terminate_app", None, package_name)
+            return
+        await self._ensure_connected()
+        assert self._client is not None
+        sid = await self._session()
+        try:
+            await self._client._request_json("POST", f"/session/{sid}/wda/apps/terminate", {"bundleId": package_name})
+        except Exception as exc:
+            raise DriverError("ios", f'Failed terminating app "{package_name}": {exc}', {"packageName": package_name}) from exc
 
     async def install_app(self, path: str) -> None:
-        del path
-        raise UnsupportedPlatformError(
-            "mobile_install_app",
-            "iOS app install via pure pymobiledevice3/WDA is not implemented yet.",
-            {"platform": "ios"},
-        )
+        from pathlib import Path as _Path
+        from pymobiledevice3.lockdown import create_using_usbmux
+        from pymobiledevice3.services.installation_proxy import InstallationProxyService
+
+        ipa = _Path(path).expanduser()
+        if not ipa.exists():
+            raise DriverError("ios", f"IPA/app path does not exist: {path}", {"path": path})
+        lockdown = await create_using_usbmux(serial=self.device_id)
+        try:
+            await InstallationProxyService(lockdown=lockdown).install_from_local(str(ipa))
+        except Exception as exc:
+            raise DriverError("ios", f"Failed installing app from {path}: {exc}", {"path": path}) from exc
 
     async def uninstall_app(self, package_name: str) -> None:
-        del package_name
-        raise UnsupportedPlatformError(
-            "mobile_uninstall_app",
-            "iOS app uninstall via pure pymobiledevice3/WDA is not implemented yet.",
-            {"platform": "ios"},
-        )
+        from pymobiledevice3.lockdown import create_using_usbmux
+        from pymobiledevice3.services.installation_proxy import InstallationProxyService
+
+        lockdown = await create_using_usbmux(serial=self.device_id)
+        try:
+            await InstallationProxyService(lockdown=lockdown).uninstall(package_name)
+        except Exception as exc:
+            raise DriverError("ios", f'Failed uninstalling app "{package_name}": {exc}', {"packageName": package_name}) from exc
 
     async def start_recording(self, remote_path: str, time_limit: int | None = None):
         del remote_path, time_limit

@@ -1,0 +1,24 @@
+feature: 2026-07-11-ios-app-lifecycle-pmd3
+created: 2026-07-11
+steps:
+  - action: "list_apps via InstallationProxy"
+    status: done
+  - action: "launch/terminate via WDA session"
+    status: done
+  - action: "install/uninstall via InstallationProxy (guarded)"
+    status: done
+checks:
+  - item: "pure pmd3/WDA only"
+    status: passed
+  - item: "list/launch/terminate live"
+    status: passed
+  - item: "install/uninstall guarded"
+    status: passed
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+    - id: CMD-IOS-APP-001
+      command: "PATH=.venv/bin:$PATH python tests/ios_app_lifecycle_live_smoke.py"
+      core: true
