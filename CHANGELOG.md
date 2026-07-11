@@ -23,7 +23,7 @@ First dual-platform usable cut of the 23 mobile-mcp core tools.
 - Live smoke scripts exit `blocked` (code 2) when no device — never fake pass
 
 ### Known limits
-- Android dropbox may include non-crash diagnostics tags
+- Android dropbox defaults to crash/ANR/tombstone tags (strictmode/boot filtered)
 - iOS recording deferred (see `.codestable/features/2026-07-11-ios-screen-recording-spike/`)
 - Recording state is process-local
 

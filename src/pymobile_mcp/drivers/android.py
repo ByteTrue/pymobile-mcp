@@ -140,7 +140,25 @@ class AndroidDriver(BaseDriver):
                 return entry["content"]
         raise DriverError("android", f'Crash report "{crash_id}" not found', {"id": crash_id})
 
-    def _parse_dropbox_print(self, output: Any) -> list[dict[str, Any]]:
+    # Tags that are usually crash/ANR-ish. Strictmode/boot noise is excluded by default.
+    # ponytail: keep this allowlist simple; expand if real crash tags are missing.
+    _DROPBOX_CRASH_TAGS = (
+        "system_app_crash",
+        "system_app_anr",
+        "system_server_crash",
+        "system_server_anr",
+        "data_app_crash",
+        "data_app_anr",
+        "system_app_native_crash",
+        "data_app_native_crash",
+        "system_server_native_crash",
+        "SYSTEM_TOMBSTONE",
+        "SYSTEM_TOMBSTONE_PROTO",
+        "system_app_wtf",
+        "system_server_wtf",
+    )
+
+    def _parse_dropbox_print(self, output: Any, *, include_all: bool = False) -> list[dict[str, Any]]:
         import re
 
         text = str(output)
@@ -158,6 +176,8 @@ class AndroidDriver(BaseDriver):
             if not match:
                 continue
             timestamp, tag, kind, size_s = match.groups()
+            if not include_all and tag not in self._DROPBOX_CRASH_TAGS and "crash" not in tag.lower() and "anr" not in tag.lower() and "tombstone" not in tag.lower():
+                continue
             base_id = f"{timestamp}::{tag}"
             n = counts.get(base_id, 0)
             counts[base_id] = n + 1

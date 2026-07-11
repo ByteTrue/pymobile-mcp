@@ -794,3 +794,31 @@ second one
     assert entries[0]["id"] == "2026-07-10 01:17:03::system_app_crash"
     assert entries[1]["id"] == "2026-07-10 01:17:03::system_app_crash#1"
     assert entries[0]["content"] == "hello crash"
+
+
+def test_android_dropbox_filters_noise():
+    from pymobile_mcp.drivers.android import AndroidDriver
+
+    sample = """
+========================================
+2026-07-10 01:17:03 system_app_crash (text, 5 bytes)
+boom
+
+========================================
+2026-07-10 01:17:03 system_server_strictmode (text, 4 bytes)
+nope
+
+========================================
+2026-07-10 01:17:03 SYSTEM_BOOT (text, 4 bytes)
+boot
+
+========================================
+2026-07-10 01:17:03 data_app_anr (text, 3 bytes)
+anr
+"""
+    driver = AndroidDriver("emulator-5554")
+    entries = driver._parse_dropbox_print(sample)
+    tags = [e["tag"] for e in entries]
+    assert tags == ["system_app_crash", "data_app_anr"]
+    all_entries = driver._parse_dropbox_print(sample, include_all=True)
+    assert len(all_entries) == 4
