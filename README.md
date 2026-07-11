@@ -5,6 +5,8 @@ Pure Python MCP server for mobile automation — Android via `uiautomator2`/`adb
 Public contract: **23 mobile-mcp core tools** from `mobile-mcp` `src/server.ts` (`c5d7d27`).  
 Not public: `mobile_get_page_source`, remote fleet tools.
 
+Current release: **0.2.0** — see [CHANGELOG.md](CHANGELOG.md).
+
 ## Install
 
 ```bash

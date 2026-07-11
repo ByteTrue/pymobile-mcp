@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pymobile-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Pure Python MCP server for mobile automation — Android via uiautomator2, iOS via pymobiledevice3"
 authors = [
     {name = "ByteTrue"}
