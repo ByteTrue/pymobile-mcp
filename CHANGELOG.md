@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Docs: rewrite README install/MCP client quickstart and troubleshooting
 - CI: GitHub Actions unit tests on Python 3.11/3.12
 - Android: `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` to include non-crash dropbox tags
 

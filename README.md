@@ -1,22 +1,84 @@
 # pymobile-mcp
 
-Pure Python MCP server for mobile automation — Android via `uiautomator2`/`adbutils`, iOS via `pymobiledevice3` + WebDriverAgent HTTP.
+Pure Python [MCP](https://modelcontextprotocol.io/) server for mobile automation.
 
-Public contract: **23 mobile-mcp core tools** from `mobile-mcp` `src/server.ts` (`c5d7d27`).  
+- **Android**: `uiautomator2` + `adbutils`
+- **iOS**: pure `pymobiledevice3` userspace tunnel + WebDriverAgent (no go-ios, no root)
+
+Public contract: **23** tools aligned with [mobile-mcp](https://github.com/mobile-next/mobile-mcp) core tools.  
 Not public: `mobile_get_page_source`, remote fleet tools.
 
-Current release: **0.2.0** — see [CHANGELOG.md](CHANGELOG.md).
+[![CI](https://github.com/ByteTrue/pymobile-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ByteTrue/pymobile-mcp/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/ByteTrue/pymobile-mcp?display_name=tag)](https://github.com/ByteTrue/pymobile-mcp/releases/latest)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/downloads/)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+
+Current release: **0.2.0** · [Changelog](CHANGELOG.md) · [Live regression checklist](docs/regression-checklist.md)
+
+## Features
+
+- One stdio MCP server for **Android + iOS**
+- Structured errors (`invalid_argument`, `unsupported_platform`, driver failures) instead of silent empty success
+- Live smoke scripts that exit `blocked` (code 2) when devices are missing — never fake pass
+- Destructive actions (install/uninstall) gated by explicit env flags
+
+## Requirements
+
+| Platform | Need |
+|---|---|
+| Host | Python **≥ 3.10**, `pip` |
+| Android | `adb` in `PATH`, authorized device or emulator |
+| iOS | macOS recommended, paired iPhone/iPad, **Developer Mode**, mounted DDI, installed WDA runner (default `com.byte.WebDriverAgentRunner.xctrunner`) |
+
+> [!NOTE]
+> iOS screen recording is **unsupported** on current pure-userspace RSD (iOS 26.5.2): no `com.apple.coredevice.displayservice`; WDA `/wda/video` can start but finalize on stop fails. See the [recording spike](.codestable/features/2026-07-11-ios-screen-recording-spike/).
 
 ## Install
 
+### From a git checkout (recommended while pre-PyPI)
+
 ```bash
+git clone https://github.com/ByteTrue/pymobile-mcp.git
+cd pymobile-mcp
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e .
-# or: pip install pymobile-mcp
+pymobile-mcp --help
 ```
 
-## MCP config
+### Dev install (tests)
+
+```bash
+pip install -e ".[dev]"
+python -m pytest -q
+```
+
+### From GitHub (no local clone of tooling)
+
+```bash
+pip install "git+https://github.com/ByteTrue/pymobile-mcp.git@v0.2.0"
+```
+
+> [!TIP]
+> Prefer a venv. System Python + `pip install` often fights with Homebrew/PEP 668.
+
+## Quick start
+
+1. Connect an Android emulator/device (`adb devices`) and/or a paired iPhone.
+2. For iOS, ensure your WDA runner is installed (Xcode once); pymobile-mcp launches it over userspace tunnel.
+3. Run the server:
+
+```bash
+pymobile-mcp run
+# equivalent:
+python -m pymobile_mcp.cli run
+```
+
+4. Point an MCP client at the process (stdio).
+
+### MCP client config
+
+**Installed entrypoint** (`pymobile-mcp` on `PATH`):
 
 ```json
 {
@@ -29,138 +91,149 @@ pip install -e .
 }
 ```
 
-From a checkout, use:
+**Checkout / venv** (absolute paths are more reliable for GUI clients):
 
 ```json
 {
   "mcpServers": {
     "pymobile-mcp": {
-      "command": "python",
+      "command": "/ABS/PATH/pymobile-mcp/.venv/bin/python",
       "args": ["-m", "pymobile_mcp.cli", "run"],
-      "env": { "PYTHONPATH": "src" }
+      "cwd": "/ABS/PATH/pymobile-mcp",
+      "env": {
+        "NO_PROXY": "*",
+        "PYTHONPATH": "src"
+      }
     }
   }
 }
 ```
 
-## Live smoke
+> [!IMPORTANT]
+> For iOS USB, unset or bypass HTTP proxies (`NO_PROXY=*` or clear `http_proxy`/`https_proxy`). Proxy env often breaks usbmux / userspace tunnel.
 
-### Android UI
+## First tools to try
 
-```bash
-# read-only-ish probe stops before interactions unless ACTIONS=1
-PATH=.venv/bin:$PATH python tests/android_live_smoke.py
-PYMOBILE_MCP_ANDROID_ACTIONS=1 PATH=.venv/bin:$PATH python tests/android_live_smoke.py
-# optional: PYMOBILE_MCP_ANDROID_DEVICE=emulator-5554 PYMOBILE_MCP_ANDROID_TAP=x,y
-```
+After the client connects:
 
-### Android app/system
-
-```bash
-PATH=.venv/bin:$PATH python tests/android_app_system_live_smoke.py
-# install/uninstall only with:
-# PYMOBILE_MCP_ANDROID_APK=/path/app.apk PYMOBILE_MCP_ANDROID_PACKAGE=com.example \
-# PYMOBILE_MCP_ANDROID_DESTRUCTIVE=1 PATH=.venv/bin:$PATH python tests/android_app_system_live_smoke.py
-```
-
-### Android recording/crash
-
-```bash
-PATH=.venv/bin:$PATH python tests/android_recording_crash_live_smoke.py
-```
-
-### iOS core / parity
-
-iOS uses pure `pymobiledevice3` userspace tunnel + in-process WDA service client.
-No go-ios runtime and no root. Requires installed WDA runner
-(`PYMOBILE_MCP_WDA_XCTRUNNER`, default `com.byte.WebDriverAgentRunner.xctrunner`).
-
-```bash
-PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
-PYMOBILE_MCP_IOS_ACTIONS=1 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
-PATH=.venv/bin:$PATH python tests/ios_system_helpers_live_smoke.py
-PATH=.venv/bin:$PATH python tests/ios_app_lifecycle_live_smoke.py
-PATH=.venv/bin:$PATH python tests/crash_tools_live_smoke.py
-
-PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
-# optional:
-# PYMOBILE_MCP_IOS_DEVICE=<udid>
-# PYMOBILE_MCP_WDA_PORT=8100
-# PYMOBILE_MCP_WDA_XCTRUNNER=com.byte.WebDriverAgentRunner.xctrunner
-```
-
-No authorized device/WDA ⇒ scripts exit `2` with `status=blocked` (not pass).
-
-Full dual-device gate and exit-code rules: [docs/regression-checklist.md](docs/regression-checklist.md).
-
-## Env knobs
-
-| Env | Purpose |
-|---|---|
-| `MOBILEMCP_ALLOW_UNSAFE_URLS=1` | allow non-http(s) `mobile_open_url` schemes |
-| `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` | include non-crash dropbox tags (strictmode/boot/etc.) |
-| `PYMOBILE_MCP_ANDROID_ACTIONS=1` | enable tap/type interactions in Android UI smoke |
-| `PYMOBILE_MCP_ANDROID_TAP=x,y` | override Android tap point |
-| `PYMOBILE_MCP_ANDROID_APK` + `PYMOBILE_MCP_ANDROID_DESTRUCTIVE=1` | allow install/uninstall smoke |
-| `PYMOBILE_MCP_WDA_HOST` / `PYMOBILE_MCP_WDA_PORT` | iOS WebDriverAgent endpoint |
+1. `mobile_list_available_devices` — confirm Android/iOS ids
+2. `mobile_get_screen_size` / `mobile_take_screenshot`
+3. `mobile_list_elements_on_screen` — UI tree (no raw page source tool)
+4. `mobile_list_apps` → `mobile_launch_app` with a known package/bundle id
 
 ## Capability matrix (23 core tools)
 
-Legend:
-
-- **supported**: implemented and smoke/unit covered on this platform
-- **unsupported**: stable structured `unsupported_platform` (not fake empty success)
-- **blocked-by-env**: code path exists; live verification needs device/WDA on this host
+| Status | Meaning |
+|---|---|
+| **supported** | Implemented and covered by unit/live smoke on this platform |
+| **unsupported** | Stable `unsupported_platform` (not fake empty success) |
 
 | Tool | Android | iOS |
 |---|---|---|
-| mobile_list_available_devices | supported | supported (usbmux discovery; empty when none) |
+| mobile_list_available_devices | supported | supported |
 | mobile_list_apps | supported | supported |
 | mobile_launch_app | supported | supported |
 | mobile_terminate_app | supported | supported |
-| mobile_install_app | supported (destructive) | supported (destructive, guarded) |
-| mobile_uninstall_app | supported (destructive) | supported (destructive, guarded) |
+| mobile_install_app | supported (destructive) | supported (destructive, gated) |
+| mobile_uninstall_app | supported (destructive) | supported (destructive, gated) |
 | mobile_get_screen_size | supported | supported |
 | mobile_click_on_screen_at_coordinates | supported | supported |
 | mobile_double_tap_on_screen | supported | supported |
 | mobile_long_press_on_screen_at_coordinates | supported | supported |
-| mobile_list_elements_on_screen | supported | supported (WDA source internal only) |
-| mobile_press_button | supported | supported (HOME/VOLUME_*; BACK unsupported) |
-| mobile_open_url | supported (http/https default) | supported (http/https; device must be unlocked) |
+| mobile_list_elements_on_screen | supported | supported (WDA source internal) |
+| mobile_press_button | supported | supported (`HOME`/`VOLUME_*`; `BACK` unsupported) |
+| mobile_open_url | supported (http/https default) | supported (device must be unlocked) |
 | mobile_swipe_on_screen | supported | supported |
 | mobile_type_keys | supported | supported |
 | mobile_save_screenshot | supported | supported |
 | mobile_take_screenshot | supported | supported |
 | mobile_set_orientation | supported | supported |
 | mobile_get_orientation | supported | supported |
-| mobile_start_screen_recording | supported | unsupported |
-| mobile_stop_screen_recording | supported | unsupported |
+| mobile_start_screen_recording | supported | **unsupported** |
+| mobile_stop_screen_recording | supported | **unsupported** |
 | mobile_list_crashes | supported (dropbox) | supported (crash reports) |
 | mobile_get_crash | supported (dropbox) | supported (crash reports) |
 
-\* iOS core driver implements UI/session methods; some app/system helpers stay Android-first and return platform/driver errors if not routed. Prefer the matrix cells above for product status.
+## Environment variables
 
-### Evidence sources
+| Env | Purpose |
+|---|---|
+| `MOBILEMCP_ALLOW_UNSAFE_URLS=1` | allow non-http(s) schemes for `mobile_open_url` |
+| `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` | include non-crash dropbox tags (strictmode/boot/…) |
+| `PYMOBILE_MCP_ANDROID_DEVICE` | pin Android serial for smokes |
+| `PYMOBILE_MCP_ANDROID_ACTIONS=1` | enable tap/type interactions in Android UI smoke |
+| `PYMOBILE_MCP_ANDROID_TAP=x,y` | override Android tap point |
+| `PYMOBILE_MCP_ANDROID_APK` + `PYMOBILE_MCP_ANDROID_PACKAGE` + `PYMOBILE_MCP_ANDROID_DESTRUCTIVE=1` | allow install/uninstall smoke |
+| `PYMOBILE_MCP_IOS_DEVICE` | pin iOS UDID |
+| `PYMOBILE_MCP_IOS_ACTIONS=1` | enable interaction steps in iOS core smoke |
+| `PYMOBILE_MCP_WDA_XCTRUNNER` | WDA runner bundle id (default `com.byte.WebDriverAgentRunner.xctrunner`) |
+| `PYMOBILE_MCP_WDA_HOST` / `PYMOBILE_MCP_WDA_PORT` | legacy WDA HTTP endpoint knobs (userspace path prefers in-process service client) |
+| `PYMOBILE_MCP_IOS_IPA` + `PYMOBILE_MCP_IOS_DESTRUCTIVE=1` | allow iOS install/uninstall smoke |
+| `NO_PROXY=*` | recommended for iOS USB / usbmux |
 
-- Android UI/app/recording acceptance under `.codestable/features/2026-07-07-android-*`
-- iOS core/parity acceptance under `.codestable/features/2026-07-07-ios-*`
-- Schema fixture: `tests/fixtures/mobile_mcp_core_tools.json` (`source.path` + `git_revision`)
+## Live smoke
 
-## Tests
+Scripts print JSON with `status: passed|failed|blocked`.  
+**Exit `2` + `blocked` = missing device/env, not a product pass.**
 
 ```bash
-python -m pytest
+export NO_PROXY='*'
+PATH=.venv/bin:$PATH
+
+# Android
+python tests/android_live_smoke.py
+PYMOBILE_MCP_ANDROID_ACTIONS=1 python tests/android_live_smoke.py
+python tests/android_app_system_live_smoke.py
+python tests/android_recording_crash_live_smoke.py
+
+# iOS (unlock phone for open_url)
+python tests/ios_pmd3_wda_live_smoke.py
+PYMOBILE_MCP_IOS_ACTIONS=1 python tests/ios_pmd3_wda_live_smoke.py
+python tests/ios_system_helpers_live_smoke.py
+python tests/ios_app_lifecycle_live_smoke.py
+python tests/crash_tools_live_smoke.py
+python tests/ios_app_recording_crash_live_smoke.py   # recording stays unsupported
 ```
+
+Full dual-device gate: [docs/regression-checklist.md](docs/regression-checklist.md).
+
+## Architecture (short)
+
+```
+MCP client  --stdio-->  pymobile-mcp server
+                           │
+                           ├─ tools/registry + specs   (23-tool contract)
+                           ├─ tools/* handlers
+                           └─ drivers/
+                                ├─ android.py  (adbutils / uiautomator2)
+                                └─ ios.py      (UserspaceRsdTunnel + WDA)
+```
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+python -m pytest -q
+```
+
+CI runs unit tests on Python 3.11 and 3.12 ([workflow](.github/workflows/ci.yml)). Device live smokes stay local.
 
 ## Known limits
 
-- Android crash tools use `dumpsys dropbox --print`, filtered to crash/ANR/tombstone-like tags by default.
-- iOS core UI/app/crash use pure pymobiledevice3; screen recording remains unsupported on iOS 26.5.2 userspace RSD (no `displayservice`; WDA `/wda/video` start works but stop finalize fails; see recording spike).
-- Recording is process-local (`ActiveRecording`); no cross-process resume.
-- `mobile_open_url` rejects custom schemes unless `MOBILEMCP_ALLOW_UNSAFE_URLS=1`.
-- Screenshot/recording host paths must resolve under cwd or system temp.
+- Android crashes come from `dumpsys dropbox --print`, filtered to crash/ANR/tombstone-like tags by default
+- iOS screen recording remains **unsupported** under pure userspace RSD on iOS 26.5.2
+- Recording state is process-local (`ActiveRecording`); no cross-process resume
+- Custom URL schemes need `MOBILEMCP_ALLOW_UNSAFE_URLS=1`
+- Screenshot/recording host paths must resolve under cwd or system temp
+- No go-ios runtime path by design
 
+## Troubleshooting
 
-## License
-
-GPL-3.0
+| Symptom | What to check |
+|---|---|
+| iOS device list empty | Cable/trust, `pymobiledevice3 usbmux list`, proxies (`NO_PROXY=*`) |
+| iOS driver tunnel errors | Developer Mode, `pymobiledevice3 mounter auto-mount`, only one userspace tunnel process |
+| `open_url` fails on iPhone | Unlock the device (passcode lock blocks Safari/WDA URL open) |
+| Android no devices | `adb devices` authorized; kill stale `adb` if offline |
+| Install/uninstall smoke skipped | Set package/apk/ipa **and** `*_DESTRUCTIVE=1` |
+| CI green but live red | Expected — CI is unit-only; use [regression checklist](docs/regression-checklist.md) |
