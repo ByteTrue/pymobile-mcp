@@ -1,7 +1,7 @@
 ---
 doc_type: roadmap
 slug: pymobile-mcp-post-mvp
-status: active
+status: completed
 created: 2026-07-11
 last_reviewed: 2026-07-11
 tags: [mcp, mobile, ios, crash, post-mvp, roadmap]
@@ -63,7 +63,7 @@ Android Driver 仅在 crash 真实现条目中触碰。
 1. **ios-live-wda-verification** — ✅ done：pure pmd3 userspace + WDA live smoke passed on real iPhone。
 2. **ios-system-helpers-parity** — ✅ done：HOME/VOLUME/save_screenshot；open_url 实现且锁定设备显式报错。
 3. **ios-app-lifecycle-pmd3** — ✅ done：list/launch/terminate live；install/uninstall API guarded。
-4. **crash-tools-real-source** — Android/iOS crash list/get 真来源 spike→实现或继续 unsupported（禁止假成功空列表）。
+4. **crash-tools-real-source** — ✅ done：Android dropbox + iOS CrashReportsManager。
 
 依赖：`2`/`3` 依赖 `1`；`4` 可与 `2`/`3` 并行，但默认排在 live 验证之后。
 

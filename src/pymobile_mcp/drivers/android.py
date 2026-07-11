@@ -113,6 +113,67 @@ class AndroidDriver(BaseDriver):
     async def set_orientation(self, orientation: str) -> None:
         await asyncio.to_thread(self._set_orientation_sync, orientation)
 
+
+    async def list_crashes(self) -> list[dict[str, Any]]:
+        return await asyncio.to_thread(self._list_crashes_sync)
+
+    async def get_crash(self, crash_id: str) -> str:
+        return await asyncio.to_thread(self._get_crash_sync, crash_id)
+
+    def _list_crashes_sync(self) -> list[dict[str, Any]]:
+        entries = self._parse_dropbox_print(self._adb().shell(["dumpsys", "dropbox", "--print"]))
+        return [
+            {
+                "id": entry["id"],
+                "name": entry["tag"],
+                "timestamp": entry["timestamp"],
+                "size": entry["size"],
+                "kind": entry["kind"],
+            }
+            for entry in entries
+        ]
+
+    def _get_crash_sync(self, crash_id: str) -> str:
+        entries = self._parse_dropbox_print(self._adb().shell(["dumpsys", "dropbox", "--print"]))
+        for entry in entries:
+            if entry["id"] == crash_id:
+                return entry["content"]
+        raise DriverError("android", f'Crash report "{crash_id}" not found', {"id": crash_id})
+
+    def _parse_dropbox_print(self, output: Any) -> list[dict[str, Any]]:
+        import re
+
+        text = str(output)
+        parts = re.split(r"={5,}\n", text)
+        header_re = re.compile(
+            r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (\S+) \(([^,]+), (\d+) bytes\)\s*$"
+        )
+        entries: list[dict[str, Any]] = []
+        counts: dict[str, int] = {}
+        for part in parts:
+            lines = part.strip().splitlines()
+            if not lines:
+                continue
+            match = header_re.match(lines[0].strip())
+            if not match:
+                continue
+            timestamp, tag, kind, size_s = match.groups()
+            base_id = f"{timestamp}::{tag}"
+            n = counts.get(base_id, 0)
+            counts[base_id] = n + 1
+            crash_id = base_id if n == 0 else f"{base_id}#{n}"
+            entries.append(
+                {
+                    "id": crash_id,
+                    "timestamp": timestamp,
+                    "tag": tag,
+                    "kind": kind,
+                    "size": int(size_s),
+                    "content": "\n".join(lines[1:]).strip(),
+                }
+            )
+        return entries
+
     def _adb(self) -> Any:
         return adbutils.adb.device(self.device_id)
 

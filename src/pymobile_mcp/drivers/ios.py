@@ -487,20 +487,42 @@ class IOSDriver(BaseDriver):
             {"platform": "ios"},
         )
 
-    async def list_crashes(self):
-        raise UnsupportedPlatformError(
-            "mobile_list_crashes",
-            "iOS crash report listing is not available through pure pymobiledevice3/WDA yet.",
-            {"platform": "ios"},
-        )
+    async def list_crashes(self) -> list[dict[str, Any]]:
+        from pymobiledevice3.lockdown import create_using_usbmux
+        from pymobiledevice3.services.crash_reports import CrashReportsManager
+
+        lockdown = await create_using_usbmux(serial=self.device_id)
+        async with CrashReportsManager(lockdown) as mgr:
+            files = await mgr.ls("/", depth=1)
+        crashes: list[dict[str, Any]] = []
+        for item in files:
+            path = str(item)
+            name = path.lstrip("/")
+            if not name or name.endswith("/"):
+                continue
+            # Skip directory-like service folders without extension.
+            if "." not in name and not name.endswith(".ips"):
+                # keep folders out of crash IDs
+                if "/" not in name.strip("/"):
+                    # could still be a file without extension; include all non-dir entries from depth=1
+                    pass
+            crashes.append({"id": name, "name": name, "path": path})
+        # Prefer report files first
+        crashes.sort(key=lambda c: (0 if str(c["id"]).endswith((".ips", ".crash", ".panic", ".log")) else 1, str(c["id"]).lower()))
+        return crashes
 
     async def get_crash(self, crash_id: str) -> str:
-        del crash_id
-        raise UnsupportedPlatformError(
-            "mobile_get_crash",
-            "iOS crash report reading is not available through pure pymobiledevice3/WDA yet.",
-            {"platform": "ios"},
-        )
+        from pymobiledevice3.lockdown import create_using_usbmux
+        from pymobiledevice3.services.crash_reports import CrashReportsManager
+
+        path = crash_id if str(crash_id).startswith("/") else f"/{crash_id}"
+        lockdown = await create_using_usbmux(serial=self.device_id)
+        async with CrashReportsManager(lockdown) as mgr:
+            try:
+                data = await mgr.afc.get_file_contents(path)
+            except Exception as exc:
+                raise DriverError("ios", f'Crash report "{crash_id}" not found or unreadable: {exc}', {"id": crash_id}) from exc
+        return data.decode("utf-8", errors="replace")
 
     async def _ensure_connected(self) -> None:
         if self._fake_wda is not None:

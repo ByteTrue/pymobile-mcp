@@ -29,7 +29,7 @@ items:
   - slug: crash-tools-real-source
     description: 为 Android/iOS mobile_list_crashes/mobile_get_crash 找到可靠来源并实现，或记录仍不可行的可复现 spike
     depends_on: []
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-07-11-crash-tools-real-source
     minimal_loop: false
-    notes: 永远不返回假成功空列表；实现后更新 README 能力矩阵
+    notes: Android dumpsys dropbox --print; iOS CrashReportsManager; not fake empty

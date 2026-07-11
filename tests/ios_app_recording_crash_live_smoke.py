@@ -1,9 +1,4 @@
-"""iOS app/recording/crash parity smoke.
-
-Without a paired iOS device this exits 2 blocked-by-env.
-With an iOS device present, verifies app/recording/crash tools return
-stable unsupported_platform (not fake empty success).
-"""
+"""iOS app/recording/crash parity smoke (updated)."""
 
 from __future__ import annotations
 
@@ -30,12 +25,13 @@ async def main() -> int:
     from mcp.client.session import ClientSession
     from mcp.client.stdio import StdioServerParameters, stdio_client
 
-    params = StdioServerParameters(
-        command=sys.executable,
-        args=["-m", "pymobile_mcp.cli", "run"],
-        cwd=str(Path.cwd()),
-        env={"PYTHONPATH": "src"},
-    )
+    env = dict(os.environ)
+    env["PYTHONPATH"] = "src"
+    for k in ["http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "all_proxy"]:
+        env.pop(k, None)
+    env["NO_PROXY"] = "*"
+    env["no_proxy"] = "*"
+    params = StdioServerParameters(command=sys.executable, args=["-m", "pymobile_mcp.cli", "run"], cwd=str(Path.cwd()), env=env)
     async with stdio_client(params) as (read_stream, write_stream):
         async with ClientSession(read_stream, write_stream) as session:
             await session.initialize()
@@ -46,24 +42,26 @@ async def main() -> int:
             if device is None:
                 print(json.dumps({"status": "blocked", "reason": "no authorized iOS device", "devices": devices_payload.get("devices", [])}, indent=2))
                 return 2
-
             device_id = device["id"]
-            results = {}
-            checks = [
-                ("mobile_list_apps", {"device": device_id}),
-                ("mobile_launch_app", {"device": device_id, "packageName": "com.example.app"}),
-                ("mobile_start_screen_recording", {"device": device_id, "output": "tmp-ios.mp4"}),
-                ("mobile_list_crashes", {"device": device_id}),
-                ("mobile_get_crash", {"device": device_id, "id": "demo"}),
-            ]
-            for tool, args in checks:
-                payload = _error_payload((await session.call_tool(tool, args)).content)
-                if payload is None or payload.get("code") != "unsupported_platform":
-                    print(json.dumps({"status": "failed", "tool": tool, "payload": payload}, indent=2))
+            apps = _payload((await session.call_tool("mobile_list_apps", {"device": device_id})).content)
+            if not apps.get("apps"):
+                print(json.dumps({"status": "failed", "reason": "list_apps empty"}, indent=2))
+                return 1
+            rec = await session.call_tool("mobile_start_screen_recording", {"device": device_id, "output": "tmp-ios.mp4"})
+            rec_err = _error_payload(rec.content)
+            if rec_err is None or rec_err.get("code") != "unsupported_platform":
+                print(json.dumps({"status": "failed", "tool": "mobile_start_screen_recording", "payload": rec_err or _payload(rec.content)}, indent=2))
+                return 1
+            crashes = _payload((await session.call_tool("mobile_list_crashes", {"device": device_id})).content)
+            crash_list = crashes.get("crashes") or []
+            sample = None
+            if crash_list:
+                sample = crash_list[0]["id"]
+                body = _payload((await session.call_tool("mobile_get_crash", {"device": device_id, "id": sample})).content)
+                if not body.get("content"):
+                    print(json.dumps({"status": "failed", "reason": "empty crash"}, indent=2))
                     return 1
-                results[tool] = "unsupported_platform"
-
-            print(json.dumps({"status": "passed", "device": device_id, "results": results}, indent=2))
+            print(json.dumps({"status": "passed", "device": device_id, "app_count": len(apps["apps"]), "recording": "unsupported_platform", "crash_count": len(crash_list), "sample_id": sample}, indent=2))
             return 0
 
 

@@ -1,0 +1,26 @@
+feature: 2026-07-11-crash-tools-real-source
+created: 2026-07-11
+steps:
+  - action: "Android dropbox dumpsys source"
+    status: done
+  - action: "iOS CrashReportsManager source"
+    status: done
+  - action: "live smoke both platforms"
+    status: done
+checks:
+  - item: "no fake empty success"
+    status: passed
+  - item: "android list/get via dumpsys dropbox --print"
+    status: passed
+  - item: "ios list/get via pmd3 crashreportcopymobile"
+    status: passed
+  - item: "no go-ios"
+    status: passed
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+    - id: CMD-CRASH-001
+      command: "PATH=.venv/bin:$PATH python tests/crash_tools_live_smoke.py"
+      core: true

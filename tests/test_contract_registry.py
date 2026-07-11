@@ -213,6 +213,12 @@ async def test_android_handlers_with_fake_driver():
             actions.append(("stop_recording", remote_path, str(local_path)))
             return 8
 
+        async def list_crashes(self):
+            return [{"id": "c1", "name": "demo", "timestamp": "t", "size": 1, "kind": "text"}]
+
+        async def get_crash(self, crash_id):
+            return f"crash-body:{crash_id}"
+
     configure_android_tools_for_tests(
         lambda: [DeviceInfo(id="android-1", name="Pixel", platform="android", type="real", version="14", state="online")],
         lambda device_id: FakeDriver(),
@@ -271,8 +277,10 @@ async def test_android_handlers_with_fake_driver():
         assert Path(stopped["output"]).exists()
         Path(stopped["output"]).unlink(missing_ok=True)
         _assert_error_content(await call_tool("mobile_stop_screen_recording", {"device": "android-1"}), "no_active_recording", "mobile_stop_screen_recording")
-        _assert_error_content(await call_tool("mobile_list_crashes", {"device": "android-1"}), "unsupported_platform", "mobile_list_crashes")
-        _assert_error_content(await call_tool("mobile_get_crash", {"device": "android-1", "id": "x"}), "unsupported_platform", "mobile_get_crash")
+        crashes = json.loads((await call_tool("mobile_list_crashes", {"device": "android-1"}))[0].text)
+        assert crashes["crashes"][0]["id"] == "c1"
+        body = json.loads((await call_tool("mobile_get_crash", {"device": "android-1", "id": "c1"}))[0].text)
+        assert body["content"] == "crash-body:c1"
         reset_recording_state_for_tests()
 
         _assert_error_content(
@@ -642,8 +650,6 @@ async def test_ios_parity_tools_return_unsupported():
     try:
         for name, args in [
             ("mobile_start_screen_recording", {"device": "ios-1", "output": "tmp.mp4"}),
-            ("mobile_list_crashes", {"device": "ios-1"}),
-            ("mobile_get_crash", {"device": "ios-1", "id": "c1"}),
         ]:
             _assert_error_content(await call_tool(name, args), "unsupported_platform", name)
         # stop without active still no_active for state machine before driver call? start fails unsupported first
@@ -740,3 +746,51 @@ async def test_ios_app_lifecycle_with_fake_driver():
         assert ("uninstall_app", "com.example.app") in actions
     finally:
         reset_android_tools_for_tests()
+
+
+@pytest.mark.asyncio
+async def test_ios_crash_tools_with_fake_driver():
+    from pymobile_mcp.drivers.base import DeviceInfo
+    from pymobile_mcp.tools.android import configure_android_tools_for_tests, reset_android_tools_for_tests
+
+    class FakeIOS:
+        async def connect(self, capabilities=None):
+            return None
+        async def list_crashes(self):
+            return [{"id": "SpringBoard.ips", "name": "SpringBoard.ips"}]
+        async def get_crash(self, crash_id):
+            return f"ios-crash:{crash_id}"
+
+    configure_android_tools_for_tests(
+        lambda: [DeviceInfo(id="ios-1", name="iPhone", platform="ios", type="real", version="17", state="online")],
+        lambda device_id: FakeIOS(),
+    )
+    try:
+        crashes = json.loads((await call_tool("mobile_list_crashes", {"device": "ios-1"}))[0].text)
+        assert crashes["crashes"][0]["id"] == "SpringBoard.ips"
+        body = json.loads((await call_tool("mobile_get_crash", {"device": "ios-1", "id": "SpringBoard.ips"}))[0].text)
+        assert body["content"].startswith("ios-crash:")
+    finally:
+        reset_android_tools_for_tests()
+
+
+def test_android_dropbox_parser():
+    from pymobile_mcp.drivers.android import AndroidDriver
+
+    sample = """
+Drop box contents: 2 entries
+
+========================================
+2026-07-10 01:17:03 system_app_crash (text, 12 bytes)
+hello crash
+
+========================================
+2026-07-10 01:17:03 system_app_crash (text, 11 bytes)
+second one
+"""
+    driver = AndroidDriver("emulator-5554")
+    entries = driver._parse_dropbox_print(sample)
+    assert len(entries) == 2
+    assert entries[0]["id"] == "2026-07-10 01:17:03::system_app_crash"
+    assert entries[1]["id"] == "2026-07-10 01:17:03::system_app_crash#1"
+    assert entries[0]["content"] == "hello crash"

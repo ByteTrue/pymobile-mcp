@@ -78,6 +78,7 @@ PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
 PYMOBILE_MCP_IOS_ACTIONS=1 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_system_helpers_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_app_lifecycle_live_smoke.py
+PATH=.venv/bin:$PATH python tests/crash_tools_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 # optional:
 # PYMOBILE_MCP_IOS_DEVICE=<udid>
@@ -128,8 +129,8 @@ Legend:
 | mobile_get_orientation | supported | supported |
 | mobile_start_screen_recording | supported | unsupported |
 | mobile_stop_screen_recording | supported | unsupported |
-| mobile_list_crashes | unsupported | unsupported |
-| mobile_get_crash | unsupported | unsupported |
+| mobile_list_crashes | supported (dropbox) | supported (crash reports) |
+| mobile_get_crash | supported (dropbox) | supported (crash reports) |
 
 \* iOS core driver implements UI/session methods; some app/system helpers stay Android-first and return platform/driver errors if not routed. Prefer the matrix cells above for product status.
 
@@ -147,8 +148,8 @@ python -m pytest
 
 ## Known limits
 
-- Android crash tools unsupported without root/reliable tombstone source.
-- iOS core UI uses pure pymobiledevice3 userspace tunnel + installed WDA runner; app/recording/crash remain unsupported for now.
+- Android crash tools use `dumpsys dropbox --print` (includes non-crash diagnostics tags when no app crashes exist).
+- iOS core UI/app/crash use pure pymobiledevice3; screen recording remains unsupported.
 - Recording is process-local (`ActiveRecording`); no cross-process resume.
 - `mobile_open_url` rejects custom schemes unless `MOBILEMCP_ALLOW_UNSAFE_URLS=1`.
 - Screenshot/recording host paths must resolve under cwd or system temp.

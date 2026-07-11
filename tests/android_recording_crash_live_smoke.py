@@ -5,7 +5,7 @@ Requires an authorized Android device.
 Runs:
 - start_screen_recording for a few seconds
 - stop_screen_recording and verify MP4 exists
-- list_crashes / get_crash return unsupported_platform
+- list_crashes / get_crash via dumpsys dropbox
 """
 
 from __future__ import annotations
@@ -86,14 +86,15 @@ async def main() -> int:
                 return _failed("expected no_active_recording", result=_payload(no_active.content))
 
             crashes = await session.call_tool("mobile_list_crashes", {"device": device_id})
-            crash_payload = _error_payload(crashes.content)
-            if crash_payload is None or crash_payload.get("code") != "unsupported_platform":
-                return _failed("expected unsupported_platform for list_crashes", result=_payload(crashes.content))
-
-            get_crash = await session.call_tool("mobile_get_crash", {"device": device_id, "id": "demo"})
-            get_payload = _error_payload(get_crash.content)
-            if get_payload is None or get_payload.get("code") != "unsupported_platform":
-                return _failed("expected unsupported_platform for get_crash", result=_payload(get_crash.content))
+            crash_err = _error_payload(crashes.content)
+            if crash_err is not None:
+                return _failed("list_crashes failed", error=crash_err)
+            crash_list = _payload(crashes.content).get("crashes") or []
+            if crash_list:
+                sample_id = crash_list[0]["id"]
+                got = await session.call_tool("mobile_get_crash", {"device": device_id, "id": sample_id})
+                if _error_payload(got.content) is not None:
+                    return _failed("get_crash failed", error=_payload(got.content))
 
             size = path.stat().st_size
             path.unlink(missing_ok=True)
@@ -103,7 +104,7 @@ async def main() -> int:
                         "status": "passed",
                         "device": device_id,
                         "recording_size": size,
-                        "crash": "unsupported_platform",
+                        "crash_count": len(crash_list),
                     },
                     indent=2,
                 )
