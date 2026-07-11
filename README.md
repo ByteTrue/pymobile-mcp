@@ -81,6 +81,7 @@ PYMOBILE_MCP_IOS_ACTIONS=1 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_s
 PATH=.venv/bin:$PATH python tests/ios_system_helpers_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_app_lifecycle_live_smoke.py
 PATH=.venv/bin:$PATH python tests/crash_tools_live_smoke.py
+
 PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 # optional:
 # PYMOBILE_MCP_IOS_DEVICE=<udid>
@@ -89,6 +90,8 @@ PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 ```
 
 No authorized device/WDA ⇒ scripts exit `2` with `status=blocked` (not pass).
+
+Full dual-device gate and exit-code rules: [docs/regression-checklist.md](docs/regression-checklist.md).
 
 ## Env knobs
 
@@ -155,6 +158,7 @@ python -m pytest
 - Recording is process-local (`ActiveRecording`); no cross-process resume.
 - `mobile_open_url` rejects custom schemes unless `MOBILEMCP_ALLOW_UNSAFE_URLS=1`.
 - Screenshot/recording host paths must resolve under cwd or system temp.
+
 
 ## License
 
