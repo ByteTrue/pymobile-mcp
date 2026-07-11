@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import io
 from pathlib import Path
 from typing import Any
@@ -158,6 +159,18 @@ class AndroidDriver(BaseDriver):
         "system_server_wtf",
     )
 
+
+    @staticmethod
+    def _dropbox_include_all_env() -> bool:
+        return os.environ.get("PYMOBILE_MCP_ANDROID_DROPBOX_ALL", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
+
+    @classmethod
+    def _is_crashish_dropbox_tag(cls, tag: str) -> bool:
+        if tag in cls._DROPBOX_CRASH_TAGS:
+            return True
+        low = tag.lower()
+        return "crash" in low or "anr" in low or "tombstone" in low
+
     def _parse_dropbox_print(self, output: Any, *, include_all: bool = False) -> list[dict[str, Any]]:
         import re
 
@@ -176,7 +189,7 @@ class AndroidDriver(BaseDriver):
             if not match:
                 continue
             timestamp, tag, kind, size_s = match.groups()
-            if not include_all and tag not in self._DROPBOX_CRASH_TAGS and "crash" not in tag.lower() and "anr" not in tag.lower() and "tombstone" not in tag.lower():
+            if not include_all and not self._dropbox_include_all_env() and not self._is_crashish_dropbox_tag(tag):
                 continue
             base_id = f"{timestamp}::{tag}"
             n = counts.get(base_id, 0)

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- CI: GitHub Actions unit tests on Python 3.11/3.12
+- Android: `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` to include non-crash dropbox tags
+
 ## 0.2.0 — 2026-07-11
 
 First dual-platform usable cut of the 23 mobile-mcp core tools.

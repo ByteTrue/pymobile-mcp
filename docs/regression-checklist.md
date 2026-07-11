@@ -19,6 +19,8 @@ PATH=.venv/bin:$PATH python -m pytest -q
 # expect: 46 passed (or current suite size)
 ```
 
+Optional Android crash listing: `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` includes non-crash dropbox tags.
+
 Unset proxies for iOS/usbmux runs:
 
 ```bash

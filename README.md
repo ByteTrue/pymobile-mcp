@@ -98,6 +98,7 @@ Full dual-device gate and exit-code rules: [docs/regression-checklist.md](docs/r
 | Env | Purpose |
 |---|---|
 | `MOBILEMCP_ALLOW_UNSAFE_URLS=1` | allow non-http(s) `mobile_open_url` schemes |
+| `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` | include non-crash dropbox tags (strictmode/boot/etc.) |
 | `PYMOBILE_MCP_ANDROID_ACTIONS=1` | enable tap/type interactions in Android UI smoke |
 | `PYMOBILE_MCP_ANDROID_TAP=x,y` | override Android tap point |
 | `PYMOBILE_MCP_ANDROID_APK` + `PYMOBILE_MCP_ANDROID_DESTRUCTIVE=1` | allow install/uninstall smoke |

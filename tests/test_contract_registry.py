@@ -822,3 +822,11 @@ anr
     assert tags == ["system_app_crash", "data_app_anr"]
     all_entries = driver._parse_dropbox_print(sample, include_all=True)
     assert len(all_entries) == 4
+
+    import os
+    os.environ["PYMOBILE_MCP_ANDROID_DROPBOX_ALL"] = "1"
+    try:
+        env_all = driver._parse_dropbox_print(sample)
+        assert len(env_all) == 4
+    finally:
+        os.environ.pop("PYMOBILE_MCP_ANDROID_DROPBOX_ALL", None)
