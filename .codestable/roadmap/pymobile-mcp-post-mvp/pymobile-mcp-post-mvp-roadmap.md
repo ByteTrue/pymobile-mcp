@@ -78,3 +78,7 @@ Android Driver 仅在 crash 真实现条目中触碰。
 1. 本机长期无 iOS 设备 → `ios-live-wda-verification` handoff，不伪造 passed。
 2. PMD3 无稳定 app/crash API → 保持 unsupported，不硬接 go-ios。
 3. crash 权限/路径随系统版本漂移 → spike 必须绑定 OS 版本与命令输出。
+
+## Deferred
+
+- **ios-screen-recording** — pure pmd3 `DisplayService` missing on userspace RSD (`com.apple.coredevice.displayservice`). Spike: `.codestable/features/2026-07-11-ios-screen-recording-spike/`. Keep unsupported until coredevice media stream is available without go-ios.

@@ -149,7 +149,7 @@ python -m pytest
 ## Known limits
 
 - Android crash tools use `dumpsys dropbox --print` (includes non-crash diagnostics tags when no app crashes exist).
-- iOS core UI/app/crash use pure pymobiledevice3; screen recording remains unsupported.
+- iOS core UI/app/crash use pure pymobiledevice3; screen recording remains unsupported (userspace RSD lacks `com.apple.coredevice.displayservice`; see recording spike).
 - Recording is process-local (`ActiveRecording`); no cross-process resume.
 - `mobile_open_url` rejects custom schemes unless `MOBILEMCP_ALLOW_UNSAFE_URLS=1`.
 - Screenshot/recording host paths must resolve under cwd or system temp.
