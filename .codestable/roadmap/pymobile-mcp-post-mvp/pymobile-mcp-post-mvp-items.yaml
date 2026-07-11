@@ -13,10 +13,10 @@ items:
   - slug: ios-system-helpers-parity
     description: 补齐 iOS press_button、open_url、save_screenshot 的实现或 stable unsupported 证据
     depends_on: [ios-live-wda-verification]
-    status: planned
-    feature: null
+    status: done
+    feature: 2026-07-11-ios-system-helpers-parity
     minimal_loop: false
-    notes: 优先复用现有 WDA/driver 方法做薄封装，不改 public schema
+    notes: HOME/VOLUME via WDA; open_url needs unlocked device; save_screenshot reuses screenshot bytes
 
   - slug: ios-app-lifecycle-pmd3
     description: 用 pure pymobiledevice3/WDA 实现 iOS app list/launch/terminate/install/uninstall，或留下更新后的 unsupported 证据

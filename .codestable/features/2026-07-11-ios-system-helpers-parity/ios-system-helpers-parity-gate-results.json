@@ -1,0 +1,1 @@
+{"gate_id":"feature-gate-summary","stage":"acceptance.before_done","status":"passed","blocking":[],"warnings":["open_url live path saw locked device"],"evidence":[{"pytest":"43 passed","live_smoke":"passed"}],"providers":{}}

@@ -1,0 +1,41 @@
+feature: 2026-07-11-ios-system-helpers-parity
+created: 2026-07-11
+
+steps:
+  - action: "iOS press_button via WDA"
+    exit_signal: "HOME/VOLUME_* work; Android-only buttons return unsupported_platform"
+    status: done
+  - action: "iOS open_url via WDA"
+    exit_signal: "open_url attempts WDA/Safari path; locked device returns clear driver_error"
+    status: done
+  - action: "iOS save_screenshot reuses screenshot bytes + path validation"
+    exit_signal: "safe path writes image file"
+    status: done
+
+checks:
+  - item: "no go-ios runtime"
+    source: 范围守护
+    status: passed
+  - item: "press_button HOME live"
+    source: 验收场景
+    status: passed
+  - item: "save_screenshot live"
+    source: 验收场景
+    status: passed
+  - item: "open_url path implemented; locked device explicit error"
+    source: 验收场景
+    status: passed
+  - item: "BACK unsupported on iOS"
+    source: 名词契约
+    status: passed
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "python -m pytest"
+      core: true
+      failure_handling: fix-or-block
+    - id: CMD-IOS-HELPERS-001
+      command: "PATH=.venv/bin:$PATH python tests/ios_system_helpers_live_smoke.py"
+      core: true
+      failure_handling: fix-or-block

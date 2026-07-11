@@ -27,8 +27,36 @@ DEFAULT_XCTRUNNER = os.environ.get(
 _PROCESS_TUNNEL: Any | None = None
 _PROCESS_RSD: Any | None = None
 _PROCESS_TUNNEL_DEVICE: str | None = None
+_PROCESS_XCT_TASK: asyncio.Task[Any] | None = None
 _PROCESS_TUNNEL_LOCK = asyncio.Lock()
 
+
+
+def _ios_button_name(button: str) -> str:
+    key = button.strip().upper()
+    if key in {
+        "BACK", "KEYCODE_BACK",
+        "ENTER", "KEYCODE_ENTER",
+        "DPAD_CENTER", "KEYCODE_DPAD_CENTER",
+        "DPAD_UP", "KEYCODE_DPAD_UP",
+        "DPAD_DOWN", "KEYCODE_DPAD_DOWN",
+        "DPAD_LEFT", "KEYCODE_DPAD_LEFT",
+        "DPAD_RIGHT", "KEYCODE_DPAD_RIGHT",
+    }:
+        raise UnsupportedPlatformError(
+            "mobile_press_button",
+            f'Button "{button}" is not supported on iOS via WDA hardware buttons.',
+            {"button": button, "platform": "ios"},
+        )
+    mapping = {
+        "HOME": "home",
+        "KEYCODE_HOME": "home",
+        "VOLUME_UP": "volumeUp",
+        "KEYCODE_VOLUME_UP": "volumeUp",
+        "VOLUME_DOWN": "volumeDown",
+        "KEYCODE_VOLUME_DOWN": "volumeDown",
+    }
+    return mapping.get(key, button)
 
 async def _shared_userspace_rsd(device_id: str) -> Any:
     global _PROCESS_TUNNEL, _PROCESS_RSD, _PROCESS_TUNNEL_DEVICE
@@ -312,6 +340,59 @@ class IOSDriver(BaseDriver):
         value = "LANDSCAPE" if orientation == "landscape" else "PORTRAIT"
         await self._client._request_json("POST", f"/session/{sid}/orientation", {"orientation": value})
 
+
+    async def press_button(self, button: str) -> None:
+        """Accept Android KEYCODE_* or raw names; map to WDA button names."""
+        if self._fake_wda is not None:
+            await self._fake_call("press_button", None, button)
+            return
+        await self._ensure_connected()
+        assert self._client is not None
+        name = _ios_button_name(button)
+        await self._client.press_button(name, session_id=await self._session())
+
+    async def open_url(self, url: str) -> None:
+        if self._fake_wda is not None:
+            await self._fake_call("open_url", None, url)
+            return
+        await self._ensure_connected()
+        assert self._client is not None
+        sid = await self._session()
+        last_exc: Exception | None = None
+        for path in (f"/session/{sid}/url", f"/session/{sid}/wda/url"):
+            try:
+                await self._client._request_json("POST", path, {"url": url})
+                return
+            except Exception as exc:
+                last_exc = exc
+                msg = str(exc)
+                if "Locked" in msg or "not, or could not be, unlocked" in msg:
+                    raise DriverError(
+                        "ios",
+                        "iPhone is locked; unlock it to open URLs.",
+                        {"url": url, "device": self.device_id},
+                    ) from exc
+        # Fallback: launch Safari with URL argument via a dedicated session.
+        try:
+            caps = {
+                "bundleId": "com.apple.mobilesafari",
+                "arguments": [url],
+                "shouldWaitForQuiescence": False,
+            }
+            payload = {"capabilities": {"alwaysMatch": caps}, "desiredCapabilities": caps}
+            await self._client._request_json("POST", "/session", payload)
+            return
+        except Exception as exc:
+            last_exc = exc
+            msg = str(exc)
+            if "Locked" in msg or "not, or could not be, unlocked" in msg:
+                raise DriverError(
+                    "ios",
+                    "iPhone is locked; unlock it to open URLs.",
+                    {"url": url, "device": self.device_id},
+                ) from exc
+        raise DriverError("ios", f"Failed to open url via WDA: {last_exc}", {"url": url}) from last_exc
+
     async def list_apps(self):
         raise UnsupportedPlatformError(
             "mobile_list_apps",
@@ -413,7 +494,7 @@ class IOSDriver(BaseDriver):
             self._client = WdaServiceClient(service_provider=self._rsd, port=DEFAULT_WDA_PORT, timeout=20.0)
         if not await self._wda_ready():
             await self._start_xctrunner_locked()
-            if not await self._wait_wda_ready(timeout=45.0):
+            if not await self._wait_wda_ready(timeout=90.0):
                 raise DriverError(
                     "ios",
                     f'WDA is not ready for device "{self.device_id}". '
@@ -445,7 +526,9 @@ class IOSDriver(BaseDriver):
         return False
 
     async def _start_xctrunner_locked(self) -> None:
-        if self._xct_task is not None and not self._xct_task.done():
+        global _PROCESS_XCT_TASK
+        if _PROCESS_XCT_TASK is not None and not _PROCESS_XCT_TASK.done():
+            self._xct_task = _PROCESS_XCT_TASK
             return
         assert self._rsd is not None
         from pymobiledevice3.services.dvt.testmanaged.xcuitest import TestConfig, XCUITestService
@@ -453,7 +536,8 @@ class IOSDriver(BaseDriver):
         try:
             cfg = await TestConfig.create_for(self._rsd, runner_bundle_id=DEFAULT_XCTRUNNER)
             service = XCUITestService(self._rsd)
-            self._xct_task = asyncio.create_task(service.run(cfg), name=f"wda-xctrunner-{self.device_id}")
+            _PROCESS_XCT_TASK = asyncio.create_task(service.run(cfg), name=f"wda-xctrunner-{self.device_id}")
+            self._xct_task = _PROCESS_XCT_TASK
         except Exception as exc:
             raise DriverError(
                 "ios",

@@ -61,7 +61,7 @@ Android Driver 仅在 crash 真实现条目中触碰。
 ## 4. 子 feature 列表（有序）
 
 1. **ios-live-wda-verification** — ✅ done：pure pmd3 userspace + WDA live smoke passed on real iPhone。
-2. **ios-system-helpers-parity** — 实现或明确 iOS `press_button` / `open_url` / `save_screenshot`。
+2. **ios-system-helpers-parity** — ✅ done：HOME/VOLUME/save_screenshot；open_url 实现且锁定设备显式报错。
 3. **ios-app-lifecycle-pmd3** — pure-PMD3/WDA app list/launch/terminate/install/uninstall 实现或 stable unsupported + 新证据。
 4. **crash-tools-real-source** — Android/iOS crash list/get 真来源 spike→实现或继续 unsupported（禁止假成功空列表）。
 

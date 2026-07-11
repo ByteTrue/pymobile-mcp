@@ -76,6 +76,7 @@ No go-ios runtime and no root. Requires installed WDA runner
 ```bash
 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
 PYMOBILE_MCP_IOS_ACTIONS=1 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py
+PATH=.venv/bin:$PATH python tests/ios_system_helpers_live_smoke.py
 PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 # optional:
 # PYMOBILE_MCP_IOS_DEVICE=<udid>
@@ -116,11 +117,11 @@ Legend:
 | mobile_double_tap_on_screen | supported | supported |
 | mobile_long_press_on_screen_at_coordinates | supported | supported |
 | mobile_list_elements_on_screen | supported | supported (WDA source internal only) |
-| mobile_press_button | supported | unsupported* |
-| mobile_open_url | supported (http/https default) | unsupported* |
+| mobile_press_button | supported | supported (HOME/VOLUME_*; BACK unsupported) |
+| mobile_open_url | supported (http/https default) | supported (http/https; device must be unlocked) |
 | mobile_swipe_on_screen | supported | supported |
 | mobile_type_keys | supported | supported |
-| mobile_save_screenshot | supported | unsupported* |
+| mobile_save_screenshot | supported | supported |
 | mobile_take_screenshot | supported | supported |
 | mobile_set_orientation | supported | supported |
 | mobile_get_orientation | supported | supported |

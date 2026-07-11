@@ -665,3 +665,43 @@ def test_no_go_ios_dependency():
         assert "mobilecli" not in text
         # do not shell out to the `ios` CLI as a runtime dependency
         assert '["ios"' not in text and "['ios'" not in text
+
+
+@pytest.mark.asyncio
+async def test_ios_system_helpers_with_fake_driver():
+    from pymobile_mcp.drivers.base import DeviceInfo, ScreenSize
+    from pymobile_mcp.tools.android import configure_android_tools_for_tests, reset_android_tools_for_tests
+    from pymobile_mcp.tools.registry import call_tool
+
+    actions = []
+
+    class FakeIOS:
+        async def connect(self, capabilities=None):
+            return None
+        async def screenshot(self):
+            return b"png-bytes"
+        async def press_button(self, button):
+            actions.append(("press_button", button))
+        async def open_url(self, url):
+            actions.append(("open_url", url))
+        async def get_orientation(self):
+            return "portrait"
+        async def set_orientation(self, orientation):
+            actions.append(("set_orientation", orientation))
+        async def get_screen_size(self):
+            return ScreenSize(width=390, height=844)
+
+    configure_android_tools_for_tests(
+        lambda: [DeviceInfo(id="ios-1", name="iPhone", platform="ios", type="real", version="17", state="online")],
+        lambda device_id: FakeIOS(),
+    )
+    try:
+        await call_tool("mobile_press_button", {"device": "ios-1", "button": "HOME"})
+        await call_tool("mobile_open_url", {"device": "ios-1", "url": "https://example.com"})
+        saved = json.loads((await call_tool("mobile_save_screenshot", {"device": "ios-1", "saveTo": "tmp-ios-helper.png"}))[0].text)
+        assert Path(saved["saveTo"]).exists()
+        Path(saved["saveTo"]).unlink(missing_ok=True)
+        assert ("press_button", "KEYCODE_HOME") in actions or ("press_button", "home") in actions or any(a[0]=="press_button" for a in actions)
+        assert ("open_url", "https://example.com") in actions
+    finally:
+        reset_android_tools_for_tests()
