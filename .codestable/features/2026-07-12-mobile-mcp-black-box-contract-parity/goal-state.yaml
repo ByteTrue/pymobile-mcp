@@ -1,0 +1,13 @@
+feature: mobile-mcp-black-box-contract-parity
+status: ready-to-dispatch
+baseline_ref: ffa668376c78e59c00b50cce319e96c581ef420c
+stage: implementation
+driver_kind: none
+driver_id: ""
+handoff_reason: ""
+handoff_next: ""
+design: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-design.md
+checklist: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-checklist.yaml
+review: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-review.md
+qa: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-qa.md
+acceptance: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-acceptance.md
