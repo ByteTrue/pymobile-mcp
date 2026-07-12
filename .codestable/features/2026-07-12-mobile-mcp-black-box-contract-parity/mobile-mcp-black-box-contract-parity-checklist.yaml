@@ -1,0 +1,152 @@
+feature: 2026-07-12-mobile-mcp-black-box-contract-parity
+created: 2026-07-12
+
+steps:
+  - action: "Upstream oracle：实现 capture/source-coverage/timeout scripts，生成 raw initialize/default/fleet/call result goldens"
+    exit_signal: "CMD-002/003/004/007 全部 exit 0；provenance、raw frames、machine reports 完整；任一 exit 2 保持 blocked"
+    status: pending
+  - action: "微重构：oracle 建立后抽最小 contract formatter/error wrapper 并拆 parity matrix tests"
+    exit_signal: "CMD-001 通过，driver side effects 未改变，diff 仅职责移动"
+    status: pending
+  - action: "Initialize/ToolSpec parity：对齐 serverInfo 与 default/fleet list_tools"
+    exit_signal: "CMD-005/006 的 raw InitializeResult 和完整 tool arrays deep-equal，fleet discovery 无豁免"
+    status: pending
+  - action: "Success branch parity：执行 scenarios.yaml 全部 source-linked success cases"
+    exit_signal: "scenario disposition coverage=100%，exact/approved_exception/blocked 分别计数；blocked 不算 pass"
+    status: pending
+  - action: "Validation/Error parity：执行 scenarios.yaml 全部 schema policy/Actionable/unexpected/screenshot cases"
+    exit_signal: "error disposition coverage=100%，含 coercion/min/max/null/unknown 和 isError 省略/true 差异"
+    status: pending
+  - action: "Image parity：用 CMD-004/008 覆盖 no-scaling、sips、ImageMagick、sips fallback 和 failure"
+    exit_signal: "fake bytes 精确；CMD-008 upstream/Python artifacts 尺寸符合算法且 RGB PSNR>=35dB；backend 缺失 exit 2；错误均 isError=true"
+    status: pending
+  - action: "User-path evidence：补 Pi direct-tools 与 Android/iOS live 原始证据"
+    exit_signal: "PI-001/LIVE-001 摘要可审，blocked/destructive/unsupported 不计为 pass"
+    status: pending
+  - action: "文档收口：同步 README/CHANGELOG/regression checklist 与 exception ledger"
+    exit_signal: "用户文档、golden provenance、已批准 exceptions 与实际黑盒行为一致"
+    status: pending
+
+checks:
+  - item: "InitializeResult raw frame 完整对齐；serverInfo.name=mobile-mcp，advertised version=0.0.1"
+    source: 验收场景
+    status: pending
+  - item: "default/fleet 两个 env mode 均有 initialize；23/26 tool objects deep-equal"
+    source: 名词契约
+    status: pending
+  - item: "Android physical public payload 固定为上游 type=emulator；iOS Simulator discovery 固定 type=simulator"
+    source: 名词契约
+    status: pending
+  - item: "iOS Simulator screen-size/WDA representative runtime 与 simctl start/stop recording exact 通过；不得复用 real-device recording exception"
+    source: 验收场景
+    status: pending
+  - item: "golden provenance 固定 commit、lock SHA、Node/npm/SDK/Python MCP、probe hash、OS、env、command、timestamp、scaling backend、deterministic oracle bundle SHA 和 exception ledger SHA/status"
+    source: 流程级约束
+    status: pending
+  - item: "raw JSON-RPC frames 在 client model 解析前保存；isError 省略不规范化为 false"
+    source: 流程级约束
+    status: pending
+  - item: "scenario 每个 case 有 source_ref、tool/request、arguments、env、fake setup、expected/golden key、disposition；normalization 显式给出或使用 exact_no_normalization 默认；action cases 有 expected effects/argv"
+    source: 编排骨架
+    status: pending
+  - item: "source coverage validator 覆盖所有 callback return、条件注册、Android physical type 映射、iOS Simulator discovery/runtime/recording、wrapper、utils validation 和 screenshot backend branch"
+    source: 编排骨架
+    status: pending
+  - item: "timeLimit=0/-1/'5'、swipe distance=0/negative、x-only/y-only、numeric coercion 均按上游行为验证"
+    source: 验收场景
+    status: pending
+  - item: "默认成功输出不使用 Python-native JSON envelope，除非上游本来返回 JSON string"
+    source: 名词契约
+    status: pending
+  - item: "Actionable-like 错误为普通 text/isError 省略；unexpected/screenshot 为 Error: text/isError=true"
+    source: 流程级约束
+    status: pending
+  - item: "screenshot fake modes 精确 bytes；CMD-008 产出 backend version、upstream/Python decoded artifacts 与 PSNR report；sips=162x360、ImageMagick/fallback=360x800、PSNR>=35dB"
+    source: 验收场景
+    status: pending
+  - item: "EXC-REMOTE-FLEET-RUNTIME 仅关联 remote fleet 3 tools / 4 success cases，approval=approved 或成功 runtime 已实现"
+    source: 范围守护
+    status: pending
+  - item: "EXC-IOS-SCREEN-RECORDING-RUNTIME 仅关联 device_type=real 的 iOS start/stop 两 cases，approval=approved 或成功 runtime 已实现"
+    source: 范围守护
+    status: pending
+  - item: "CMD-005/006/007 显式消费 exception ledger；allowed_case_ids 双向相等；approval=pending/rejected→blocked，approved 且 text/isError/scope 精确匹配→approved_exception，否则 exit 1"
+    source: 流程级约束
+    status: pending
+  - item: "Pi 新会话自然 direct tools 路径有 Pi 版本、脱敏 config、commit、text/image/error/action 证据"
+    source: 验收场景
+    status: pending
+  - item: "Android/iOS live 子项保留逐条 pass/blocked/fail；blocked/destructive/unsupported 不聚合为 pass"
+    source: 流程级约束
+    status: pending
+  - item: "runtime 不引入 go-ios/mobilecli fallback；不提交本地 Pi session HTML"
+    source: 范围守护
+    status: pending
+  - item: "不把 mobile_get_page_source 当作固定上游 contract tool"
+    source: 范围守护
+    status: pending
+
+dod:
+  commands:
+    - id: CMD-001
+      command: "PATH=.venv/bin:$PATH python scripts/run_with_timeout.py --timeout 120 --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/pytest.json -- .venv/bin/python -m pytest -q --junitxml=.codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/pytest.xml"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+    - id: CMD-002
+      command: "MOBILEMCP_DISABLE_TELEMETRY=1 PATH=.venv/bin:$PATH python scripts/capture_mobile_mcp_contract.py --source /Users/byte/workspace/forks/mobile-mcp --mode default --clean-install --expected-revision c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7 --expected-lock-sha256 a85bcc836ace219e24e039edab27adb309482961b8f91ab72de0ad2ea01b4ae5 --expected-node v24.15.0 --expected-npm 12.0.0 --timeout 30 --raw-frames .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/upstream-default.jsonl --output tests/fixtures/mobile_mcp_wire_default.json --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/capture-default.json"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+    - id: CMD-003
+      command: "MOBILEMCP_DISABLE_TELEMETRY=1 PATH=.venv/bin:$PATH python scripts/capture_mobile_mcp_contract.py --source /Users/byte/workspace/forks/mobile-mcp --mode fleet --clean-install --expected-revision c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7 --expected-lock-sha256 a85bcc836ace219e24e039edab27adb309482961b8f91ab72de0ad2ea01b4ae5 --expected-node v24.15.0 --expected-npm 12.0.0 --timeout 30 --raw-frames .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/upstream-fleet.jsonl --output tests/fixtures/mobile_mcp_wire_fleet.json --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/capture-fleet.json"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+    - id: CMD-004
+      command: "MOBILEMCP_DISABLE_TELEMETRY=1 PATH=tests/fixtures/mobile_mcp/fake-bin:.venv/bin:$PATH MOBILECLI_PATH=tests/fixtures/mobile_mcp/fake-bin/mobilecli python scripts/capture_mobile_mcp_calls.py --source /Users/byte/workspace/forks/mobile-mcp --expected-revision c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7 --expected-lock-sha256 a85bcc836ace219e24e039edab27adb309482961b8f91ab72de0ad2ea01b4ae5 --expected-node v24.15.0 --expected-npm 12.0.0 --clean-install --scenarios .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml --bundle-manifest tests/fixtures/mobile_mcp/bundle-manifest.json --fixture-root tests/fixtures/mobile_mcp --node-preload tests/fixtures/mobile_mcp/fakes/child-process-hook.cjs --scaling-modes no_scaling,sips,imagemagick,sips_fallback,scaling_failure --timeout 30 --raw-frames .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/upstream-calls.jsonl --output tests/fixtures/mobile_mcp_call_results.json --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/capture-calls.json"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+    - id: CMD-005
+      command: "PATH=.venv/bin:$PATH python scripts/assert_mobile_mcp_contract.py --mode default --scenarios .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml --exceptions .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml --bundle-manifest tests/fixtures/mobile_mcp/bundle-manifest.json --golden tests/fixtures/mobile_mcp_wire_default.json --calls tests/fixtures/mobile_mcp_call_results.json --timeout 30 --raw-frames .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/python-default.jsonl --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/assert-default.json"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+    - id: CMD-006
+      command: "PATH=.venv/bin:$PATH python scripts/assert_mobile_mcp_contract.py --mode fleet --scenarios .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml --exceptions .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml --bundle-manifest tests/fixtures/mobile_mcp/bundle-manifest.json --golden tests/fixtures/mobile_mcp_wire_fleet.json --calls tests/fixtures/mobile_mcp_call_results.json --timeout 30 --raw-frames .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/python-fleet.jsonl --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/assert-fleet.json"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+    - id: CMD-007
+      command: "PATH=.venv/bin:$PATH python scripts/validate_mobile_mcp_source_coverage.py --source /Users/byte/workspace/forks/mobile-mcp --expected-revision c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7 --scenarios .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml --exceptions .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml --bundle-manifest tests/fixtures/mobile_mcp/bundle-manifest.json --timeout 30 --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/source-coverage.json"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+    - id: CMD-008
+      command: "MOBILEMCP_DISABLE_TELEMETRY=1 PATH=.venv/bin:$PATH python scripts/compare_mobile_mcp_image_backends.py --source /Users/byte/workspace/forks/mobile-mcp --expected-revision c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7 --expected-lock-sha256 a85bcc836ace219e24e039edab27adb309482961b8f91ab72de0ad2ea01b4ae5 --expected-node v24.15.0 --expected-npm 12.0.0 --bundle-manifest tests/fixtures/mobile_mcp/bundle-manifest.json --fixture tests/fixtures/mobile_mcp/input-1080x2400.png --screen-scale 3 --backends sips,imagemagick,sips_fallback --psnr-min 35 --timeout 30 --artifact-dir .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images --report .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/image-backends.json"
+      core: true
+      failure_handling: exit-1-or-2-blocks
+  exit_codes:
+    passed: 0
+    failed_or_mismatch: 1
+    environment_blocked: 2
+    blocked_policy: "CMD-001~008 任一 exit 2 blocks black-box attestation; never count as pass"
+  manual_evidence:
+    - id: PI-001
+      required: "Pi version, redacted MCP config, project commit; new session calls list_available_devices, get_screen_size(device=emulator-5554), take_screenshot, press_button(HOME), open_url(demo://home error); record content/isError"
+    - id: LIVE-001
+      required: "docs/regression-checklist.md commands with exact env/stdout/exit per subtest"
+  evidence_required:
+    - command_output
+    - machine_reports
+    - raw_jsonrpc_frames
+    - diff_summary
+    - initialize_default_fleet_goldens
+    - call_result_golden
+    - source_coverage_report
+    - scenario_disposition_report
+    - image_backend_artifacts_and_psnr_report
+    - exception_ledger
+    - pi_redacted_evidence
+    - live_stdout_exit_code
+    - deterministic_oracle_bundle_hash
+    - exception_ledger_hash_and_dispositions
+  cleanliness:
+    debug_output: forbidden
+    local_session_html: forbidden
+    device_private_info: redact
+    runtime_go_ios_mobilecli_fallback: forbidden

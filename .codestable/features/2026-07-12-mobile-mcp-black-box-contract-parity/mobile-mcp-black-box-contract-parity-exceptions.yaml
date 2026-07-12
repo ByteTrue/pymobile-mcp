@@ -1,0 +1,48 @@
+feature: 2026-07-12-mobile-mcp-black-box-contract-parity
+status: approved
+approval_values: [pending, approved, rejected]
+upstream:
+  repository: mobile-next/mobile-mcp
+  git_revision: c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7
+  source_tag: 0.0.61
+  advertised_server_version: 0.0.1
+
+exceptions:
+  - id: EXC-REMOTE-FLEET-RUNTIME
+    approval: approved
+    approved_by: user
+    approved_on: 2026-07-12
+    scope: "仅 MOBILEFLEET_ENABLE=1 下 remote fleet 三工具的成功 runtime；发现、title、description、schema、annotations 必须完全一致"
+    tools: [mobile_list_remote_devices, mobile_allocate_remote_device, mobile_release_remote_device]
+    env: {MOBILEFLEET_ENABLE: "1"}
+    allowed_case_ids:
+      - S-REMOTE-LIST
+      - S-REMOTE-ALLOCATE-IOS
+      - S-REMOTE-ALLOCATE-ANDROID
+      - S-REMOTE-RELEASE
+    upstream_behavior: "mobilecli remote list-devices/allocate/release 成功时原样返回 CLI 字符串"
+    python_behavior:
+      content_type: text
+      text: "mobilecli is not available or not working properly. Please review the documentation at https://github.com/mobile-next/mobile-mcp/wiki for installation instructions. Please fix the issue and try again."
+      isError: omitted
+    reason: "项目运行时禁止 mobilecli/go-ios，且当前没有 Python remote fleet provider"
+    impact: "默认 23-tool 模式无差异；启用 fleet env 后工具可发现但不能完成真实分配/释放"
+    transition_condition: "存在可测试的 Python remote fleet provider，并能逐字匹配上游成功输出"
+
+  - id: EXC-IOS-SCREEN-RECORDING-RUNTIME
+    approval: approved
+    approved_by: user
+    approved_on: 2026-07-12
+    scope: "iOS 真机 mobile_start_screen_recording / mobile_stop_screen_recording 的成功 runtime；工具发现和 schema 必须完全一致"
+    tools: [mobile_start_screen_recording, mobile_stop_screen_recording]
+    platform: ios
+    device_type: real
+    allowed_case_ids: [S-START-REC-IOS, S-STOP-REC-IOS]
+    upstream_behavior: "mobilecli screenrecord 能启动/停止并返回标准 recording 文本"
+    python_behavior:
+      content_type: text
+      text: "iOS screen recording is not available through pure pymobiledevice3/WDA yet. Please fix the issue and try again."
+      isError: omitted
+    reason: "当前 pure pymobiledevice3/WDA：RSD 无 displayservice，WDA video stop finalize 失败"
+    impact: "Android recording 对齐；iOS recording 仍为公开功能差异"
+    transition_condition: "pymobiledevice3 DisplayService 可用，或 WDA video start/stop 可稳定导出媒体文件"

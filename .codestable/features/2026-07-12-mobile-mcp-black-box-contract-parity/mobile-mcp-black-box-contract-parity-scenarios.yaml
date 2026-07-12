@@ -1,0 +1,963 @@
+feature: 2026-07-12-mobile-mcp-black-box-contract-parity
+schema_version: 1
+status: draft
+upstream:
+  git_revision: c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7
+  package_lock_sha256: a85bcc836ace219e24e039edab27adb309482961b8f91ab72de0ad2ea01b4ae5
+  node_version: v24.15.0
+  npm_version: 12.0.0
+  sdk_version: 1.26.0
+probe:
+  python_mcp_version: 1.28.1
+  raw_jsonrpc_frames: required
+  telemetry_env:
+    MOBILEMCP_DISABLE_TELEMETRY: "1"
+  initialize_request:
+    jsonrpc: "2.0"
+    id_policy: "每个隔离 server 固定 request id=1"
+    protocolVersion: "2025-11-25"
+    capabilities: {}
+    clientInfo: {name: pymobile-mcp-contract-probe, version: "1.0.0"}
+  case_defaults:
+    normalization: exact_no_normalization
+    expected_isError: omitted_unless_explicit
+    fake_effect_log: required_for_action_tools
+oracle_bundle:
+  manifest: tests/fixtures/mobile_mcp/bundle-manifest.json
+  required_paths:
+    - .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml
+    - .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml
+    - scripts/capture_mobile_mcp_contract.py
+    - scripts/capture_mobile_mcp_calls.py
+    - scripts/assert_mobile_mcp_contract.py
+    - scripts/validate_mobile_mcp_source_coverage.py
+    - scripts/compare_mobile_mcp_image_backends.py
+    - scripts/run_with_timeout.py
+    - tests/fixtures/mobile_mcp/fakes/**
+    - tests/fixtures/mobile_mcp/fake-bin/**
+    - tests/fixtures/mobile_mcp/input-1080x2400.png
+  algorithm: "展开 glob 后只取 regular files；repo-relative POSIX UTF-8 path 升序；每项 {path,sha256}；对无空白、object keys 排序的 canonical JSON UTF-8 bytes 计算 aggregate SHA-256"
+  report_policy: "CMD-004/005/006/007/008 machine reports 必须记录 entries 与 aggregate hash；任一输入变化但 golden 未更新时 exit 1"
+
+fixtures:
+  devices_empty:
+    devices: []
+  devices_two:
+    devices:
+      - {id: emulator-5554, name: Pixel, platform: android, type: emulator, version: "16", state: online}
+      - {id: ios-1, name: iPhone, platform: ios, type: real, version: "26.5.2", state: online}
+  devices_android_physical:
+    devices:
+      - {id: R5CT123456, name: Galaxy, platform: android, type: emulator, version: "14", state: online}
+  devices_ios_simulator:
+    devices:
+      - {id: sim-1, name: iPhone 16, platform: ios, type: simulator, version: "18.0", state: online}
+  apps_empty:
+    apps: []
+  apps_two:
+    apps:
+      - {appName: Settings, packageName: com.android.settings}
+      - {appName: Chrome, packageName: com.android.chrome}
+  elements_two:
+    elements:
+      - {type: Button, text: OK, label: null, name: null, value: OK, identifier: ok, rect: {x: 1, y: 2, width: 3, height: 4}, focused: false}
+      - {type: TextField, text: null, label: Search, name: search, value: "", identifier: search, rect: {x: 5, y: 6, width: 7, height: 8}, focused: true}
+  remote_stdout:
+    list: '{"status":"ok","data":{"devices":[]}}'
+    allocate: '{"status":"ok","data":{"device":"remote-ios-1"}}'
+    release: '{"status":"ok","data":{"released":"remote-ios-1"}}'
+  crash_list:
+    data:
+      - {processName: Demo, timestamp: "2026-07-12T00:00:00Z", id: crash-1}
+  crash_content:
+    content: "Incident Identifier: crash-1\nDemo crashed"
+  screenshot_png:
+    path: tests/fixtures/mobile_mcp/input-1080x2400.png
+    width: 1080
+    height: 2400
+    screen_scale: 3
+  recording_file:
+    path: /tmp/mobile-mcp-contract.mp4
+    size_bytes: 1048576
+    elapsed_seconds: 7
+
+wire_cases:
+  - id: INIT-DEFAULT
+    source_ref: "server.ts:41-51;package.json:4"
+    env_mode: default
+    request: {method: initialize}
+    expected_golden_key: wire.default.initialize
+    required_disposition: exact
+  - id: INIT-FLEET
+    source_ref: "server.ts:41-51,285;package.json:4"
+    env_mode: fleet
+    env: {MOBILEFLEET_ENABLE: "1"}
+    request: {method: initialize}
+    expected_golden_key: wire.fleet.initialize
+    required_disposition: exact
+  - id: LIST-DEFAULT
+    source_ref: "server.ts:216-841"
+    env_mode: default
+    request: {method: tools/list}
+    expected_golden_key: wire.default.list_tools
+    required_disposition: exact
+  - id: LIST-FLEET
+    source_ref: "server.ts:285-328"
+    env_mode: fleet
+    env: {MOBILEFLEET_ENABLE: "1"}
+    request: {method: tools/list}
+    expected_golden_key: wire.fleet.list_tools
+    required_disposition: exact
+
+call_cases:
+  - id: S-LIST-DEVICES-EMPTY
+    source_ref: "server.ts:216-283:return-281"
+    tool: mobile_list_available_devices
+    arguments: {}
+    env_mode: default
+    fake_setup: {fixture: devices_empty}
+    expected: {content: [{type: text, text: '{"devices":[]}'}], isError: omitted}
+    required_disposition: exact
+  - id: S-LIST-DEVICES-NONEMPTY
+    source_ref: "server.ts:216-283:return-281"
+    tool: mobile_list_available_devices
+    arguments: {}
+    env_mode: default
+    fake_setup: {fixture: devices_two}
+    expected_golden_key: calls.S-LIST-DEVICES-NONEMPTY
+    required_disposition: exact
+  - id: S-LIST-DEVICES-ANDROID-PHYSICAL
+    source_ref: "server.ts:231-241:return-281"
+    tool: mobile_list_available_devices
+    arguments: {}
+    env_mode: default
+    fake_setup: {fixture: devices_android_physical, source_device_kind: physical}
+    expected: {content: [{type: text, text: '{"devices":[{"id":"R5CT123456","name":"Galaxy","platform":"android","type":"emulator","version":"14","state":"online"}]}'}], isError: omitted}
+    required_disposition: exact
+  - id: S-LIST-DEVICES-IOS-SIMULATOR
+    source_ref: "server.ts:188-209,261-278:return-281"
+    tool: mobile_list_available_devices
+    arguments: {}
+    env_mode: default
+    fake_setup: {fixture: devices_ios_simulator, backend: xcrun_simctl}
+    expected: {content: [{type: text, text: '{"devices":[{"id":"sim-1","name":"iPhone 16","platform":"ios","type":"simulator","version":"18.0","state":"online"}]}'}], isError: omitted}
+    required_disposition: exact
+  - id: S-REMOTE-LIST
+    source_ref: "server.ts:285-297:return-295"
+    tool: mobile_list_remote_devices
+    arguments: {}
+    env_mode: fleet
+    env: {MOBILEFLEET_ENABLE: "1"}
+    fake_setup: {mobilecli_stdout_fixture: remote_stdout.list}
+    expected_cli_argv: [remote, list-devices]
+    expected: {content: [{type: text, text: '{"status":"ok","data":{"devices":[]}}'}], isError: omitted}
+    allowed_exception: EXC-REMOTE-FLEET-RUNTIME
+    required_disposition: exact_or_approved_exception
+  - id: S-REMOTE-ALLOCATE-IOS
+    source_ref: "server.ts:299-312:return-310"
+    tool: mobile_allocate_remote_device
+    arguments: {platform: ios}
+    env_mode: fleet
+    env: {MOBILEFLEET_ENABLE: "1"}
+    fake_setup: {mobilecli_stdout_fixture: remote_stdout.allocate}
+    expected_cli_argv: [remote, allocate, --platform, ios]
+    expected: {content: [{type: text, text: '{"status":"ok","data":{"device":"remote-ios-1"}}'}], isError: omitted}
+    allowed_exception: EXC-REMOTE-FLEET-RUNTIME
+    required_disposition: exact_or_approved_exception
+  - id: S-REMOTE-ALLOCATE-ANDROID
+    source_ref: "server.ts:299-312:return-310"
+    tool: mobile_allocate_remote_device
+    arguments: {platform: android}
+    env_mode: fleet
+    env: {MOBILEFLEET_ENABLE: "1"}
+    fake_setup: {mobilecli_stdout_fixture: remote_stdout.allocate}
+    expected_cli_argv: [remote, allocate, --platform, android]
+    expected_golden_key: calls.S-REMOTE-ALLOCATE-ANDROID
+    allowed_exception: EXC-REMOTE-FLEET-RUNTIME
+    required_disposition: exact_or_approved_exception
+  - id: S-REMOTE-RELEASE
+    source_ref: "server.ts:314-327:return-325"
+    tool: mobile_release_remote_device
+    arguments: {device: remote-ios-1}
+    env_mode: fleet
+    env: {MOBILEFLEET_ENABLE: "1"}
+    fake_setup: {mobilecli_stdout_fixture: remote_stdout.release}
+    expected_cli_argv: [remote, release, --device, remote-ios-1]
+    expected: {content: [{type: text, text: '{"status":"ok","data":{"released":"remote-ios-1"}}'}], isError: omitted}
+    allowed_exception: EXC-REMOTE-FLEET-RUNTIME
+    required_disposition: exact_or_approved_exception
+  - id: S-LIST-APPS-EMPTY
+    source_ref: "server.ts:330-343:return-341"
+    tool: mobile_list_apps
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {fixture: apps_empty}
+    expected: {content: [{type: text, text: "Found these apps on device: "}], isError: omitted}
+    required_disposition: exact
+  - id: S-LIST-APPS-TWO
+    source_ref: "server.ts:330-343:return-341"
+    tool: mobile_list_apps
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {fixture: apps_two}
+    expected: {content: [{type: text, text: "Found these apps on device: Settings (com.android.settings), Chrome (com.android.chrome)"}], isError: omitted}
+    required_disposition: exact
+  - id: S-LAUNCH-NO-LOCALE
+    source_ref: "server.ts:345-360:return-358"
+    tool: mobile_launch_app
+    arguments: {device: emulator-5554, packageName: com.android.chrome}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: launchApp, args: [com.android.chrome, null]}]
+    expected: {content: [{type: text, text: "Launched app com.android.chrome"}], isError: omitted}
+    required_disposition: exact
+  - id: S-LAUNCH-LOCALE
+    source_ref: "server.ts:345-360:return-358"
+    tool: mobile_launch_app
+    arguments: {device: emulator-5554, packageName: com.android.chrome, locale: "zh-CN,en-US"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: launchApp, args: [com.android.chrome, "zh-CN,en-US"]}]
+    expected: {content: [{type: text, text: "Launched app com.android.chrome"}], isError: omitted}
+    required_disposition: exact
+  - id: S-TERMINATE
+    source_ref: "server.ts:362-376:return-374"
+    tool: mobile_terminate_app
+    arguments: {device: emulator-5554, packageName: com.android.chrome}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: terminateApp, args: [com.android.chrome]}]
+    expected: {content: [{type: text, text: "Terminated app com.android.chrome"}], isError: omitted}
+    required_disposition: exact
+  - id: S-INSTALL
+    source_ref: "server.ts:378-392:return-390"
+    tool: mobile_install_app
+    arguments: {device: emulator-5554, path: /tmp/demo.apk}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: installApp, args: [/tmp/demo.apk]}]
+    expected: {content: [{type: text, text: "Installed app from /tmp/demo.apk"}], isError: omitted}
+    required_disposition: exact
+  - id: S-UNINSTALL
+    source_ref: "server.ts:394-408:return-406"
+    tool: mobile_uninstall_app
+    arguments: {device: emulator-5554, bundle_id: com.example.demo}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: uninstallApp, args: [com.example.demo]}]
+    expected: {content: [{type: text, text: "Uninstalled app com.example.demo"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SCREEN-SIZE
+    source_ref: "server.ts:410-423:return-421"
+    tool: mobile_get_screen_size
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {screen_size: {width: 1080, height: 2400, scale: 3}}
+    expected: {content: [{type: text, text: "Screen size is 1080x2400 pixels"}], isError: omitted}
+    required_disposition: exact
+  - id: S-IOS-SIM-SCREEN-SIZE
+    source_ref: "server.ts:188-209,410-423:return-421"
+    tool: mobile_get_screen_size
+    platform: ios
+    device_type: simulator
+    arguments: {device: sim-1}
+    env_mode: default
+    fake_setup: {backend: simulator_wda, screen_size: {width: 1179, height: 2556, scale: 3}}
+    expected_effects: [{method: wdaGetScreenSize, device: sim-1}]
+    expected: {content: [{type: text, text: "Screen size is 1179x2556 pixels"}], isError: omitted}
+    required_disposition: exact
+  - id: S-CLICK-COERCE
+    source_ref: "server.ts:425-440:return-438"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: "10", y: "20"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: tap, args: [10, 20], arg_types: [number, number]}]
+    expected: {content: [{type: text, text: "Clicked on screen at coordinates: 10, 20"}], isError: omitted}
+    required_disposition: exact
+  - id: S-DOUBLE-TAP
+    source_ref: "server.ts:442-457:return-455"
+    tool: mobile_double_tap_on_screen
+    arguments: {device: emulator-5554, x: "10", y: "20"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: doubleTap, args: [10, 20], arg_types: [number, number]}]
+    expected: {content: [{type: text, text: "Double-tapped on screen at coordinates: 10, 20"}], isError: omitted}
+    required_disposition: exact
+  - id: S-LONG-PRESS-DEFAULT
+    source_ref: "server.ts:459-476:return-474"
+    tool: mobile_long_press_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: 10, y: 20}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: longPress, args: [10, 20, 500], duration_unit: milliseconds}]
+    expected: {content: [{type: text, text: "Long pressed on screen at coordinates: 10, 20 for 500ms"}], isError: omitted}
+    required_disposition: exact
+  - id: S-LONG-PRESS-COERCE
+    source_ref: "server.ts:459-476:return-474"
+    tool: mobile_long_press_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: "10", y: "20", duration: "750"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: longPress, args: [10, 20, 750], arg_types: [number, number, number], duration_unit: milliseconds}]
+    expected: {content: [{type: text, text: "Long pressed on screen at coordinates: 10, 20 for 750ms"}], isError: omitted}
+    required_disposition: exact
+  - id: S-ELEMENTS-EMPTY
+    source_ref: "server.ts:478-515:return-513"
+    tool: mobile_list_elements_on_screen
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {elements: []}
+    expected: {content: [{type: text, text: "Found these elements on screen: []"}], isError: omitted}
+    required_disposition: exact
+  - id: S-ELEMENTS-TWO
+    source_ref: "server.ts:478-515:return-513"
+    tool: mobile_list_elements_on_screen
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {fixture: elements_two}
+    expected_golden_key: calls.S-ELEMENTS-TWO
+    required_disposition: exact
+  - id: S-PRESS-BUTTON
+    source_ref: "server.ts:517-531:return-529"
+    tool: mobile_press_button
+    arguments: {device: emulator-5554, button: HOME}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: pressButton, args: [HOME]}]
+    expected: {content: [{type: text, text: "Pressed the button: HOME"}], isError: omitted}
+    required_disposition: exact
+  - id: S-OPEN-HTTPS
+    source_ref: "server.ts:533-552:return-550"
+    tool: mobile_open_url
+    arguments: {device: emulator-5554, url: "https://example.com"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: openUrl, args: ["https://example.com"]}]
+    expected: {content: [{type: text, text: "Opened URL: https://example.com"}], isError: omitted}
+    required_disposition: exact
+  - id: S-OPEN-CUSTOM
+    source_ref: "server.ts:533-552:return-550"
+    tool: mobile_open_url
+    arguments: {device: emulator-5554, url: "demo://home"}
+    env_mode: custom_url
+    env: {MOBILEMCP_ALLOW_UNSAFE_URLS: "1"}
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: openUrl, args: ["demo://home"]}]
+    expected: {content: [{type: text, text: "Opened URL: demo://home"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-CENTER-X-ONLY
+    source_ref: "server.ts:554-580:return-577"
+    tool: mobile_swipe_on_screen
+    arguments: {device: emulator-5554, direction: up, x: "10"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: swipe, args: [up]}]
+    expected: {content: [{type: text, text: "Swiped up on screen"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-CENTER-Y-ONLY
+    source_ref: "server.ts:554-580:return-577"
+    tool: mobile_swipe_on_screen
+    arguments: {device: emulator-5554, direction: down, y: "20"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: swipe, args: [down]}]
+    expected: {content: [{type: text, text: "Swiped down on screen"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-DEFAULT-ANDROID
+    source_ref: "server.ts:554-580:return-573;android.ts:205-241"
+    tool: mobile_swipe_on_screen
+    platform: android
+    arguments: {device: emulator-5554, direction: left, x: "500", y: "1000"}
+    env_mode: default
+    fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, omitted], arg_types: [number, number, string, omitted]}]
+    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "176", "1000", "1000"]}]
+    expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-DEFAULT-IOS
+    source_ref: "server.ts:554-580:return-573;webdriver-agent.ts:372-430"
+    tool: mobile_swipe_on_screen
+    platform: ios
+    arguments: {device: ios-1, direction: left, x: "500", y: "1000"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, omitted], arg_types: [number, number, string, omitted]}]
+    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [100, 1000]]}]
+    expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-ZERO-ANDROID
+    source_ref: "server.ts:554-580:return-573;android.ts:205-241"
+    tool: mobile_swipe_on_screen
+    platform: android
+    arguments: {device: emulator-5554, direction: left, x: "500", y: "1000", distance: 0}
+    env_mode: default
+    fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, 0], arg_types: [number, number, string, number]}]
+    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "176", "1000", "1000"]}]
+    expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-ZERO-IOS
+    source_ref: "server.ts:554-580:return-573;webdriver-agent.ts:372-430"
+    tool: mobile_swipe_on_screen
+    platform: ios
+    arguments: {device: ios-1, direction: left, x: "500", y: "1000", distance: 0}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, 0], arg_types: [number, number, string, number]}]
+    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [500, 1000]]}]
+    expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-NEGATIVE-ANDROID
+    source_ref: "server.ts:554-580:return-573;android.ts:205-241"
+    tool: mobile_swipe_on_screen
+    platform: android
+    arguments: {device: emulator-5554, direction: right, x: 500, y: 1000, distance: -5}
+    env_mode: default
+    fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, right, -5]}]
+    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "495", "1000", "1000"]}]
+    expected: {content: [{type: text, text: "Swiped right -5 pixels from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-NEGATIVE-IOS
+    source_ref: "server.ts:554-580:return-573;webdriver-agent.ts:372-430"
+    tool: mobile_swipe_on_screen
+    platform: ios
+    arguments: {device: ios-1, direction: right, x: 500, y: 1000, distance: -5}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, right, -5]}]
+    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [495, 1000]]}]
+    expected: {content: [{type: text, text: "Swiped right -5 pixels from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-DISTANCE-COERCE-ANDROID
+    source_ref: "server.ts:554-580:return-573;android.ts:205-241"
+    tool: mobile_swipe_on_screen
+    platform: android
+    arguments: {device: emulator-5554, direction: up, x: "500", y: "1000", distance: "5"}
+    env_mode: default
+    fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, up, 5], arg_types: [number, number, string, number]}]
+    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "500", "995", "1000"]}]
+    expected: {content: [{type: text, text: "Swiped up 5 pixels from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SWIPE-COORD-DISTANCE-COERCE-IOS
+    source_ref: "server.ts:554-580:return-573;webdriver-agent.ts:372-430"
+    tool: mobile_swipe_on_screen
+    platform: ios
+    arguments: {device: ios-1, direction: up, x: "500", y: "1000", distance: "5"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, up, 5], arg_types: [number, number, string, number]}]
+    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [500, 995]]}]
+    expected: {content: [{type: text, text: "Swiped up 5 pixels from coordinates: 500, 1000"}], isError: omitted}
+    required_disposition: exact
+  - id: S-TYPE-FALSE
+    source_ref: "server.ts:582-602:return-600"
+    tool: mobile_type_keys
+    arguments: {device: emulator-5554, text: hello, submit: false}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: sendKeys, args: [hello]}]
+    expected: {content: [{type: text, text: "Typed text: hello"}], isError: omitted}
+    required_disposition: exact
+  - id: S-TYPE-TRUE
+    source_ref: "server.ts:582-602:return-600"
+    tool: mobile_type_keys
+    arguments: {device: emulator-5554, text: hello, submit: true}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: sendKeys, args: [hello]}, {method: pressButton, args: [ENTER]}]
+    expected: {content: [{type: text, text: "Typed text: hello"}], isError: omitted}
+    required_disposition: exact
+  - id: S-SAVE-SCREENSHOT
+    source_ref: "server.ts:604-623:return-621"
+    tool: mobile_save_screenshot
+    arguments: {device: emulator-5554, saveTo: /tmp/screen.png}
+    env_mode: default
+    fake_setup: {fixture: screenshot_png}
+    expected_effects: [{method: writeFile, args: [/tmp/screen.png], bytes_fixture: screenshot_png}]
+    expected: {content: [{type: text, text: "Screenshot saved to: /tmp/screen.png"}], isError: omitted}
+    required_disposition: exact
+  - id: S-TAKE-PNG
+    source_ref: "server.ts:625-687:return-676-678"
+    tool: mobile_take_screenshot
+    arguments: {device: emulator-5554}
+    env_mode: no_scaling
+    fake_setup: {fixture: screenshot_png, preload_mode: no_scaling}
+    expected_golden_key: calls.S-TAKE-PNG
+    normalization: {image_bytes: exact, dimensions: [1080, 2400], mimeType: image/png}
+    required_disposition: exact
+  - id: S-TAKE-JPEG-SIPS
+    source_ref: "server.ts:652-678;image-utils.ts:66-102"
+    tool: mobile_take_screenshot
+    arguments: {device: emulator-5554}
+    env_mode: scaling_sips
+    fake_setup: {fixture: screenshot_png, preload_mode: sips}
+    expected_golden_key: calls.S-TAKE-JPEG-SIPS
+    normalization: {image_bytes: exact_in_deterministic_fake, live_dimensions: [162, 360], live_psnr_min_db: 35, mimeType: image/jpeg}
+    live_reference_golden_key: live_images.upstream.sips
+    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-sips.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-sips.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/psnr-sips.json, backend_version_required: true}
+    required_disposition: exact
+  - id: S-TAKE-JPEG-MAGICK
+    source_ref: "server.ts:652-678;image-utils.ts:104-114"
+    tool: mobile_take_screenshot
+    arguments: {device: emulator-5554}
+    env_mode: scaling_magick
+    fake_setup: {fixture: screenshot_png, preload_mode: imagemagick}
+    expected_golden_key: calls.S-TAKE-JPEG-MAGICK
+    normalization: {image_bytes: exact_in_deterministic_fake, live_dimensions: [360, 800], live_psnr_min_db: 35, mimeType: image/jpeg}
+    live_reference_golden_key: live_images.upstream.imagemagick
+    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-imagemagick.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-imagemagick.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/psnr-imagemagick.json, backend_version_required: true}
+    required_disposition: exact
+  - id: S-TAKE-JPEG-SIPS-FALLBACK
+    source_ref: "image-utils.ts:33-47"
+    tool: mobile_take_screenshot
+    arguments: {device: emulator-5554}
+    env_mode: scaling_sips_fallback
+    fake_setup: {fixture: screenshot_png, preload_mode: sips_fail_magick}
+    expected_golden_key: calls.S-TAKE-JPEG-SIPS-FALLBACK
+    normalization: {image_bytes: exact_in_deterministic_fake, live_dimensions: [360, 800], live_psnr_min_db: 35, mimeType: image/jpeg}
+    live_reference_golden_key: live_images.upstream.sips_fallback
+    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-sips-fallback.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-sips-fallback.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/psnr-sips-fallback.json, backend_version_required: true}
+    required_disposition: exact
+  - id: S-SET-ORIENTATION
+    source_ref: "server.ts:689-703:return-701"
+    tool: mobile_set_orientation
+    arguments: {device: emulator-5554, orientation: landscape}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_effects: [{method: setOrientation, args: [landscape]}]
+    expected: {content: [{type: text, text: "Changed device orientation to landscape"}], isError: omitted}
+    required_disposition: exact
+  - id: S-GET-ORIENTATION
+    source_ref: "server.ts:705-718:return-716"
+    tool: mobile_get_orientation
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {orientation: portrait}
+    expected: {content: [{type: text, text: "Current device orientation is portrait"}], isError: omitted}
+    required_disposition: exact
+  - id: S-START-REC-DEFAULT
+    source_ref: "server.ts:720-766:return-764"
+    tool: mobile_start_screen_recording
+    platform: android
+    arguments: {device: emulator-5554}
+    env_mode: fixed_clock_tmp
+    fake_setup: {driver_result: ok, clock_ms: 1700000000000, tmpdir: /tmp}
+    expected_cli_argv: [screenrecord, --device, emulator-5554, --output, /tmp/screen-recording-1700000000000.mp4, --silent]
+    expected: {content: [{type: text, text: "Screen recording started. Output will be saved to: /tmp/screen-recording-1700000000000.mp4"}], isError: omitted}
+    required_disposition: exact
+  - id: S-START-REC-TIME-ZERO
+    source_ref: "server.ts:720-766:return-764"
+    tool: mobile_start_screen_recording
+    platform: android
+    arguments: {device: emulator-5554, output: /tmp/mobile-mcp-contract.mp4, timeLimit: 0}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_cli_argv: [screenrecord, --device, emulator-5554, --output, /tmp/mobile-mcp-contract.mp4, --silent, --time-limit, "0"]
+    expected: {content: [{type: text, text: "Screen recording started. Output will be saved to: /tmp/mobile-mcp-contract.mp4"}], isError: omitted}
+    required_disposition: exact
+  - id: S-START-REC-TIME-NEGATIVE
+    source_ref: "server.ts:720-766:return-764"
+    tool: mobile_start_screen_recording
+    platform: android
+    arguments: {device: emulator-5554, output: /tmp/mobile-mcp-contract.mp4, timeLimit: -1}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_cli_argv: [screenrecord, --device, emulator-5554, --output, /tmp/mobile-mcp-contract.mp4, --silent, --time-limit, "-1"]
+    expected: {content: [{type: text, text: "Screen recording started. Output will be saved to: /tmp/mobile-mcp-contract.mp4"}], isError: omitted}
+    required_disposition: exact
+  - id: S-START-REC-TIME-COERCE
+    source_ref: "server.ts:720-766:return-764"
+    tool: mobile_start_screen_recording
+    platform: android
+    arguments: {device: emulator-5554, output: /tmp/mobile-mcp-contract.mp4, timeLimit: "5"}
+    env_mode: default
+    fake_setup: {driver_result: ok}
+    expected_cli_argv: [screenrecord, --device, emulator-5554, --output, /tmp/mobile-mcp-contract.mp4, --silent, --time-limit, "5"]
+    expected: {content: [{type: text, text: "Screen recording started. Output will be saved to: /tmp/mobile-mcp-contract.mp4"}], isError: omitted}
+    required_disposition: exact
+  - id: S-START-REC-IOS
+    source_ref: "server.ts:720-766:return-764"
+    tool: mobile_start_screen_recording
+    platform: ios
+    device_type: real
+    arguments: {device: ios-1, output: /tmp/mobile-mcp-contract.mp4}
+    env_mode: default
+    fake_setup: {driver_result: upstream_recording_success}
+    expected_cli_argv: [screenrecord, --device, ios-1, --output, /tmp/mobile-mcp-contract.mp4, --silent]
+    expected_golden_key: calls.S-START-REC-IOS
+    allowed_exception: EXC-IOS-SCREEN-RECORDING-RUNTIME
+    required_disposition: exact_or_approved_exception
+  - id: S-START-REC-IOS-SIMULATOR
+    source_ref: "server.ts:188-209,720-766:return-764"
+    tool: mobile_start_screen_recording
+    platform: ios
+    device_type: simulator
+    arguments: {device: sim-1, output: /tmp/sim-recording.mp4}
+    env_mode: default
+    fake_setup: {backend: xcrun_simctl, driver_result: ok}
+    expected_cli_argv: [screenrecord, --device, sim-1, --output, /tmp/sim-recording.mp4, --silent]
+    expected_backend_effects: [{argv: [xcrun, simctl, io, sim-1, recordVideo, /tmp/sim-recording.mp4]}]
+    expected: {content: [{type: text, text: "Screen recording started. Output will be saved to: /tmp/sim-recording.mp4"}], isError: omitted}
+    required_disposition: exact
+  - id: S-STOP-REC-MISSING
+    source_ref: "server.ts:768-810:return-802"
+    tool: mobile_stop_screen_recording
+    platform: android
+    arguments: {device: emulator-5554}
+    env_mode: fixed_clock
+    fake_setup: {active_recording: recording_file, output_exists: false}
+    expected_effects: [{method: processKill, args: [SIGINT]}, {method: fileExists, args: [/tmp/mobile-mcp-contract.mp4], result: false}]
+    expected: {content: [{type: text, text: "Recording stopped after ~7s but the output file was not found at: /tmp/mobile-mcp-contract.mp4"}], isError: omitted}
+    required_disposition: exact
+  - id: S-STOP-REC-FILE
+    source_ref: "server.ts:768-810:return-808"
+    tool: mobile_stop_screen_recording
+    platform: android
+    arguments: {device: emulator-5554}
+    env_mode: fixed_clock
+    fake_setup: {active_recording: recording_file, output_exists: true}
+    expected_effects: [{method: processKill, args: [SIGINT]}, {method: fileExists, args: [/tmp/mobile-mcp-contract.mp4], result: true}, {method: statSize, args: [/tmp/mobile-mcp-contract.mp4], result: 1048576}]
+    expected: {content: [{type: text, text: "Recording stopped. File: /tmp/mobile-mcp-contract.mp4 (1.00 MB, ~7s)"}], isError: omitted}
+    required_disposition: exact
+  - id: S-STOP-REC-IOS
+    source_ref: "server.ts:768-810:return-808"
+    tool: mobile_stop_screen_recording
+    platform: ios
+    device_type: real
+    arguments: {device: ios-1}
+    env_mode: fixed_clock
+    fake_setup: {active_recording: recording_file, driver_result: upstream_recording_success}
+    expected_effects: [{method: processKill, args: [SIGINT]}, {method: fileExists, args: [/tmp/mobile-mcp-contract.mp4], result: true}]
+    expected_golden_key: calls.S-STOP-REC-IOS
+    allowed_exception: EXC-IOS-SCREEN-RECORDING-RUNTIME
+    required_disposition: exact_or_approved_exception
+  - id: S-STOP-REC-IOS-SIMULATOR
+    source_ref: "server.ts:188-209,768-810:return-808"
+    tool: mobile_stop_screen_recording
+    platform: ios
+    device_type: simulator
+    arguments: {device: sim-1}
+    env_mode: fixed_clock
+    fake_setup: {backend: xcrun_simctl, active_recording: recording_file, output_exists: true}
+    expected_backend_effects: [{method: processKill, args: [SIGINT]}, {method: fileExists, args: [/tmp/mobile-mcp-contract.mp4], result: true}, {method: statSize, args: [/tmp/mobile-mcp-contract.mp4], result: 1048576}]
+    expected: {content: [{type: text, text: "Recording stopped. File: /tmp/mobile-mcp-contract.mp4 (1.00 MB, ~7s)"}], isError: omitted}
+    required_disposition: exact
+  - id: S-LIST-CRASHES
+    source_ref: "server.ts:812-825:return-823"
+    tool: mobile_list_crashes
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {fixture: crash_list}
+    expected: {content: [{type: text, text: '[{"processName":"Demo","timestamp":"2026-07-12T00:00:00Z","id":"crash-1"}]'}], isError: omitted}
+    required_disposition: exact
+  - id: S-GET-CRASH
+    source_ref: "server.ts:827-841:return-839"
+    tool: mobile_get_crash
+    arguments: {device: emulator-5554, id: crash-1}
+    env_mode: default
+    fake_setup: {fixture: crash_content}
+    expected: {content: [{type: text, text: "Incident Identifier: crash-1\nDemo crashed"}], isError: omitted}
+    required_disposition: exact
+
+validation_and_error_cases:
+  - id: E-UNKNOWN-TOOL
+    source_ref: "sdk:mcp.js:tool-not-found"
+    tool: mobile_not_real
+    arguments: {}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-UNKNOWN-TOOL
+    required_disposition: exact
+  - id: E-MISSING-DEVICE
+    source_ref: "server.ts:410-417:zod-required"
+    tool: mobile_get_screen_size
+    arguments: {}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-MISSING-DEVICE
+    required_disposition: exact
+  - id: V-EXTRA-FIELD
+    source_ref: "server.ts:410-417:zod-object-policy"
+    tool: mobile_get_screen_size
+    arguments: {device: emulator-5554, extra: true}
+    env_mode: default
+    fake_setup: {screen_size: {width: 1080, height: 2400, scale: 3}}
+    expected_golden_key: validation.V-EXTRA-FIELD
+    required_disposition: exact
+  - id: E-NONCOERCIBLE-X
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: nope, y: 20}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-NONCOERCIBLE-X
+    required_disposition: exact
+  - id: E-WRONG-BOOLEAN
+    source_ref: "server.ts:582-590:zod-boolean"
+    tool: mobile_type_keys
+    arguments: {device: emulator-5554, text: hello, submit: "true"}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-WRONG-BOOLEAN
+    required_disposition: exact
+  - id: E-NULL-ARGUMENTS
+    source_ref: "sdk:mcp.js:input-validation"
+    tool: mobile_get_screen_size
+    raw_arguments: null
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-NULL-ARGUMENTS
+    required_disposition: exact
+  - id: E-NONOBJECT-ARGUMENTS
+    source_ref: "sdk:mcp.js:input-validation"
+    tool: mobile_get_screen_size
+    raw_arguments: []
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-NONOBJECT-ARGUMENTS
+    required_disposition: exact
+  - id: E-BAD-DIRECTION
+    source_ref: "server.ts:554-564:zod-enum"
+    tool: mobile_swipe_on_screen
+    arguments: {device: emulator-5554, direction: diagonal}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-BAD-DIRECTION
+    required_disposition: exact
+  - id: E-LONG-PRESS-ZERO
+    source_ref: "server.ts:459-468:zod-min"
+    tool: mobile_long_press_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: 10, y: 20, duration: 0}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-LONG-PRESS-ZERO
+    required_disposition: exact
+  - id: E-LONG-PRESS-TOO-HIGH
+    source_ref: "server.ts:459-468:zod-max"
+    tool: mobile_long_press_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: 10, y: 20, duration: 10001}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-LONG-PRESS-TOO-HIGH
+    required_disposition: exact
+  - id: E-DEVICE-NOT-FOUND
+    source_ref: "server.ts:165-214;wrapper:88-93"
+    tool: mobile_get_screen_size
+    arguments: {device: missing}
+    env_mode: default
+    fake_setup: {devices: []}
+    expected: {content: [{type: text, text: 'Device "missing" not found. Use the mobile_list_available_devices tool to see available devices.. Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-MOBILECLI-UNAVAILABLE
+    source_ref: "server.ts:154-163;wrapper:88-93"
+    tool: mobile_list_available_devices
+    arguments: {}
+    env_mode: default
+    fake_setup: {mobilecli_version: failed}
+    expected: {content: [{type: text, text: "mobilecli is not available or not working properly. Please review the documentation at https://github.com/mobile-next/mobile-mcp/wiki for installation instructions. Please fix the issue and try again."}], isError: omitted}
+    required_disposition: exact
+  - id: E-UNSAFE-URL
+    source_ref: "server.ts:533-546;wrapper:88-93"
+    tool: mobile_open_url
+    arguments: {device: emulator-5554, url: "demo://home"}
+    env_mode: default
+    fake_setup: null
+    expected: {content: [{type: text, text: "Only http:// and https:// URLs are allowed. Set MOBILEMCP_ALLOW_UNSAFE_URLS=1 to allow other URL schemes.. Please fix the issue and try again."}], isError: omitted}
+    required_disposition: exact
+  - id: E-INVALID-PACKAGE-ANDROID-LAUNCH
+    source_ref: "android.ts:143-145;utils.ts:6-10;wrapper:88-93"
+    tool: mobile_launch_app
+    arguments: {device: emulator-5554, packageName: "bad/name"}
+    env_mode: default
+    fake_setup: {device_platform: android}
+    expected: {content: [{type: text, text: 'Invalid package name: "bad/name". Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-INVALID-LOCALE-ANDROID-LAUNCH
+    source_ref: "android.ts:143-147;utils.ts:12-16;wrapper:88-93"
+    tool: mobile_launch_app
+    arguments: {device: emulator-5554, packageName: com.example.demo, locale: "bad@locale"}
+    env_mode: default
+    fake_setup: {device_platform: android}
+    expected: {content: [{type: text, text: 'Invalid locale: "bad@locale". Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-INVALID-PACKAGE-IOS-LAUNCH
+    source_ref: "ios.ts:141-143;utils.ts:6-10;wrapper:88-93"
+    tool: mobile_launch_app
+    arguments: {device: ios-1, packageName: "bad/name"}
+    env_mode: default
+    fake_setup: {device_platform: ios}
+    expected: {content: [{type: text, text: 'Invalid package name: "bad/name". Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-INVALID-LOCALE-IOS-LAUNCH
+    source_ref: "ios.ts:141-146;utils.ts:12-16;wrapper:88-93"
+    tool: mobile_launch_app
+    arguments: {device: ios-1, packageName: com.example.demo, locale: "bad@locale"}
+    env_mode: default
+    fake_setup: {device_platform: ios}
+    expected: {content: [{type: text, text: 'Invalid locale: "bad@locale". Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-INVALID-PACKAGE-ANDROID-TERMINATE
+    source_ref: "android.ts:370-372;utils.ts:6-10;wrapper:88-93"
+    tool: mobile_terminate_app
+    arguments: {device: emulator-5554, packageName: "bad/name"}
+    env_mode: default
+    fake_setup: {device_platform: android}
+    expected: {content: [{type: text, text: 'Invalid package name: "bad/name". Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-INVALID-PACKAGE-IOS-TERMINATE
+    source_ref: "ios.ts:155-158;utils.ts:6-10;wrapper:88-93"
+    tool: mobile_terminate_app
+    arguments: {device: ios-1, packageName: "bad/name"}
+    env_mode: default
+    fake_setup: {device_platform: ios}
+    expected: {content: [{type: text, text: 'Invalid package name: "bad/name". Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-SAVE-BAD-EXTENSION
+    source_ref: "server.ts:604-615;utils.ts:50-54;wrapper:88-93"
+    tool: mobile_save_screenshot
+    arguments: {device: emulator-5554, saveTo: /tmp/screen.gif}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-SAVE-BAD-EXTENSION
+    required_disposition: exact
+  - id: E-START-BAD-EXTENSION
+    source_ref: "server.ts:720-734;utils.ts:50-54;wrapper:88-93"
+    tool: mobile_start_screen_recording
+    arguments: {device: emulator-5554, output: /tmp/record.mov}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-START-BAD-EXTENSION
+    required_disposition: exact
+  - id: E-SAVE-UNSAFE-PATH
+    source_ref: "server.ts:604-615;utils.ts:69-88;wrapper:88-93"
+    tool: mobile_save_screenshot
+    arguments: {device: emulator-5554, saveTo: ../screen.png}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-SAVE-UNSAFE-PATH
+    required_disposition: exact
+  - id: E-START-UNSAFE-PATH
+    source_ref: "server.ts:720-734;utils.ts:69-88;wrapper:88-93"
+    tool: mobile_start_screen_recording
+    arguments: {device: emulator-5554, output: ../record.mp4}
+    env_mode: default
+    fake_setup: null
+    expected_golden_key: errors.E-START-UNSAFE-PATH
+    required_disposition: exact
+  - id: E-ALREADY-RECORDING
+    source_ref: "server.ts:738-740;wrapper:88-93"
+    tool: mobile_start_screen_recording
+    arguments: {device: emulator-5554, output: /tmp/mobile-mcp-contract.mp4}
+    env_mode: default
+    fake_setup: {active_recording: recording_file}
+    expected: {content: [{type: text, text: 'Device "emulator-5554" is already being recorded. Stop the current recording first with mobile_stop_screen_recording.. Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-NO-RECORDING
+    source_ref: "server.ts:777-780;wrapper:88-93"
+    tool: mobile_stop_screen_recording
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {active_recording: null}
+    expected: {content: [{type: text, text: 'No active recording found for device "emulator-5554". Start a recording first with mobile_start_screen_recording.. Please fix the issue and try again.'}], isError: omitted}
+    required_disposition: exact
+  - id: E-ACTIONABLE-PASSTHROUGH
+    source_ref: "server.ts:88-93"
+    tool: mobile_press_button
+    arguments: {device: ios-1, button: BACK}
+    env_mode: default
+    fake_setup: {driver_error_kind: actionable, message: "Button BACK is not supported"}
+    expected: {content: [{type: text, text: "Button BACK is not supported. Please fix the issue and try again."}], isError: omitted}
+    required_disposition: exact
+  - id: E-UNEXPECTED-DRIVER
+    source_ref: "server.ts:94-100"
+    tool: mobile_get_orientation
+    arguments: {device: emulator-5554}
+    env_mode: default
+    fake_setup: {driver_error_kind: unexpected, message: boom}
+    expected: {content: [{type: text, text: "Error: boom"}], isError: true}
+    required_disposition: exact
+  - id: E-SCREENSHOT-INVALID
+    source_ref: "server.ts:645-650,679-684"
+    tool: mobile_take_screenshot
+    arguments: {device: emulator-5554}
+    env_mode: no_scaling
+    fake_setup: {screenshot_bytes: invalid}
+    expected_golden_key: errors.E-SCREENSHOT-INVALID
+    required_disposition: exact
+  - id: E-SCREENSHOT-ZERO
+    source_ref: "server.ts:645-650,679-684"
+    tool: mobile_take_screenshot
+    arguments: {device: emulator-5554}
+    env_mode: no_scaling
+    fake_setup: {screenshot_fixture: zero_dimensions}
+    expected: {content: [{type: text, text: "Error: Screenshot is invalid. Please try again."}], isError: true}
+    required_disposition: exact
+  - id: E-SCREENSHOT-SCALING-FAIL
+    source_ref: "image-utils.ts:33-47;server.ts:679-684"
+    tool: mobile_take_screenshot
+    arguments: {device: emulator-5554}
+    env_mode: scaling_failure
+    fake_setup: {fixture: screenshot_png, preload_mode: sips_fail_magick_fail}
+    expected: {content: [{type: text, text: "Error: Image scaling unavailable (requires Sips or ImageMagick)."}], isError: true}
+    required_disposition: exact
+
+source_coverage:
+  validator: "scripts/validate_mobile_mcp_source_coverage.py"
+  policy: "validator 必须解析固定源码/调用路径并输出 case→实际 caller/branch→disposition；每个 wire/call/validation_and_error case 必须映射实际 schema、guard、wrapper、callback return 或 backend branch；漏项、仅靠 source_ref 自称覆盖、重复 case id、越界 exception 均 exit 1"
+  required_groups:
+    - initialize
+    - default_tool_registration
+    - fleet_tool_registration
+    - all_callback_returns
+    - actionable_wrapper
+    - unexpected_wrapper
+    - screenshot_png
+    - screenshot_sips
+    - screenshot_imagemagick
+    - screenshot_sips_fallback
+    - screenshot_errors
+    - utils_package_android_launch
+    - utils_package_ios_launch
+    - utils_package_android_terminate
+    - utils_package_ios_terminate
+    - utils_locale_android_launch
+    - utils_locale_ios_launch
+    - utils_extension_save_screenshot
+    - utils_extension_start_recording
+    - utils_output_path_save_screenshot
+    - utils_output_path_start_recording
+    - schema_required
+    - schema_object_policy
+    - schema_number_coercion
+    - schema_boolean
+    - schema_enum
+    - schema_min_max
+    - guard_mobilecli_available
+    - guard_device_found
+    - guard_unsafe_url
+    - guard_recording_already_active
+    - guard_recording_not_active
+    - android_physical_public_type_emulator
+    - ios_simulator_discovery
+    - ios_simulator_runtime_wda
+    - ios_simulator_recording_simctl
+
+normalization_rules:
+  case_default: "case 未显式 normalization 时，严格 exact_no_normalization；validator 必须把该默认写入 machine report"
+  raw_frames: "golden 保存 SDK client model 解析前的 JSON-RPC request/response frames；isError 遗漏不得规范化为 false"
+  list_tools: "只排序 JSON object keys；保留 tool/array 顺序、缺字段/null 和字符串逐字内容"
+  temp_path: "固定 clock/tmpdir；禁止全局删除 path"
+  recording_duration: "固定 clock=7s；禁止全局删除 duration"
+  recording_size: "固定 1048576 bytes；保留 1.00 MB 格式"
+  deterministic_image_fakes: "PNG/JPEG 均比较精确 bytes、mime、decoded dimensions"
+  live_image_backend: "sips 1080x2400 scale=3 期望 162x360；ImageMagick/fallback 期望 360x800；与对应 upstream live capture 解码 RGB 后 PSNR>=35dB"
+
+exception_policy:
+  disposition_values: [exact, approved_exception, blocked]
+  coverage_metric: "scenario_disposition_coverage=100%; exact、approved_exception、blocked 分别计数；blocked 不算 pass"
+  scope_guard: "ledger.allowed_case_ids 与 scenarios 中每个 allowed_exception 的 case 集合必须双向相等；EXC-IOS-SCREEN-RECORDING-RUNTIME 还必须 platform=ios 且 device_type=real；EXC-REMOTE-FLEET-RUNTIME 仅限 remote fleet 3 tools / 4 success cases，不能用于 initialize/list_tools/schema"
+  ledger_path: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml
+  report_policy: "CMD-005/006/007 必须记录 ledger SHA-256、approval(pending|approved|rejected)、allowed_case_ids 双向校验和 case disposition；pending/rejected→blocked，approved 且 text/isError/scope 精确匹配→approved_exception，否则 exit 1"
