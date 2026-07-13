@@ -5,8 +5,8 @@ Pure Python [MCP](https://modelcontextprotocol.io/) server for mobile automation
 - **Android**: `uiautomator2` + `adbutils`
 - **iOS**: pure `pymobiledevice3` userspace tunnel + WebDriverAgent (no go-ios, no root)
 
-Public contract: **23** tools aligned with [mobile-mcp](https://github.com/mobile-next/mobile-mcp) core tools.  
-Not public: `mobile_get_page_source`, remote fleet tools.
+Public contract: fixed upstream `mobile-mcp@c5d7d27` — **23 tools by default**, **26 with `MOBILEFLEET_ENABLE=1`**.
+`mobile_get_page_source` is not public; fleet runtime uses the documented approved exception when no Python fleet provider is installed.
 
 [![CI](https://github.com/ByteTrue/pymobile-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ByteTrue/pymobile-mcp/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/ByteTrue/pymobile-mcp?display_name=tag)](https://github.com/ByteTrue/pymobile-mcp/releases/latest)
@@ -18,7 +18,7 @@ Current release: **0.2.0** · [Changelog](CHANGELOG.md) · [Live regression chec
 ## Features
 
 - One stdio MCP server for **Android + iOS**
-- Structured errors (`invalid_argument`, `unsupported_platform`, driver failures) instead of silent empty success
+- Upstream-compatible natural-language/image results and exact Actionable vs `isError=true` failures
 - Live smoke scripts that exit `blocked` (code 2) when devices are missing — never fake pass
 - Destructive actions (install/uninstall) gated by explicit env flags
 
@@ -31,7 +31,7 @@ Current release: **0.2.0** · [Changelog](CHANGELOG.md) · [Live regression chec
 | iOS | macOS recommended, paired iPhone/iPad, **Developer Mode**, mounted DDI, installed WDA runner (default `com.byte.WebDriverAgentRunner.xctrunner`) |
 
 > [!NOTE]
-> iOS screen recording is **unsupported** on current pure-userspace RSD (iOS 26.5.2): no `com.apple.coredevice.displayservice`; WDA `/wda/video` can start but finalize on stop fails. See the [recording spike](.codestable/features/2026-07-11-ios-screen-recording-spike/).
+> iOS real-device screen recording returns the approved upstream-compatible Actionable exception on current pure-userspace RSD (iOS 26.5.2). iOS Simulator uses `simctl recordVideo` + WDA and is not covered by that exception.
 
 ## Install
 
@@ -121,12 +121,14 @@ After the client connects:
 3. `mobile_list_elements_on_screen` — UI tree (no raw page source tool)
 4. `mobile_list_apps` → `mobile_launch_app` with a known package/bundle id
 
-## Capability matrix (23 core tools)
+## Capability matrix (23 default tools; 26 with fleet env)
 
 | Status | Meaning |
 |---|---|
-| **supported** | Implemented and covered by unit/live smoke on this platform |
-| **unsupported** | Stable `unsupported_platform` (not fake empty success) |
+| **supported** | Implemented and covered by automated contract tests; this label is not a claim of current-device live attestation |
+| **approved exception** | Explicit, reviewed black-box difference with stable upstream-compatible text |
+
+Current live evidence passes on Android physical, Android emulator, iOS Simulator, and iOS real device. Android recording and iOS Simulator recording both passed live; iOS real-device recording remains the approved exception.
 
 | Tool | Android | iOS |
 |---|---|---|
@@ -149,8 +151,8 @@ After the client connects:
 | mobile_take_screenshot | supported | supported |
 | mobile_set_orientation | supported | supported |
 | mobile_get_orientation | supported | supported |
-| mobile_start_screen_recording | supported | **unsupported** |
-| mobile_stop_screen_recording | supported | **unsupported** |
+| mobile_start_screen_recording | supported; live passed | simulator supported/live passed; real device **approved exception** |
+| mobile_stop_screen_recording | supported; live passed | simulator supported/live passed; real device **approved exception** |
 | mobile_list_crashes | supported (dropbox) | supported (crash reports) |
 | mobile_get_crash | supported (dropbox) | supported (crash reports) |
 
@@ -159,6 +161,7 @@ After the client connects:
 | Env | Purpose |
 |---|---|
 | `MOBILEMCP_ALLOW_UNSAFE_URLS=1` | allow non-http(s) schemes for `mobile_open_url` |
+| `MOBILEFLEET_ENABLE=1` | expose the upstream fleet tool set (26 tools); runtime returns approved exception without a Python fleet provider |
 | `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` | include non-crash dropbox tags (strictmode/boot/…) |
 | `PYMOBILE_MCP_ANDROID_DEVICE` | pin Android serial for smokes |
 | `PYMOBILE_MCP_ANDROID_ACTIONS=1` | enable tap/type interactions in Android UI smoke |
@@ -192,7 +195,7 @@ PYMOBILE_MCP_IOS_ACTIONS=1 python tests/ios_pmd3_wda_live_smoke.py
 python tests/ios_system_helpers_live_smoke.py
 python tests/ios_app_lifecycle_live_smoke.py
 python tests/crash_tools_live_smoke.py
-python tests/ios_app_recording_crash_live_smoke.py   # recording stays unsupported
+python tests/ios_app_recording_crash_live_smoke.py   # real recording uses approved exception
 ```
 
 Full dual-device gate: [docs/regression-checklist.md](docs/regression-checklist.md).
@@ -202,11 +205,12 @@ Full dual-device gate: [docs/regression-checklist.md](docs/regression-checklist.
 ```
 MCP client  --stdio-->  pymobile-mcp server
                            │
-                           ├─ tools/registry + specs   (23-tool contract)
+                           ├─ tools/registry + specs   (23 default / 26 fleet contract)
                            ├─ tools/* handlers
                            └─ drivers/
-                                ├─ android.py  (adbutils / uiautomator2)
-                                └─ ios.py      (UserspaceRsdTunnel + WDA)
+                                ├─ android.py       (adbutils / uiautomator2)
+                                ├─ ios.py           (UserspaceRsdTunnel + WDA)
+                                └─ ios_simulator.py (simctl + WDA)
 ```
 
 ## Development
@@ -221,11 +225,11 @@ CI runs unit tests on Python 3.11 and 3.12 ([workflow](.github/workflows/ci.yml)
 ## Known limits
 
 - Android crashes come from `dumpsys dropbox --print`, filtered to crash/ANR/tombstone-like tags by default
-- iOS screen recording remains **unsupported** under pure userspace RSD on iOS 26.5.2
+- iOS real-device recording remains an approved exception; Simulator recording requires a booted CoreSimulator + WDA
 - Recording state is process-local (`ActiveRecording`); no cross-process resume
 - Custom URL schemes need `MOBILEMCP_ALLOW_UNSAFE_URLS=1`
 - Screenshot/recording host paths must resolve under cwd or system temp
-- No go-ios runtime path by design
+- No go-ios/mobilecli runtime fallback by design
 
 ## Troubleshooting
 

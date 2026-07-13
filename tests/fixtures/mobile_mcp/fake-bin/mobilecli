@@ -1,0 +1,7 @@
+#!/bin/sh
+# The upstream oracle preload intercepts this executable; this fallback only proves PATH wiring.
+if [ "$1" = "--version" ]; then
+  echo "mobilecli version 1.0.0"
+  exit 0
+fi
+printf '%s\n' '{"status":"ok","data":{"devices":[]}}'

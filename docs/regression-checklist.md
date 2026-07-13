@@ -16,7 +16,7 @@ Unit gate (always):
 
 ```bash
 PATH=.venv/bin:$PATH python -m pytest -q
-# expect: 46 passed (or current suite size)
+# expect: 107 passed
 ```
 
 Optional Android crash listing: `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` includes non-crash dropbox tags.
@@ -27,6 +27,8 @@ Unset proxies for iOS/usbmux runs:
 export NO_PROXY='*'
 # optional: unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY all_proxy
 ```
+
+Public result checks use upstream natural-language/image content. Actionable errors omit `isError`; schema/unexpected/screenshot errors set `isError=true`.
 
 ---
 
@@ -92,11 +94,11 @@ Covers: list/launch/terminate apps.
 PATH=.venv/bin:$PATH python tests/crash_tools_live_smoke.py
 ```
 
-### I5. Recording parity (expect unsupported)
+### I5. Recording parity (real-device approved exception)
 ```bash
 PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 ```
-Expect: app/crash work; **screen recording remains `unsupported_platform`**.
+Expect exact Actionable text for real iOS recording, with `isError` omitted. A booted iOS Simulator is tested separately through `simctl recordVideo` + WDA and must not use this exception.
 
 ---
 
@@ -119,11 +121,13 @@ PATH=.venv/bin:$PATH python tests/ios_app_recording_crash_live_smoke.py
 
 Record: host OS, device ids, iOS/Android versions, commit SHA, pass/blocked/fail per script.
 
+Pi gate: use a fresh session and the prefixed direct tools (`pymobile_mcp_mobile_*`); generic `mcp` gateway-only availability is blocked evidence, not a direct-tools pass.
+
 ---
 
-## Explicit non-goals (v0.2.0)
+## Explicit non-goals
 
-- iOS `mobile_start/stop_screen_recording` as supported
-- go-ios / mobilecli recording
+- go-ios / mobilecli runtime fallback
+- Unapproved exception expansion (especially fleet discovery/schema or iOS Simulator)
 - Fake empty crash lists
 - Treating `blocked` as pass

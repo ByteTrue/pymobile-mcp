@@ -1,0 +1,62 @@
+{
+  "aggregate_sha256": "952c55cf10c45ce35857016a70639ea3cc4377b5bea31bd3b30cb57c06a1889c",
+  "algorithm": "\u5c55\u5f00 glob \u540e\u53ea\u53d6 regular files\uff1brepo-relative POSIX UTF-8 path \u5347\u5e8f\uff1b\u6bcf\u9879 {path,sha256}\uff1b\u5bf9\u65e0\u7a7a\u767d\u3001object keys \u6392\u5e8f\u7684 canonical JSON UTF-8 bytes \u8ba1\u7b97 aggregate SHA-256",
+  "entries": [
+    {
+      "path": ".codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml",
+      "sha256": "356b18cbf93ffd5a9e222e15c8b9a3c64f40fd334cd56bb67f83077fdd9cf82f"
+    },
+    {
+      "path": ".codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml",
+      "sha256": "2d20a07c1b44025f842de74adcbdbfe67c92b820cdde7ea6adb596c2e013720c"
+    },
+    {
+      "path": "scripts/assert_mobile_mcp_contract.py",
+      "sha256": "02fc36c19dba91f8c8d141441cc9d0cd17eec51b37317647a31e9472d02186d6"
+    },
+    {
+      "path": "scripts/capture_mobile_mcp_calls.py",
+      "sha256": "db595f470042f17f2e352dd2705b1f58827e4624365b5a7855504d292190c534"
+    },
+    {
+      "path": "scripts/capture_mobile_mcp_contract.py",
+      "sha256": "53375acac869cd65a7ffc8d42b825b08fa7d6d2c8c756f3f7a36991b5715605e"
+    },
+    {
+      "path": "scripts/compare_mobile_mcp_image_backends.py",
+      "sha256": "5bc00343d7492ca9ce0dcfec2b887aa92d86a70bafa6dccb1f5244db7d1fcec4"
+    },
+    {
+      "path": "scripts/contract_common.py",
+      "sha256": "eb9d387a9ef93b874eed824766ebd8d992918642f6dec8cd73b5f6993880ce74"
+    },
+    {
+      "path": "scripts/run_with_timeout.py",
+      "sha256": "fcd6c50594e67f8c0b37a6e671ea517cf5933cee41a8727f89819cf138d5a870"
+    },
+    {
+      "path": "scripts/validate_mobile_mcp_source_coverage.py",
+      "sha256": "9be2e1cc0b491cdb062cf71df58acb45c4c60580ed6b9b2918497fc4b9b893ce"
+    },
+    {
+      "path": "tests/fixtures/mobile_mcp/fake-bin/mobilecli",
+      "sha256": "d4eaedad418d886baeeb438b6d486a0b4db70350a82cfae19fa5044dd72eba55"
+    },
+    {
+      "path": "tests/fixtures/mobile_mcp/fakes/child-process-hook.cjs",
+      "sha256": "f0838ccc826e44e659b13ea6e73f1b898d0f7e15e9721a35a24655d73f41e499"
+    },
+    {
+      "path": "tests/fixtures/mobile_mcp/input-1080x2400.png",
+      "sha256": "877691a4577ab50295d4eebd3c7b9a04c75ba7194a52f6646b9af002321a6dc4"
+    },
+    {
+      "path": "tests/mobile_mcp_scenario_runner.py",
+      "sha256": "00a81610ff489549260c304c8a392341ec196c45007402508b3254a0be0da1a7"
+    },
+    {
+      "path": "tests/mobile_mcp_stdio_fixture_server.py",
+      "sha256": "9db1c331ca7629dc1baf88685d87c9165f718beb1d945b1e5aecc99c8861bd86"
+    }
+  ]
+}

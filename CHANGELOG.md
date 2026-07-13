@@ -5,6 +5,10 @@
 - Docs: rewrite README install/MCP client quickstart and troubleshooting
 - CI: GitHub Actions unit tests on Python 3.11/3.12
 - Android: `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` to include non-crash dropbox tags
+- Contract: exact pinned `mobile-mcp@c5d7d27` initialize, 23/default + 26/fleet tool discovery, natural-language/image results, validation and `isError` semantics
+- iOS Simulator: native `simctl` discovery/app/system/recording with WDA UI; no go-ios/mobilecli runtime fallback
+- Contract verification: deterministic upstream raw-wire/call goldens, 91-scenario matrix, exception scope guard, image backend PSNR artifacts
+- Exceptions: remote-fleet success runtime and iOS real-device recording use user-approved exact Actionable responses
 
 ## 0.2.0 — 2026-07-11
 

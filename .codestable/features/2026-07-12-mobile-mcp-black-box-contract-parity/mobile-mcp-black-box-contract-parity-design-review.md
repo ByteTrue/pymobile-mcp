@@ -9,6 +9,8 @@ reviewer: subagent
 
 # mobile-mcp-black-box-contract-parity feature design 审查报告
 
+> Historical design-gate report：pending exception language below records the pre-approval review state；the current approved exception ledger and lifecycle artifacts supersede that status.
+
 ## 1. Scope And Inputs
 
 - Design: `.codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-design.md`

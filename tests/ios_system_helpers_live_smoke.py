@@ -10,15 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-def _payload(content: Any) -> dict[str, Any]:
-    return json.loads(content[0].text)
-
-
-def _error_payload(content: Any) -> dict[str, Any] | None:
-    if content[0].type != "text":
-        return None
-    payload = json.loads(content[0].text)
-    return payload if payload.get("status") == "error" else None
+from ios_live_smoke_support import error_text, is_locked, is_unsupported, json_object, run_with_timeout, saved_path
 
 
 def _failed(reason: str, **extra: Any) -> int:
@@ -46,7 +38,11 @@ async def main() -> int:
     async with stdio_client(params) as (read_stream, write_stream):
         async with ClientSession(read_stream, write_stream) as session:
             await session.initialize()
-            devices_payload = _payload((await session.call_tool("mobile_list_available_devices", {})).content)
+            devices_result = await session.call_tool("mobile_list_available_devices", {})
+            devices_error = error_text(devices_result.content)
+            if devices_error is not None:
+                return _failed("device discovery failed", error=devices_error)
+            devices_payload = json_object(devices_result.content)
             devices = [d for d in devices_payload.get("devices", []) if d.get("platform") == "ios" and d.get("state") == "online"]
             wanted = os.environ.get("PYMOBILE_MCP_IOS_DEVICE")
             device = next((item for item in devices if not wanted or item["id"] == wanted), None)
@@ -56,33 +52,33 @@ async def main() -> int:
 
             device_id = device["id"]
             open_url = await session.call_tool("mobile_open_url", {"device": device_id, "url": "https://example.com"})
-            open_err = _error_payload(open_url.content)
+            open_error = error_text(open_url.content)
             open_status = "ok"
-            if open_err is not None:
-                # Locked device is an environment condition; still prove the tool path and message.
-                if open_err.get("code") == "driver_error" and "locked" in str(open_err.get("message", "")).lower():
+            if open_error is not None:
+                if is_locked(open_error):
                     open_status = "locked"
                 else:
-                    return _failed("open_url failed", error=open_err)
+                    return _failed("open_url failed", error=open_error)
 
             press = await session.call_tool("mobile_press_button", {"device": device_id, "button": "HOME"})
-            if _error_payload(press.content) is not None:
-                return _failed("press_button HOME failed", error=_payload(press.content))
+            press_error = error_text(press.content)
+            if press_error is not None:
+                return _failed("press_button HOME failed", error=press_error)
 
             save_to = Path("tmp-ios-system-helper.png")
             saved = await session.call_tool("mobile_save_screenshot", {"device": device_id, "saveTo": str(save_to)})
-            saved_payload = _payload(saved.content)
-            if _error_payload(saved.content) is not None:
-                return _failed("save_screenshot failed", error=saved_payload)
-            path = Path(saved_payload["saveTo"])
+            saved_error = error_text(saved.content)
+            if saved_error is not None:
+                return _failed("save_screenshot failed", error=saved_error)
+            path = saved_path(saved.content)
             if not path.exists() or path.stat().st_size <= 0:
                 return _failed("saved file missing", saveTo=str(path))
 
             # Android-only button should stay unsupported on iOS
             back = await session.call_tool("mobile_press_button", {"device": device_id, "button": "BACK"})
-            back_payload = _error_payload(back.content)
-            if back_payload is None or back_payload.get("code") != "unsupported_platform":
-                return _failed("expected unsupported BACK on iOS", result=_payload(back.content))
+            back_error = error_text(back.content)
+            if not is_unsupported(back_error):
+                return _failed("expected unsupported BACK on iOS", result=back.content[0].text)
 
             size = path.stat().st_size
             path.unlink(missing_ok=True)
@@ -91,4 +87,4 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
+    raise SystemExit(asyncio.run(run_with_timeout(main)))

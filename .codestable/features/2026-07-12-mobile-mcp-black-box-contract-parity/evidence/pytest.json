@@ -1,0 +1,14 @@
+{
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "--junitxml=.codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/pytest.xml"
+  ],
+  "duration_seconds": 4.181,
+  "exit_code": 0,
+  "status": "passed",
+  "stderr": "",
+  "stdout": "........................................................................ [ 67%]\n...................................                                      [100%]\n107 passed in 3.94s\n"
+}

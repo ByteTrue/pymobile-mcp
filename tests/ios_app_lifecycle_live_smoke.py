@@ -14,15 +14,7 @@ from pathlib import Path
 from typing import Any
 
 
-def _payload(content: Any) -> dict[str, Any]:
-    return json.loads(content[0].text)
-
-
-def _error_payload(content: Any) -> dict[str, Any] | None:
-    if content[0].type != "text":
-        return None
-    payload = json.loads(content[0].text)
-    return payload if payload.get("status") == "error" else None
+from ios_live_smoke_support import apps, error_text, json_object, run_with_timeout
 
 
 def _failed(reason: str, **extra: Any) -> int:
@@ -45,7 +37,11 @@ async def main() -> int:
     async with stdio_client(params) as (read_stream, write_stream):
         async with ClientSession(read_stream, write_stream) as session:
             await session.initialize()
-            devices_payload = _payload((await session.call_tool("mobile_list_available_devices", {})).content)
+            devices_result = await session.call_tool("mobile_list_available_devices", {})
+            devices_error = error_text(devices_result.content)
+            if devices_error is not None:
+                return _failed("device discovery failed", error=devices_error)
+            devices_payload = json_object(devices_result.content)
             devices = [d for d in devices_payload.get("devices", []) if d.get("platform") == "ios" and d.get("state") == "online"]
             wanted = os.environ.get("PYMOBILE_MCP_IOS_DEVICE")
             device = next((item for item in devices if not wanted or item["id"] == wanted), None)
@@ -54,34 +50,41 @@ async def main() -> int:
                 return 2
 
             device_id = device["id"]
-            apps = _payload((await session.call_tool("mobile_list_apps", {"device": device_id})).content)
-            app_list = apps.get("apps") or []
+            apps_result = await session.call_tool("mobile_list_apps", {"device": device_id})
+            apps_error = error_text(apps_result.content)
+            if apps_error is not None:
+                return _failed("list_apps failed", error=apps_error)
+            app_list = apps(apps_result.content)
             if not app_list:
-                return _failed("list_apps empty", apps=apps)
+                return _failed("list_apps empty")
 
             package = "com.apple.Preferences"
             launch = await session.call_tool("mobile_launch_app", {"device": device_id, "packageName": package})
-            if _error_payload(launch.content) is not None:
-                return _failed("launch failed", error=_payload(launch.content))
+            launch_error = error_text(launch.content)
+            if launch_error is not None:
+                return _failed("launch failed", error=launch_error)
             terminate = await session.call_tool("mobile_terminate_app", {"device": device_id, "packageName": package})
-            if _error_payload(terminate.content) is not None:
-                return _failed("terminate failed", error=_payload(terminate.content))
+            terminate_error = error_text(terminate.content)
+            if terminate_error is not None:
+                return _failed("terminate failed", error=terminate_error)
 
             destructive = {
                 "status": "blocked",
-                "reason": "install/uninstall require PYMOBILE_MCP_IOS_IPA and PYMOBILE_MCP_ANDROID_DESTRUCTIVE=1 or PYMOBILE_MCP_IOS_DESTRUCTIVE=1",
+                "reason": "install/uninstall require PYMOBILE_MCP_IOS_IPA and PYMOBILE_MCP_IOS_DESTRUCTIVE=1",
             }
             ipa = os.environ.get("PYMOBILE_MCP_IOS_IPA")
             if ipa and os.environ.get("PYMOBILE_MCP_IOS_DESTRUCTIVE") == "1":
                 install = await session.call_tool("mobile_install_app", {"device": device_id, "path": ipa})
-                if _error_payload(install.content) is not None:
-                    return _failed("install failed", error=_payload(install.content))
+                install_error = error_text(install.content)
+                if install_error is not None:
+                    return _failed("install failed", error=install_error)
                 bundle = os.environ.get("PYMOBILE_MCP_IOS_PACKAGE")
                 if not bundle:
                     return _failed("install ran but PYMOBILE_MCP_IOS_PACKAGE missing")
                 uninstall = await session.call_tool("mobile_uninstall_app", {"device": device_id, "bundle_id": bundle})
-                if _error_payload(uninstall.content) is not None:
-                    return _failed("uninstall failed", error=_payload(uninstall.content))
+                uninstall_error = error_text(uninstall.content)
+                if uninstall_error is not None:
+                    return _failed("uninstall failed", error=uninstall_error)
                 destructive = {"status": "passed", "ipa": ipa, "package": bundle}
 
             print(
@@ -100,4 +103,4 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
+    raise SystemExit(asyncio.run(run_with_timeout(main)))

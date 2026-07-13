@@ -1,0 +1,44 @@
+{
+  "acceptance": {
+    "auditor_recommendation": "Accept",
+    "checks_passed": 19,
+    "checks_total": 19,
+    "dod_accept_001": "closed",
+    "execution": "report-created",
+    "pending_item": "none",
+    "report_created": true,
+    "status": "passed",
+    "user_confirmed": "2026-07-13"
+  },
+  "blocking": [],
+  "bundle_sha256": "952c55cf10c45ce35857016a70639ea3cc4377b5bea31bd3b30cb57c06a1889c",
+  "evidence": [
+    {"exit_code": 0, "id": "CMD-001", "report": "evidence/pytest.json", "status": "passed", "summary": "107 passed"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "exit_code": 0, "id": "CMD-002", "report": "evidence/capture-default.json", "status": "passed", "summary": "23 tools"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "exit_code": 0, "id": "CMD-003", "report": "evidence/capture-fleet.json", "status": "passed", "summary": "26 tools"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "exit_code": 0, "id": "CMD-004", "report": "evidence/capture-calls.json", "status": "passed", "summary": "47 upstream call results; full bundle recorded"},
+    {"exit_code": 0, "id": "CMD-005", "report": "evidence/assert-default.json", "status": "passed", "summary": "23 tools / 106 scenarios"},
+    {"exit_code": 0, "id": "CMD-006", "report": "evidence/assert-fleet.json", "status": "passed", "summary": "26 tools / 110 scenarios"},
+    {"exit_code": 0, "id": "CMD-007", "report": "evidence/source-coverage.json", "status": "passed", "summary": "91 source-linked scenarios"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "exit_code": 0, "id": "CMD-008", "report": "evidence/image-backends.json", "status": "passed", "summary": "3 image modes"}
+  ],
+  "gate_id": "feature-gate-summary",
+  "live_evidence": {
+    "child_smokes_passed": 16,
+    "child_smokes_total": 16,
+    "id": "LIVE-001",
+    "report": "evidence/live-evidence.md",
+    "status": "passed"
+  },
+  "qa_status": "passed",
+  "review": {
+    "status": "passed",
+    "summary": "latest independent image live_artifact QA-fix review found no blocking or important findings"
+  },
+  "stage": "complete",
+  "status": "passed",
+  "warnings": [
+    "Destructive install/uninstall was not authorized or run and is not counted as passed",
+    "iOS real-device recording remains the approved exception"
+  ]
+}

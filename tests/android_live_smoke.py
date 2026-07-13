@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -19,11 +20,21 @@ def _payload(content: Any) -> dict[str, Any]:
     return json.loads(content[0].text)
 
 
+def _screen_size(content: Any) -> dict[str, int]:
+    match = re.fullmatch(r"Screen size is (\d+)x(\d+) pixels", content[0].text)
+    if match is None:
+        raise ValueError(content[0].text)
+    return {"width": int(match.group(1)), "height": int(match.group(2))}
+
+
+def _elements(content: Any) -> list[dict[str, Any]]:
+    prefix = "Found these elements on screen: "
+    return json.loads(content[0].text.removeprefix(prefix))
+
 def _error_payload(content: Any) -> dict[str, Any] | None:
-    if content[0].type != "text":
-        return None
-    payload = json.loads(content[0].text)
-    return payload if payload.get("status") == "error" else None
+    if content[0].type == "text" and content[0].text.startswith(("Error:", "MCP error")):
+        return {"message": content[0].text}
+    return None
 
 
 def _failed(reason: str, **extra: Any) -> int:
@@ -73,18 +84,17 @@ async def main() -> int:
                 return 2
 
             device_id = device["id"]
-            size = _payload((await session.call_tool("mobile_get_screen_size", {"device": device_id})).content)
+            size = _screen_size((await session.call_tool("mobile_get_screen_size", {"device": device_id})).content)
             if size["width"] <= 0 or size["height"] <= 0:
                 print(json.dumps({"status": "failed", "reason": "invalid screen size", "size": size}, indent=2))
                 return 1
 
             screenshot = await session.call_tool("mobile_take_screenshot", {"device": device_id})
-            if screenshot.content[0].type != "image" or screenshot.content[0].mimeType != "image/png":
+            if screenshot.content[0].type != "image" or screenshot.content[0].mimeType not in {"image/png", "image/jpeg"}:
                 print(json.dumps({"status": "failed", "reason": "invalid screenshot content"}, indent=2))
                 return 1
 
-            elements_payload = _payload((await session.call_tool("mobile_list_elements_on_screen", {"device": device_id})).content)
-            elements = elements_payload.get("elements", [])
+            elements = _elements((await session.call_tool("mobile_list_elements_on_screen", {"device": device_id})).content)
             if not all("coordinates" in element for element in elements):
                 print(json.dumps({"status": "failed", "reason": "element missing coordinates", "elements": elements[:3]}, indent=2))
                 return 1

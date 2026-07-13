@@ -2,17 +2,20 @@
 
 from __future__ import annotations
 
+
 from typing import Any
 
 from mcp.server import Server
-from mcp.server.stdio import stdio_server
+from .stdio import contract_stdio_server
+from mcp.server.models import InitializationOptions
+from mcp.types import ServerCapabilities, ToolsCapability
 
 from .tools import call_tool, list_tool_specs
 
 
 class PyMobileMCPServer:
     def __init__(self) -> None:
-        self.mcp = Server("pymobile-mcp")
+        self.mcp = Server("mobile-mcp", version="0.0.1")
         self._register_tools()
 
     def _register_tools(self) -> None:
@@ -25,5 +28,13 @@ class PyMobileMCPServer:
             return await call_tool(name, arguments or {})
 
     async def run(self) -> None:
-        async with stdio_server() as (read_stream, write_stream):
-            await self.mcp.run(read_stream, write_stream, self.mcp.create_initialization_options())
+        async with contract_stdio_server() as (read_stream, write_stream):
+            await self.mcp.run(read_stream, write_stream, self._initialization_options())
+
+    @staticmethod
+    def _initialization_options() -> InitializationOptions:
+        return InitializationOptions(
+            server_name="mobile-mcp",
+            server_version="0.0.1",
+            capabilities=ServerCapabilities(tools=ToolsCapability(listChanged=True)),
+        )

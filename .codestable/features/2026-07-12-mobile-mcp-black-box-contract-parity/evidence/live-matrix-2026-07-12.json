@@ -1,0 +1,65 @@
+{
+  "status": "passed",
+  "observed_at": "2026-07-12",
+  "command": "PYMOBILE_MCP_ACTIONS=1 PYMOBILE_MCP_LIVE_TIMEOUT=180 PATH=.venv/bin:$PATH python tests/all_devices_live_smoke.py",
+  "policy": {
+    "online_devices_only": true,
+    "per_child_timeout_seconds": 180,
+    "device_pipelines_concurrent": true,
+    "scripts_per_device_sequential": true,
+    "destructive_install_uninstall": "not-authorized"
+  },
+  "devices": [
+    {
+      "label": "android-physical-redacted",
+      "platform": "android",
+      "version": "15",
+      "results": {
+        "android_live_smoke.py": "passed",
+        "android_app_system_live_smoke.py": "passed",
+        "crash_tools_live_smoke.py": "passed",
+        "android_recording_crash_live_smoke.py": "passed"
+      },
+      "recording_size_bytes": 3232,
+      "crash_count": 0
+    },
+    {
+      "label": "android-emulator",
+      "platform": "android",
+      "version": "16",
+      "results": {
+        "android_live_smoke.py": "passed",
+        "android_app_system_live_smoke.py": "passed",
+        "crash_tools_live_smoke.py": "passed",
+        "android_recording_crash_live_smoke.py": "passed"
+      },
+      "recording_size_bytes": 62408,
+      "crash_count": 0
+    },
+    {
+      "label": "ios-simulator",
+      "platform": "ios",
+      "version": "26.5",
+      "results": {
+        "ios_pmd3_wda_live_smoke.py": "passed",
+        "ios_system_helpers_live_smoke.py": "passed",
+        "ios_app_lifecycle_live_smoke.py": "passed",
+        "ios_app_recording_crash_live_smoke.py": "passed"
+      },
+      "app_count": 26,
+      "recording_backend": "simctl",
+      "recording_size_bytes": 128447,
+      "crash_count": 0
+    }
+  ],
+  "summary": {
+    "passed": 12,
+    "blocked": 0,
+    "failed": 0,
+    "timed_out": 0
+  },
+  "excluded": {
+    "ios_real": "disconnected and explicitly excluded by user",
+    "destructive_install_uninstall": "credentials/artifacts not provided"
+  }
+}

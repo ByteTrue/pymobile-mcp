@@ -1,0 +1,1455 @@
+{
+  "backend_inventory": [
+    {
+      "identity": "upstream:android.ts",
+      "line": 81,
+      "source": "return execFileSync(getAdbPath(), [\"-s\", this.deviceId, ...args], {"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 88,
+      "source": "return execFileSync(getAdbPath(), [\"-s\", this.deviceId, ...args], {"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 96,
+      "source": "return this.adb(\"shell\", \"pm\", \"list\", \"features\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 105,
+      "source": "const screenSize = this.adb(\"shell\", \"wm\", \"size\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 121,
+      "source": "return this.adb(\"shell\", \"cmd\", \"package\", \"query-activities\", \"-a\", \"android.intent.action.MAIN\", \"-c\", \"android.intent.category.LAUNCHER\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 135,
+      "source": "return this.adb(\"shell\", \"pm\", \"list\", \"packages\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 163,
+      "source": "return this.adb(\"shell\", \"ps\", \"-e\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 202,
+      "source": "this.adb(\"shell\", \"input\", \"swipe\", `${x0}`, `${y0}`, `${x1}`, `${y1}`, \"1000\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 241,
+      "source": "this.adb(\"shell\", \"input\", \"swipe\", `${x0}`, `${y0}`, `${x1}`, `${y1}`, \"1000\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 245,
+      "source": "return this.adb(\"shell\", \"dumpsys\", \"SurfaceFlinger\", \"--display-id\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 255,
+      "source": "const displays = this.adb(\"shell\", \"cmd\", \"display\", \"get-displays\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 281,
+      "source": "const dumpsys = this.adb(\"shell\", \"dumpsys\", \"display\")"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 310,
+      "source": "return this.adb(\"exec-out\", \"screencap\", \"-p\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 318,
+      "source": "return this.adb(\"exec-out\", \"screencap\", \"-p\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 321,
+      "source": "return this.adb(\"exec-out\", \"screencap\", \"-p\", \"-d\", `${displayId}`);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 372,
+      "source": "this.adb(\"shell\", \"am\", \"force-stop\", packageName);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 377,
+      "source": "this.adb(\"install\", \"-r\", path);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 388,
+      "source": "this.adb(\"uninstall\", bundleId);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 398,
+      "source": "this.adb(\"shell\", \"am\", \"start\", \"-a\", \"android.intent.action.VIEW\", \"-d\", this.escapeShellText(url));"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 426,
+      "source": "this.adb(\"shell\", \"input\", \"text\", _text);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 432,
+      "source": "this.adb(\"shell\", \"am\", \"broadcast\", \"-a\", \"devicekit.clipboard.set\", \"-e\", \"encoding\", \"base64\", \"-e\", \"text\", base64, \"-n\", \"com.mobilenext.devicekit/.ClipboardBroadcastReceiver\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 433,
+      "source": "this.adb(\"shell\", \"input\", \"keyevent\", \"KEYCODE_PASTE\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 436,
+      "source": "this.adb(\"shell\", \"am\", \"broadcast\", \"-a\", \"devicekit.clipboard.clear\", \"-n\", \"com.mobilenext.devicekit/.ClipboardBroadcastReceiver\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 448,
+      "source": "this.adb(\"shell\", \"input\", \"keyevent\", mapped);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 452,
+      "source": "this.adb(\"shell\", \"input\", \"tap\", `${x}`, `${y}`);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 457,
+      "source": "this.adb(\"shell\", \"input\", \"swipe\", `${x}`, `${y}`, `${x}`, `${y}`, `${duration}`);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 470,
+      "source": "this.adb(\"shell\", \"settings\", \"put\", \"system\", \"accelerometer_rotation\", \"0\");"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 471,
+      "source": "this.adb(\"shell\", \"content\", \"insert\", \"--uri\", \"content://settings/system\", \"--bind\", \"name:s:user_rotation\", \"--bind\", `value:i:${value}`);"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 475,
+      "source": "const rotation = this.adb(\"shell\", \"settings\", \"get\", \"system\", \"user_rotation\").toString().trim();"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 481,
+      "source": "const dump = this.adb(\"exec-out\", \"uiautomator\", \"dump\", \"/dev/tty\").toString();"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 537,
+      "source": "const output = execFileSync(getAdbPath(), [\"-s\", deviceId, \"shell\", \"getprop\", \"ro.build.version.release\"], {"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 549,
+      "source": "const avdName = execFileSync(getAdbPath(), [\"-s\", deviceId, \"shell\", \"getprop\", \"ro.boot.qemu.avd_name\"], {"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 559,
+      "source": "const output = execFileSync(getAdbPath(), [\"-s\", deviceId, \"shell\", \"getprop\", \"ro.product.model\"], {"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 570,
+      "source": "const names = execFileSync(getAdbPath(), [\"devices\"])"
+    },
+    {
+      "identity": "upstream:android.ts",
+      "line": 591,
+      "source": "const names = execFileSync(getAdbPath(), [\"devices\"])"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 88,
+      "source": "if (!(await wda.isRunning())) {"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 96,
+      "source": "return execFileSync(getGoIosPath(), [\"--udid\", this.deviceId, ...args], {}).toString();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 100,
+      "source": "const output = await this.ios(\"info\");"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 113,
+      "source": "return await wda.getScreenSize();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 118,
+      "source": "await wda.swipe(direction);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 123,
+      "source": "await wda.swipeFromCoordinate(x, y, direction, distance);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 129,
+      "source": "const output = await this.ios(\"apps\", \"--all\", \"--list\");"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 152,
+      "source": "await this.ios(...args);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 158,
+      "source": "await this.ios(\"kill\", packageName);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 164,
+      "source": "await this.ios(\"install\", \"--path\", path);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 176,
+      "source": "await this.ios(\"uninstall\", \"--bundleid\", bundleId);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 187,
+      "source": "await wda.openUrl(url);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 192,
+      "source": "await wda.sendKeys(text);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 197,
+      "source": "await wda.pressButton(button);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 202,
+      "source": "await wda.tap(x, y);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 207,
+      "source": "await wda.doubleTap(x, y);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 212,
+      "source": "await wda.longPress(x, y, duration);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 217,
+      "source": "return await wda.getElementsOnScreen();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 222,
+      "source": "return await wda.getScreenshot();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 227,
+      "source": "await this.ios(\"screenshot\", \"--output\", tmpFilename);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 236,
+      "source": "await wda.setOrientation(orientation);"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 241,
+      "source": "return await wda.getOrientation();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 249,
+      "source": "const output = execFileSync(getGoIosPath(), [\"version\"], { stdio: [\"pipe\", \"pipe\", \"ignore\"] }).toString();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 258,
+      "source": "const output = execFileSync(getGoIosPath(), [\"info\", \"--udid\", deviceId]).toString();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 264,
+      "source": "const output = execFileSync(getGoIosPath(), [\"info\", \"--udid\", deviceId]).toString();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 275,
+      "source": "const output = execFileSync(getGoIosPath(), [\"list\"]).toString();"
+    },
+    {
+      "identity": "upstream:ios.ts",
+      "line": 291,
+      "source": "const output = execFileSync(getGoIosPath(), [\"list\"]).toString();"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 33,
+      "source": "const response = await fetch(url);"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 44,
+      "source": "const response = await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 67,
+      "source": "const response = await fetch(url, { method: \"DELETE\" });"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 81,
+      "source": "const url = `${sessionUrl}/wda/screen`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 82,
+      "source": "const response = await fetch(url);"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 91,
+      "source": "const url = `${sessionUrlInner}/wda/screen`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 92,
+      "source": "const response = await fetch(url);"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 105,
+      "source": "const url = `${sessionUrl}/wda/keys`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 106,
+      "source": "await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 134,
+      "source": "const url = `${sessionUrl}/wda/pressButton`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 135,
+      "source": "const response = await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 151,
+      "source": "const url = `${sessionUrl}/actions`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 152,
+      "source": "await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 178,
+      "source": "const url = `${sessionUrl}/actions`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 179,
+      "source": "await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 211,
+      "source": "const url = `${sessionUrl}/actions`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 212,
+      "source": "await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 276,
+      "source": "const response = await fetch(url);"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 288,
+      "source": "await fetch(`${sessionUrl}/url`, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 297,
+      "source": "const response = await fetch(url);"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 337,
+      "source": "const url = `${sessionUrl}/actions`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 338,
+      "source": "const response = await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 366,
+      "source": "await fetch(`${sessionUrl}/actions`, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 398,
+      "source": "const url = `${sessionUrl}/actions`;"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 399,
+      "source": "const response = await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 427,
+      "source": "await fetch(`${sessionUrl}/actions`, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 436,
+      "source": "await fetch(url, {"
+    },
+    {
+      "identity": "upstream:webdriver-agent.ts",
+      "line": 449,
+      "source": "const response = await fetch(url);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 70,
+      "source": "private runCommand(args: string[]): string {"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 76,
+      "source": "const response = JSON.parse(this.runCommand([\"device\", \"info\"])) as DeviceInfoResponse;"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 113,
+      "source": "this.runCommand([\"io\", \"swipe\", `${startX},${startY},${endX},${endY}`]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 136,
+      "source": "this.runCommand([\"io\", \"swipe\", `${x},${y},${endX},${endY}`]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 145,
+      "source": "const response = JSON.parse(this.runCommand([\"apps\", \"list\"])) as InstalledAppsResponse;"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 158,
+      "source": "this.runCommand(args);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 162,
+      "source": "this.runCommand([\"apps\", \"terminate\", packageName]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 166,
+      "source": "this.runCommand([\"apps\", \"install\", path]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 170,
+      "source": "this.runCommand([\"apps\", \"uninstall\", bundleId]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 174,
+      "source": "this.runCommand([\"url\", url]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 178,
+      "source": "this.runCommand([\"io\", \"text\", text]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 182,
+      "source": "this.runCommand([\"io\", \"button\", button]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 186,
+      "source": "this.runCommand([\"io\", \"tap\", `${x},${y}`]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 196,
+      "source": "this.runCommand([\"io\", \"longpress\", `${x},${y}`, \"--duration\", `${duration}`]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 200,
+      "source": "const response = JSON.parse(this.runCommand([\"dump\", \"ui\"])) as DumpUIResponse;"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 214,
+      "source": "this.runCommand([\"device\", \"orientation\", \"set\", orientation]);"
+    },
+    {
+      "identity": "upstream:mobile-device.ts",
+      "line": 218,
+      "source": "const response = JSON.parse(this.runCommand([\"device\", \"orientation\", \"get\"])) as OrientationResponse;"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 251,
+      "source": "self._adb().shell( [ \"cmd\", \"package\", \"query-activities\", \"-a\", \"android.intent.action.MAIN\", \"-c\", \"android.intent.category.LAUNCHER\", ] )"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 276,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 328,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 329,
+      "source": "adb.shell([\"settings\", \"put\", \"system\", \"accelerometer_rotation\", \"0\"])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 330,
+      "source": "adb.shell( [ \"content\", \"insert\", \"--uri\", \"content://settings/system\", \"--bind\", \"name:s:user_rotation\", \"--bind\", f\"value:i:{value}\", ] )"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 99,
+      "source": "asyncio.to_thread( self._adb().shell, android_swipe_argv(start_x, start_y, end_x, end_y) )"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 146,
+      "source": "self._adb().shell([\"dumpsys\", \"dropbox\", \"--print\"])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 161,
+      "source": "self._adb().shell([\"dumpsys\", \"dropbox\", \"--print\"])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 293,
+      "source": "adb.shell( [ \"monkey\", \"-p\", package_name, \"-c\", \"android.intent.category.LAUNCHER\", \"1\", ] )"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 369,
+      "source": "subprocess.Popen( cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, )"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 384,
+      "source": "self._adb().shell([\"rm\", \"-f\", remote_path])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 393,
+      "source": "self._adb().shell([\"rm\", \"-f\", remote_path])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 453,
+      "source": "self._adb().shell([\"rm\", \"-f\", remote_path])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 251,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 279,
+      "source": "adb.shell( [ \"cmd\", \"locale\", \"set-app-locales\", package_name, \"--locales\", locale, ] )"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 447,
+      "source": "self._adb().shell([\"ls\", \"-l\", remote_path])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 100,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 116,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 119,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 122,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 126,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 146,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 161,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 312,
+      "source": "self._adb().shell([\"settings\", \"get\", \"system\", \"user_rotation\"])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 384,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 393,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 451,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 453,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 427,
+      "source": "self._adb().shell([\"pkill\", \"-INT\", \"screenrecord\"])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 447,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 312,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 427,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 430,
+      "source": "self._adb().shell([\"killall\", \"-2\", \"screenrecord\"])"
+    },
+    {
+      "identity": "python:drivers/android.py",
+      "line": 430,
+      "source": "self._adb()"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 258,
+      "source": "self._client.get_screenshot(session_id=await self._session())"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 265,
+      "source": "self._client.get_source(session_id=await self._session())"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 276,
+      "source": "self._client._request_json(\"GET\", f\"/session/{await self._session()}/wda/screen\", None)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 330,
+      "source": "self._client._request_json(\"POST\", path, wda_swipe_payload(start_x, start_y, end_x, end_y))"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 331,
+      "source": "self._client._request_json(\"DELETE\", path, None)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 340,
+      "source": "self._client.send_keys(text, session_id=sid)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 350,
+      "source": "self._client._request_json(\"GET\", f\"/session/{sid}/orientation\", None)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 362,
+      "source": "self._client._request_json(\"POST\", f\"/session/{sid}/orientation\", {\"orientation\": value})"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 373,
+      "source": "self._client.press_button(name, session_id=await self._session())"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 528,
+      "source": "CrashReportsManager(lockdown)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 553,
+      "source": "CrashReportsManager(lockdown)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 572,
+      "source": "self._client.start_session()"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 290,
+      "source": "self._client._request_json(\"POST\", f\"/session/{sid}/wda/tap\", {\"x\": x, \"y\": y})"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 302,
+      "source": "self._client._request_json(\"POST\", f\"/session/{sid}/wda/doubleTap\", {\"x\": x, \"y\": y})"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 315,
+      "source": "self._client._request_json( \"POST\", f\"/session/{sid}/wda/touchAndHold\", {\"x\": x, \"y\": y, \"duration\": duration}, )"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 342,
+      "source": "self._client.send_keys(\"\\n\", session_id=sid)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 404,
+      "source": "self._client._request_json(\"POST\", \"/session\", payload)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 457,
+      "source": "self._client._request_json(\"POST\", \"/session\", payload)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 479,
+      "source": "self._client._request_json(\"POST\", f\"/session/{sid}/wda/apps/terminate\", {\"bundleId\": package_name})"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 604,
+      "source": "self._client.get_status()"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 292,
+      "source": "self._client.swipe(int(x), int(y), int(x), int(y), duration=0.05, session_id=sid)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 321,
+      "source": "self._client.swipe(int(x), int(y), int(x), int(y), duration=duration, session_id=sid)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 385,
+      "source": "self._client._request_json(\"POST\", path, {\"url\": url})"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 436,
+      "source": "InstallationProxyService(lockdown=lockdown)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 650,
+      "source": "self._client._request_json(\"DELETE\", f\"/session/{self._session_id}\", None)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 412,
+      "source": "self._client._request_json(\"DELETE\", f\"/session/{fallback_session}\", None)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 493,
+      "source": "InstallationProxyService(lockdown=lockdown)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 503,
+      "source": "InstallationProxyService(lockdown=lockdown)"
+    },
+    {
+      "identity": "python:drivers/ios.py",
+      "line": 646,
+      "source": "self._client._request_json(\"DELETE\", f\"/session/{fallback_session}\", None)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 317,
+      "source": "_simctl(\"listapps\", device_id)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 25,
+      "source": "_create_subprocess_exec( \"xcrun\", \"simctl\", \"io\", device_id, \"recordVideo\", output_path, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 286,
+      "source": "_simctl_json(\"list\", \"devices\", \"available\")"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 307,
+      "source": "subprocess.run( [\"xcrun\", \"simctl\", *args], check=True, capture_output=True, text=True )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 313,
+      "source": "_simctl(*args, \"--json\")"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 50,
+      "source": "asyncio.to_thread(_simctl_json, \"list\", \"devices\", \"available\")"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 61,
+      "source": "asyncio.to_thread(self._request, \"GET\", \"/status\", None)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 74,
+      "source": "asyncio.to_thread(self._request, \"GET\", \"/screenshot\", None)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 80,
+      "source": "asyncio.to_thread( self._request, \"GET\", f\"/session/{await self._session()}/source\", None )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 86,
+      "source": "asyncio.to_thread( self._request, \"GET\", f\"/session/{await self._session()}/wda/screen\", None )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 97,
+      "source": "asyncio.to_thread( self._request, \"POST\", f\"/session/{await self._session()}/wda/tap\", {\"x\": x, \"y\": y}, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 105,
+      "source": "asyncio.to_thread( self._request, \"POST\", f\"/session/{await self._session()}/wda/doubleTap\", {\"x\": x, \"y\": y}, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 113,
+      "source": "asyncio.to_thread( self._request, \"POST\", f\"/session/{await self._session()}/wda/touchAndHold\", {\"x\": x, \"y\": y, \"duration\": duration}, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 123,
+      "source": "asyncio.to_thread( self._request, \"POST\", f\"/session/{await self._session()}/wda/dragfromtoforduration\", { \"fromX\": start_x, \"fromY\": start_y, \"toX\": end_x, \"toY\": end_y, \"duration\": 0.5, }, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 138,
+      "source": "asyncio.to_thread( self._request, \"POST\", f\"/session/{await self._session()}/wda/keys\", {\"value\": list(value)}, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 166,
+      "source": "asyncio.to_thread(_simctl, *args)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 169,
+      "source": "asyncio.to_thread(_simctl, \"terminate\", self.device_id, package_name)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 172,
+      "source": "asyncio.to_thread(_simctl, \"install\", self.device_id, path)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 175,
+      "source": "asyncio.to_thread(_simctl, \"uninstall\", self.device_id, package_name)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 184,
+      "source": "asyncio.to_thread( self._request, \"POST\", f\"/session/{await self._session()}/wda/pressButton\", {\"name\": name}, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 192,
+      "source": "asyncio.to_thread(_simctl, \"openurl\", self.device_id, url)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 195,
+      "source": "asyncio.to_thread( self._request, \"GET\", f\"/session/{await self._session()}/orientation\", None )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 201,
+      "source": "asyncio.to_thread( self._request, \"POST\", f\"/session/{await self._session()}/orientation\", {\"orientation\": orientation.upper()}, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 212,
+      "source": "start_simctl_recording(self.device_id, output_path)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 245,
+      "source": "asyncio.to_thread( self._request, \"POST\", \"/session\", { \"capabilities\": {\"alwaysMatch\": {\"shouldWaitForQuiescence\": False}}, \"desiredCapabilities\": {}, }, )"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 268,
+      "source": "urllib.request.urlopen(request, timeout=20)"
+    },
+    {
+      "identity": "python:drivers/ios_simulator.py",
+      "line": 66,
+      "source": "asyncio.to_thread( self._request, \"DELETE\", f\"/session/{self._session_id}\", None )"
+    }
+  ],
+  "backend_inventory_summary": {
+    "python:drivers/android.py": {
+      "count": 34,
+      "sha256": "54d1e89f1996b724a2a60b2152527266bcec7d45aa880db6f0db108489dd5e2d"
+    },
+    "python:drivers/ios.py": {
+      "count": 29,
+      "sha256": "ad3ce4cf224b5303eade78475a0c325ff0b25970db772b67577051bbcc565081"
+    },
+    "python:drivers/ios_simulator.py": {
+      "count": 27,
+      "sha256": "335a8d052174c8a67739dd213ff3892ba2c4e48ada44126388b73c97d49d5c94"
+    },
+    "upstream:android.ts": {
+      "count": 35,
+      "sha256": "b453d65dd0345032216e26c6845bd458f60122f7087b502b35789c547a45fec6"
+    },
+    "upstream:ios.ts": {
+      "count": 27,
+      "sha256": "4cfed003ea45c7364fd0eb897340eaa91a0fbed102a23d0ba09647a19f6eb3d0"
+    },
+    "upstream:mobile-device.ts": {
+      "count": 17,
+      "sha256": "a4e5340ffb5dcab5c9acaffa9879dfaefb588168473ba5fbcd1f425dca0075b6"
+    },
+    "upstream:webdriver-agent.ts": {
+      "count": 28,
+      "sha256": "ab910eebc16611647b0dc6ca3d223559001bbe191420592cacf649634ba482ec"
+    }
+  },
+  "bundle": {
+    "aggregate_sha256": "952c55cf10c45ce35857016a70639ea3cc4377b5bea31bd3b30cb57c06a1889c",
+    "algorithm": "\u5c55\u5f00 glob \u540e\u53ea\u53d6 regular files\uff1brepo-relative POSIX UTF-8 path \u5347\u5e8f\uff1b\u6bcf\u9879 {path,sha256}\uff1b\u5bf9\u65e0\u7a7a\u767d\u3001object keys \u6392\u5e8f\u7684 canonical JSON UTF-8 bytes \u8ba1\u7b97 aggregate SHA-256",
+    "entries": [
+      {
+        "path": ".codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml",
+        "sha256": "356b18cbf93ffd5a9e222e15c8b9a3c64f40fd334cd56bb67f83077fdd9cf82f"
+      },
+      {
+        "path": ".codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml",
+        "sha256": "2d20a07c1b44025f842de74adcbdbfe67c92b820cdde7ea6adb596c2e013720c"
+      },
+      {
+        "path": "scripts/assert_mobile_mcp_contract.py",
+        "sha256": "02fc36c19dba91f8c8d141441cc9d0cd17eec51b37317647a31e9472d02186d6"
+      },
+      {
+        "path": "scripts/capture_mobile_mcp_calls.py",
+        "sha256": "db595f470042f17f2e352dd2705b1f58827e4624365b5a7855504d292190c534"
+      },
+      {
+        "path": "scripts/capture_mobile_mcp_contract.py",
+        "sha256": "53375acac869cd65a7ffc8d42b825b08fa7d6d2c8c756f3f7a36991b5715605e"
+      },
+      {
+        "path": "scripts/compare_mobile_mcp_image_backends.py",
+        "sha256": "5bc00343d7492ca9ce0dcfec2b887aa92d86a70bafa6dccb1f5244db7d1fcec4"
+      },
+      {
+        "path": "scripts/contract_common.py",
+        "sha256": "eb9d387a9ef93b874eed824766ebd8d992918642f6dec8cd73b5f6993880ce74"
+      },
+      {
+        "path": "scripts/run_with_timeout.py",
+        "sha256": "fcd6c50594e67f8c0b37a6e671ea517cf5933cee41a8727f89819cf138d5a870"
+      },
+      {
+        "path": "scripts/validate_mobile_mcp_source_coverage.py",
+        "sha256": "9be2e1cc0b491cdb062cf71df58acb45c4c60580ed6b9b2918497fc4b9b893ce"
+      },
+      {
+        "path": "tests/fixtures/mobile_mcp/fake-bin/mobilecli",
+        "sha256": "d4eaedad418d886baeeb438b6d486a0b4db70350a82cfae19fa5044dd72eba55"
+      },
+      {
+        "path": "tests/fixtures/mobile_mcp/fakes/child-process-hook.cjs",
+        "sha256": "f0838ccc826e44e659b13ea6e73f1b898d0f7e15e9721a35a24655d73f41e499"
+      },
+      {
+        "path": "tests/fixtures/mobile_mcp/input-1080x2400.png",
+        "sha256": "877691a4577ab50295d4eebd3c7b9a04c75ba7194a52f6646b9af002321a6dc4"
+      },
+      {
+        "path": "tests/mobile_mcp_scenario_runner.py",
+        "sha256": "00a81610ff489549260c304c8a392341ec196c45007402508b3254a0be0da1a7"
+      },
+      {
+        "path": "tests/mobile_mcp_stdio_fixture_server.py",
+        "sha256": "9db1c331ca7629dc1baf88685d87c9165f718beb1d945b1e5aecc99c8861bd86"
+      }
+    ]
+  },
+  "disposition_coverage_percent": 100,
+  "errors": [],
+  "exception_scope": {
+    "EXC-IOS-SCREEN-RECORDING-RUNTIME": [
+      "S-START-REC-IOS",
+      "S-STOP-REC-IOS"
+    ],
+    "EXC-REMOTE-FLEET-RUNTIME": [
+      "S-REMOTE-ALLOCATE-ANDROID",
+      "S-REMOTE-ALLOCATE-IOS",
+      "S-REMOTE-LIST",
+      "S-REMOTE-RELEASE"
+    ]
+  },
+  "exceptions": [
+    {
+      "allowed_case_ids": [
+        "S-REMOTE-LIST",
+        "S-REMOTE-ALLOCATE-IOS",
+        "S-REMOTE-ALLOCATE-ANDROID",
+        "S-REMOTE-RELEASE"
+      ],
+      "approval": "approved",
+      "device_type": null,
+      "disposition": "approved_exception",
+      "env": {
+        "MOBILEFLEET_ENABLE": "1"
+      },
+      "id": "EXC-REMOTE-FLEET-RUNTIME",
+      "platform": null,
+      "scope": "\u4ec5 MOBILEFLEET_ENABLE=1 \u4e0b remote fleet \u4e09\u5de5\u5177\u7684\u6210\u529f runtime\uff1b\u53d1\u73b0\u3001title\u3001description\u3001schema\u3001annotations \u5fc5\u987b\u5b8c\u5168\u4e00\u81f4",
+      "tools": [
+        "mobile_list_remote_devices",
+        "mobile_allocate_remote_device",
+        "mobile_release_remote_device"
+      ]
+    },
+    {
+      "allowed_case_ids": [
+        "S-START-REC-IOS",
+        "S-STOP-REC-IOS"
+      ],
+      "approval": "approved",
+      "device_type": "real",
+      "disposition": "approved_exception",
+      "env": {},
+      "id": "EXC-IOS-SCREEN-RECORDING-RUNTIME",
+      "platform": "ios",
+      "scope": "iOS \u771f\u673a mobile_start_screen_recording / mobile_stop_screen_recording \u7684\u6210\u529f runtime\uff1b\u5de5\u5177\u53d1\u73b0\u548c schema \u5fc5\u987b\u5b8c\u5168\u4e00\u81f4",
+      "tools": [
+        "mobile_start_screen_recording",
+        "mobile_stop_screen_recording"
+      ]
+    }
+  ],
+  "provenance": {
+    "git_revision": "c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7",
+    "node_version": "v24.15.0",
+    "npm_version": "12.0.1",
+    "os": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "package_lock_sha256": "a85bcc836ace219e24e039edab27adb309482961b8f91ab72de0ad2ea01b4ae5",
+    "package_version": "0.0.1",
+    "sdk_version": "1.26.0",
+    "source": "/Users/byte/workspace/forks/mobile-mcp",
+    "timestamp": "2026-07-12T17:24:16Z"
+  },
+  "required_group_coverage": {
+    "actionable_wrapper": [
+      "E-DEVICE-NOT-FOUND",
+      "E-ACTIONABLE-PASSTHROUGH"
+    ],
+    "all_callback_returns": [
+      "S-LIST-DEVICES-EMPTY",
+      "S-LIST-DEVICES-NONEMPTY",
+      "S-LIST-DEVICES-ANDROID-PHYSICAL",
+      "S-LIST-DEVICES-IOS-SIMULATOR",
+      "S-REMOTE-LIST",
+      "S-REMOTE-ALLOCATE-IOS",
+      "S-REMOTE-ALLOCATE-ANDROID",
+      "S-REMOTE-RELEASE",
+      "S-LIST-APPS-EMPTY",
+      "S-LIST-APPS-TWO",
+      "S-LAUNCH-NO-LOCALE",
+      "S-LAUNCH-LOCALE",
+      "S-TERMINATE",
+      "S-INSTALL",
+      "S-UNINSTALL",
+      "S-SCREEN-SIZE",
+      "S-IOS-SIM-SCREEN-SIZE",
+      "S-CLICK-COERCE",
+      "S-DOUBLE-TAP",
+      "S-LONG-PRESS-DEFAULT",
+      "S-LONG-PRESS-COERCE",
+      "S-ELEMENTS-EMPTY",
+      "S-ELEMENTS-TWO",
+      "S-PRESS-BUTTON",
+      "S-OPEN-HTTPS",
+      "S-OPEN-CUSTOM",
+      "S-SWIPE-CENTER-X-ONLY",
+      "S-SWIPE-CENTER-Y-ONLY",
+      "S-SWIPE-COORD-DEFAULT-ANDROID",
+      "S-SWIPE-COORD-DEFAULT-IOS",
+      "S-SWIPE-COORD-ZERO-ANDROID",
+      "S-SWIPE-COORD-ZERO-IOS",
+      "S-SWIPE-COORD-NEGATIVE-ANDROID",
+      "S-SWIPE-COORD-NEGATIVE-IOS",
+      "S-SWIPE-COORD-DISTANCE-COERCE-ANDROID",
+      "S-SWIPE-COORD-DISTANCE-COERCE-IOS",
+      "S-TYPE-FALSE",
+      "S-TYPE-TRUE",
+      "S-SAVE-SCREENSHOT",
+      "S-TAKE-PNG",
+      "S-SET-ORIENTATION",
+      "S-GET-ORIENTATION",
+      "S-START-REC-DEFAULT",
+      "S-START-REC-TIME-ZERO",
+      "S-START-REC-TIME-NEGATIVE",
+      "S-START-REC-TIME-COERCE",
+      "S-START-REC-IOS",
+      "S-START-REC-IOS-SIMULATOR",
+      "S-STOP-REC-MISSING",
+      "S-STOP-REC-FILE",
+      "S-STOP-REC-IOS",
+      "S-STOP-REC-IOS-SIMULATOR",
+      "S-LIST-CRASHES",
+      "S-GET-CRASH",
+      "E-SCREENSHOT-INVALID",
+      "E-SCREENSHOT-ZERO",
+      "E-SCREENSHOT-SCALING-FAIL"
+    ],
+    "android_physical_public_type_emulator": [
+      "S-LIST-DEVICES-ANDROID-PHYSICAL"
+    ],
+    "default_tool_registration": [
+      "LIST-DEFAULT"
+    ],
+    "fleet_tool_registration": [
+      "LIST-FLEET",
+      "S-REMOTE-LIST"
+    ],
+    "guard_device_found": [
+      "E-DEVICE-NOT-FOUND"
+    ],
+    "guard_mobilecli_available": [
+      "E-MOBILECLI-UNAVAILABLE"
+    ],
+    "guard_recording_already_active": [
+      "E-ALREADY-RECORDING"
+    ],
+    "guard_recording_not_active": [
+      "E-NO-RECORDING"
+    ],
+    "guard_unsafe_url": [
+      "E-UNSAFE-URL"
+    ],
+    "initialize": [
+      "INIT-DEFAULT",
+      "INIT-FLEET"
+    ],
+    "ios_simulator_discovery": [
+      "S-LIST-DEVICES-IOS-SIMULATOR"
+    ],
+    "ios_simulator_recording_simctl": [
+      "S-START-REC-IOS-SIMULATOR",
+      "S-STOP-REC-IOS-SIMULATOR"
+    ],
+    "ios_simulator_runtime_wda": [
+      "S-IOS-SIM-SCREEN-SIZE"
+    ],
+    "schema_boolean": [
+      "E-WRONG-BOOLEAN"
+    ],
+    "schema_enum": [
+      "E-BAD-DIRECTION"
+    ],
+    "schema_min_max": [
+      "E-LONG-PRESS-ZERO",
+      "E-LONG-PRESS-TOO-HIGH"
+    ],
+    "schema_number_coercion": [
+      "S-CLICK-COERCE",
+      "E-NONCOERCIBLE-X"
+    ],
+    "schema_object_policy": [
+      "V-EXTRA-FIELD"
+    ],
+    "schema_required": [
+      "E-MISSING-DEVICE"
+    ],
+    "screenshot_errors": [
+      "E-SCREENSHOT-INVALID",
+      "E-SCREENSHOT-ZERO",
+      "E-SCREENSHOT-SCALING-FAIL"
+    ],
+    "screenshot_imagemagick": [
+      "S-TAKE-JPEG-MAGICK"
+    ],
+    "screenshot_png": [
+      "S-TAKE-PNG"
+    ],
+    "screenshot_sips": [
+      "S-TAKE-JPEG-SIPS"
+    ],
+    "screenshot_sips_fallback": [
+      "S-TAKE-JPEG-SIPS-FALLBACK"
+    ],
+    "unexpected_wrapper": [
+      "E-UNEXPECTED-DRIVER"
+    ],
+    "utils_extension_save_screenshot": [
+      "E-SAVE-BAD-EXTENSION"
+    ],
+    "utils_extension_start_recording": [
+      "E-START-BAD-EXTENSION"
+    ],
+    "utils_locale_android_launch": [
+      "E-INVALID-LOCALE-ANDROID-LAUNCH"
+    ],
+    "utils_locale_ios_launch": [
+      "E-INVALID-LOCALE-IOS-LAUNCH"
+    ],
+    "utils_output_path_save_screenshot": [
+      "E-SAVE-UNSAFE-PATH"
+    ],
+    "utils_output_path_start_recording": [
+      "E-START-UNSAFE-PATH"
+    ],
+    "utils_package_android_launch": [
+      "E-INVALID-PACKAGE-ANDROID-LAUNCH"
+    ],
+    "utils_package_android_terminate": [
+      "E-INVALID-PACKAGE-ANDROID-TERMINATE"
+    ],
+    "utils_package_ios_launch": [
+      "E-INVALID-PACKAGE-IOS-LAUNCH"
+    ],
+    "utils_package_ios_terminate": [
+      "E-INVALID-PACKAGE-IOS-TERMINATE"
+    ]
+  },
+  "scenario_count": 91,
+  "source_inventory": {
+    "backends": [
+      "image-utils.ts:34",
+      "image-utils.ts:36",
+      "image-utils.ts:43",
+      "image-utils.ts:46",
+      "image-utils.ts:66",
+      "image-utils.ts:104",
+      "image-utils.ts:163"
+    ],
+    "guards": [
+      "server.ts:161",
+      "server.ts:213",
+      "server.ts:545",
+      "server.ts:649",
+      "server.ts:738",
+      "server.ts:739",
+      "server.ts:778",
+      "server.ts:779"
+    ],
+    "returns": [
+      "server.ts:281",
+      "server.ts:295",
+      "server.ts:310",
+      "server.ts:325",
+      "server.ts:341",
+      "server.ts:358",
+      "server.ts:374",
+      "server.ts:390",
+      "server.ts:406",
+      "server.ts:421",
+      "server.ts:438",
+      "server.ts:455",
+      "server.ts:474",
+      "server.ts:513",
+      "server.ts:529",
+      "server.ts:550",
+      "server.ts:573",
+      "server.ts:577",
+      "server.ts:600",
+      "server.ts:621",
+      "server.ts:676",
+      "server.ts:681",
+      "server.ts:701",
+      "server.ts:716",
+      "server.ts:764",
+      "server.ts:802",
+      "server.ts:808",
+      "server.ts:823",
+      "server.ts:839"
+    ],
+    "schemas": [
+      "server.ts:304",
+      "server.ts:319",
+      "server.ts:335",
+      "server.ts:350",
+      "server.ts:351",
+      "server.ts:352",
+      "server.ts:367",
+      "server.ts:368",
+      "server.ts:383",
+      "server.ts:384",
+      "server.ts:399",
+      "server.ts:400",
+      "server.ts:415",
+      "server.ts:430",
+      "server.ts:431",
+      "server.ts:432",
+      "server.ts:447",
+      "server.ts:448",
+      "server.ts:449",
+      "server.ts:464",
+      "server.ts:465",
+      "server.ts:466",
+      "server.ts:467",
+      "server.ts:483",
+      "server.ts:522",
+      "server.ts:523",
+      "server.ts:538",
+      "server.ts:539",
+      "server.ts:559",
+      "server.ts:560",
+      "server.ts:561",
+      "server.ts:562",
+      "server.ts:563",
+      "server.ts:587",
+      "server.ts:588",
+      "server.ts:589",
+      "server.ts:609",
+      "server.ts:610",
+      "server.ts:631",
+      "server.ts:694",
+      "server.ts:695",
+      "server.ts:710",
+      "server.ts:725",
+      "server.ts:726",
+      "server.ts:727",
+      "server.ts:773",
+      "server.ts:817",
+      "server.ts:832",
+      "server.ts:833"
+    ],
+    "tools": [
+      "mobile_allocate_remote_device",
+      "mobile_click_on_screen_at_coordinates",
+      "mobile_double_tap_on_screen",
+      "mobile_get_crash",
+      "mobile_get_orientation",
+      "mobile_get_screen_size",
+      "mobile_install_app",
+      "mobile_launch_app",
+      "mobile_list_apps",
+      "mobile_list_available_devices",
+      "mobile_list_crashes",
+      "mobile_list_elements_on_screen",
+      "mobile_list_remote_devices",
+      "mobile_long_press_on_screen_at_coordinates",
+      "mobile_open_url",
+      "mobile_press_button",
+      "mobile_release_remote_device",
+      "mobile_save_screenshot",
+      "mobile_set_orientation",
+      "mobile_start_screen_recording",
+      "mobile_stop_screen_recording",
+      "mobile_swipe_on_screen",
+      "mobile_take_screenshot",
+      "mobile_terminate_app",
+      "mobile_type_keys",
+      "mobile_uninstall_app"
+    ]
+  },
+  "source_linked_count": 91,
+  "status": "passed"
+}

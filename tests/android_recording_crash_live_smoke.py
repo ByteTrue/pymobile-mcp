@@ -15,6 +15,7 @@ import json
 import os
 import sys
 import time
+import re
 from pathlib import Path
 from typing import Any
 
@@ -26,8 +27,18 @@ def _payload(content: Any) -> dict[str, Any]:
 def _error_payload(content: Any) -> dict[str, Any] | None:
     if content[0].type != "text":
         return None
-    payload = json.loads(content[0].text)
-    return payload if payload.get("status") == "error" else None
+    text = content[0].text
+    if text.startswith(("Error:", "MCP error")) or text.endswith("Please fix the issue and try again."):
+        return {"message": text}
+    return None
+
+
+def _recording_path(content: Any) -> Path:
+    text = content[0].text
+    match = re.match(r"Recording stopped\. File: (.+) \([0-9.]+ MB, ~\d+s\)$", text)
+    if match is None:
+        raise ValueError(text)
+    return Path(match.group(1))
 
 
 def _failed(reason: str, **extra: Any) -> int:
@@ -70,31 +81,30 @@ async def main() -> int:
                 {"device": device_id, "output": str(output), "timeLimit": 5},
             )
             if _error_payload(started.content) is not None:
-                return _failed("start recording failed", error=_payload(started.content))
+                return _failed("start recording failed", error=started.content[0].text)
             time.sleep(2)
             stopped = await session.call_tool("mobile_stop_screen_recording", {"device": device_id})
-            stopped_payload = _payload(stopped.content)
             if _error_payload(stopped.content) is not None:
-                return _failed("stop recording failed", error=stopped_payload)
-            path = Path(stopped_payload["output"])
+                return _failed("stop recording failed", error=stopped.content[0].text)
+            path = _recording_path(stopped.content)
             if not path.exists() or path.stat().st_size <= 0:
                 return _failed("recording file missing", output=str(path))
 
             no_active = await session.call_tool("mobile_stop_screen_recording", {"device": device_id})
             no_active_payload = _error_payload(no_active.content)
-            if no_active_payload is None or no_active_payload.get("code") != "no_active_recording":
-                return _failed("expected no_active_recording", result=_payload(no_active.content))
+            if no_active_payload is None or "No active recording found" not in no_active_payload["message"]:
+                return _failed("expected no active recording", result=no_active.content[0].text)
 
             crashes = await session.call_tool("mobile_list_crashes", {"device": device_id})
             crash_err = _error_payload(crashes.content)
             if crash_err is not None:
                 return _failed("list_crashes failed", error=crash_err)
-            crash_list = _payload(crashes.content).get("crashes") or []
+            crash_list = _payload(crashes.content) or []
             if crash_list:
                 sample_id = crash_list[0]["id"]
                 got = await session.call_tool("mobile_get_crash", {"device": device_id, "id": sample_id})
                 if _error_payload(got.content) is not None:
-                    return _failed("get_crash failed", error=_payload(got.content))
+                    return _failed("get_crash failed", error=got.content[0].text)
 
             size = path.stat().st_size
             path.unlink(missing_ok=True)

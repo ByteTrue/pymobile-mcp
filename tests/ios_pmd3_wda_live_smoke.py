@@ -17,15 +17,7 @@ from pathlib import Path
 from typing import Any
 
 
-def _payload(content: Any) -> dict[str, Any]:
-    return json.loads(content[0].text)
-
-
-def _error_payload(content: Any) -> dict[str, Any] | None:
-    if content[0].type != "text":
-        return None
-    payload = json.loads(content[0].text)
-    return payload if payload.get("status") == "error" else None
+from ios_live_smoke_support import elements, error_text, json_object, run_with_timeout, screen_size
 
 
 def _failed(reason: str, **extra: Any) -> int:
@@ -46,7 +38,11 @@ async def main() -> int:
     async with stdio_client(params) as (read_stream, write_stream):
         async with ClientSession(read_stream, write_stream) as session:
             await session.initialize()
-            devices_payload = _payload((await session.call_tool("mobile_list_available_devices", {})).content)
+            devices_result = await session.call_tool("mobile_list_available_devices", {})
+            devices_error = error_text(devices_result.content)
+            if devices_error is not None:
+                return _failed("device discovery failed", error=devices_error)
+            devices_payload = json_object(devices_result.content)
             devices = [
                 device
                 for device in devices_payload.get("devices", [])
@@ -73,21 +69,22 @@ async def main() -> int:
 
             device_id = device["id"]
             size = await session.call_tool("mobile_get_screen_size", {"device": device_id})
-            if _error_payload(size.content) is not None:
-                return _failed("screen size failed", error=_payload(size.content))
-            size_payload = _payload(size.content)
-            if size_payload.get("width", 0) <= 0:
+            size_error = error_text(size.content)
+            if size_error is not None:
+                return _failed("screen size failed", error=size_error)
+            size_payload = screen_size(size.content)
+            if size_payload["width"] <= 0 or size_payload["height"] <= 0:
                 return _failed("invalid screen size", size=size_payload)
 
             shot = await session.call_tool("mobile_take_screenshot", {"device": device_id})
             if shot.content[0].type != "image":
                 return _failed("screenshot not image")
 
-            elements = await session.call_tool("mobile_list_elements_on_screen", {"device": device_id})
-            if _error_payload(elements.content) is not None:
-                return _failed("elements failed", error=_payload(elements.content))
-            element_payload = _payload(elements.content)
-            items = element_payload.get("elements", [])
+            element_result = await session.call_tool("mobile_list_elements_on_screen", {"device": device_id})
+            element_error = error_text(element_result.content)
+            if element_error is not None:
+                return _failed("elements failed", error=element_error)
+            items = elements(element_result.content)
             if not all("coordinates" in item for item in items):
                 return _failed("element missing coordinates", sample=items[:1])
 
@@ -99,8 +96,9 @@ async def main() -> int:
                     "mobile_click_on_screen_at_coordinates",
                     {"device": device_id, "x": x, "y": y},
                 )
-                if _error_payload(tap.content) is not None:
-                    return _failed("tap failed", error=_payload(tap.content))
+                tap_error = error_text(tap.content)
+                if tap_error is not None:
+                    return _failed("tap failed", error=tap_error)
 
             print(
                 json.dumps(
@@ -117,4 +115,4 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
+    raise SystemExit(asyncio.run(run_with_timeout(main)))

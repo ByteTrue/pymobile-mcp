@@ -1,6 +1,6 @@
 feature: 2026-07-12-mobile-mcp-black-box-contract-parity
 schema_version: 1
-status: draft
+status: approved
 upstream:
   git_revision: c5d7d27fd61e4762e15ae4b1c68b6c011be88bb7
   package_lock_sha256: a85bcc836ace219e24e039edab27adb309482961b8f91ab72de0ad2ea01b4ae5
@@ -33,9 +33,12 @@ oracle_bundle:
     - scripts/validate_mobile_mcp_source_coverage.py
     - scripts/compare_mobile_mcp_image_backends.py
     - scripts/run_with_timeout.py
+    - scripts/contract_common.py
     - tests/fixtures/mobile_mcp/fakes/**
     - tests/fixtures/mobile_mcp/fake-bin/**
     - tests/fixtures/mobile_mcp/input-1080x2400.png
+    - tests/mobile_mcp_scenario_runner.py
+    - tests/mobile_mcp_stdio_fixture_server.py
   algorithm: "展开 glob 后只取 regular files；repo-relative POSIX UTF-8 path 升序；每项 {path,sha256}；对无空白、object keys 排序的 canonical JSON UTF-8 bytes 计算 aggregate SHA-256"
   report_policy: "CMD-004/005/006/007/008 machine reports 必须记录 entries 与 aggregate hash；任一输入变化但 golden 未更新时 exit 1"
 
@@ -372,7 +375,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, omitted], arg_types: [number, number, string, omitted]}]
-    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "176", "1000", "1000"]}]
+    expected_backend_effects: [{adb_argv: [input, swipe, "500", "1000", "176", "1000", "1000"]}]
     expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-SWIPE-COORD-DEFAULT-IOS
@@ -383,7 +386,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, omitted], arg_types: [number, number, string, omitted]}]
-    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [100, 1000]]}]
+    expected_backend_effects: [{wda_endpoint: /session/fixture/actions, wda_pointer_moves: [[500, 1000], [100, 1000]]}]
     expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-SWIPE-COORD-ZERO-ANDROID
@@ -394,7 +397,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, 0], arg_types: [number, number, string, number]}]
-    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "176", "1000", "1000"]}]
+    expected_backend_effects: [{adb_argv: [input, swipe, "500", "1000", "176", "1000", "1000"]}]
     expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-SWIPE-COORD-ZERO-IOS
@@ -405,7 +408,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, left, 0], arg_types: [number, number, string, number]}]
-    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [500, 1000]]}]
+    expected_backend_effects: [{wda_endpoint: /session/fixture/actions, wda_pointer_moves: [[500, 1000], [500, 1000]]}]
     expected: {content: [{type: text, text: "Swiped left from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-SWIPE-COORD-NEGATIVE-ANDROID
@@ -416,7 +419,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, right, -5]}]
-    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "495", "1000", "1000"]}]
+    expected_backend_effects: [{adb_argv: [input, swipe, "500", "1000", "495", "1000", "1000"]}]
     expected: {content: [{type: text, text: "Swiped right -5 pixels from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-SWIPE-COORD-NEGATIVE-IOS
@@ -427,7 +430,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, right, -5]}]
-    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [495, 1000]]}]
+    expected_backend_effects: [{wda_endpoint: /session/fixture/actions, wda_pointer_moves: [[500, 1000], [495, 1000]]}]
     expected: {content: [{type: text, text: "Swiped right -5 pixels from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-SWIPE-COORD-DISTANCE-COERCE-ANDROID
@@ -438,7 +441,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok, screen_size: {width: 1080, height: 2400}}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, up, 5], arg_types: [number, number, string, number]}]
-    expected_backend_effects: [{adb_argv: [shell, input, swipe, "500", "1000", "500", "995", "1000"]}]
+    expected_backend_effects: [{adb_argv: [input, swipe, "500", "1000", "500", "995", "1000"]}]
     expected: {content: [{type: text, text: "Swiped up 5 pixels from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-SWIPE-COORD-DISTANCE-COERCE-IOS
@@ -449,7 +452,7 @@ call_cases:
     env_mode: default
     fake_setup: {driver_result: ok}
     expected_effects: [{method: swipeFromCoordinate, args: [500, 1000, up, 5], arg_types: [number, number, string, number]}]
-    expected_backend_effects: [{wda_pointer_moves: [[500, 1000], [500, 995]]}]
+    expected_backend_effects: [{wda_endpoint: /session/fixture/actions, wda_pointer_moves: [[500, 1000], [500, 995]]}]
     expected: {content: [{type: text, text: "Swiped up 5 pixels from coordinates: 500, 1000"}], isError: omitted}
     required_disposition: exact
   - id: S-TYPE-FALSE
@@ -489,7 +492,7 @@ call_cases:
     normalization: {image_bytes: exact, dimensions: [1080, 2400], mimeType: image/png}
     required_disposition: exact
   - id: S-TAKE-JPEG-SIPS
-    source_ref: "server.ts:652-678;image-utils.ts:66-102"
+    source_ref: "server.ts:652-678;image-utils.ts:66-102;image-utils.ts:162-163"
     tool: mobile_take_screenshot
     arguments: {device: emulator-5554}
     env_mode: scaling_sips
@@ -497,7 +500,7 @@ call_cases:
     expected_golden_key: calls.S-TAKE-JPEG-SIPS
     normalization: {image_bytes: exact_in_deterministic_fake, live_dimensions: [162, 360], live_psnr_min_db: 35, mimeType: image/jpeg}
     live_reference_golden_key: live_images.upstream.sips
-    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-sips.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-sips.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/psnr-sips.json, backend_version_required: true}
+    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-sips.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-sips.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/image-backends.json, backend_version_required: true}
     required_disposition: exact
   - id: S-TAKE-JPEG-MAGICK
     source_ref: "server.ts:652-678;image-utils.ts:104-114"
@@ -508,7 +511,7 @@ call_cases:
     expected_golden_key: calls.S-TAKE-JPEG-MAGICK
     normalization: {image_bytes: exact_in_deterministic_fake, live_dimensions: [360, 800], live_psnr_min_db: 35, mimeType: image/jpeg}
     live_reference_golden_key: live_images.upstream.imagemagick
-    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-imagemagick.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-imagemagick.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/psnr-imagemagick.json, backend_version_required: true}
+    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-imagemagick.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-imagemagick.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/image-backends.json, backend_version_required: true}
     required_disposition: exact
   - id: S-TAKE-JPEG-SIPS-FALLBACK
     source_ref: "image-utils.ts:33-47"
@@ -519,7 +522,7 @@ call_cases:
     expected_golden_key: calls.S-TAKE-JPEG-SIPS-FALLBACK
     normalization: {image_bytes: exact_in_deterministic_fake, live_dimensions: [360, 800], live_psnr_min_db: 35, mimeType: image/jpeg}
     live_reference_golden_key: live_images.upstream.sips_fallback
-    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-sips-fallback.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-sips-fallback.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/psnr-sips-fallback.json, backend_version_required: true}
+    live_artifacts: {upstream: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/upstream-sips_fallback.jpg, python: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/images/python-sips_fallback.jpg, report: .codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/evidence/image-backends.json, backend_version_required: true}
     required_disposition: exact
   - id: S-SET-ORIENTATION
     source_ref: "server.ts:689-703:return-701"
@@ -880,7 +883,7 @@ validation_and_error_cases:
     expected: {content: [{type: text, text: "Error: boom"}], isError: true}
     required_disposition: exact
   - id: E-SCREENSHOT-INVALID
-    source_ref: "server.ts:645-650,679-684"
+    source_ref: "server.ts:645-650,679-684:return-681"
     tool: mobile_take_screenshot
     arguments: {device: emulator-5554}
     env_mode: no_scaling
@@ -888,7 +891,7 @@ validation_and_error_cases:
     expected_golden_key: errors.E-SCREENSHOT-INVALID
     required_disposition: exact
   - id: E-SCREENSHOT-ZERO
-    source_ref: "server.ts:645-650,679-684"
+    source_ref: "server.ts:645-650,679-684:return-681"
     tool: mobile_take_screenshot
     arguments: {device: emulator-5554}
     env_mode: no_scaling
@@ -896,7 +899,7 @@ validation_and_error_cases:
     expected: {content: [{type: text, text: "Error: Screenshot is invalid. Please try again."}], isError: true}
     required_disposition: exact
   - id: E-SCREENSHOT-SCALING-FAIL
-    source_ref: "image-utils.ts:33-47;server.ts:679-684"
+    source_ref: "image-utils.ts:33-47;server.ts:679-684:return-681"
     tool: mobile_take_screenshot
     arguments: {device: emulator-5554}
     env_mode: scaling_failure
@@ -904,8 +907,166 @@ validation_and_error_cases:
     expected: {content: [{type: text, text: "Error: Image scaling unavailable (requires Sips or ImageMagick)."}], isError: true}
     required_disposition: exact
 
+review_cases:
+  - id: R-COERCE-EMPTY
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: "", y: 20}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-COERCE-EMPTY
+    expected_effects: [{method: tap, args: [0, 20], arg_types: [number, number]}]
+  - id: R-COERCE-SPACE
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: "  ", y: 20}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-COERCE-SPACE
+    expected_effects: [{method: tap, args: [0, 20], arg_types: [number, number]}]
+  - id: R-COERCE-NULL
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: null, y: 20}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-COERCE-NULL
+    expected_effects: [{method: tap, args: [0, 20], arg_types: [number, number]}]
+  - id: R-COERCE-BOOL
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: true, y: 20}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-COERCE-BOOL
+    expected_effects: [{method: tap, args: [1, 20], arg_types: [number, number]}]
+  - id: R-COERCE-ARRAY-EMPTY
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: [], y: 20}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-COERCE-ARRAY-EMPTY
+    expected_effects: [{method: tap, args: [0, 20], arg_types: [number, number]}]
+  - id: R-COERCE-ARRAY-ONE
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: [5], y: 20}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-COERCE-ARRAY-ONE
+    expected_effects: [{method: tap, args: [5, 20], arg_types: [number, number]}]
+  - id: R-COERCE-INFINITY
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: Infinity, y: 20}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-INFINITY
+  - id: R-TIME-FRACTION
+    source_ref: "server.ts:720-766:return-764"
+    tool: mobile_start_screen_recording
+    arguments: {device: emulator-5554, output: /tmp/review-fraction.mp4, timeLimit: 1.9}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-TIME-FRACTION
+    expected_cli_argv: [screenrecord, --device, emulator-5554, --output, /tmp/review-fraction.mp4, --silent, --time-limit, "1.9"]
+  - id: R-URL-UPPERCASE
+    source_ref: "server.ts:533-546;wrapper:88-93"
+    tool: mobile_open_url
+    arguments: {device: emulator-5554, url: "HTTP://example.com"}
+    fake_setup: null
+    expected_golden_key: review.R-URL-UPPERCASE
+  - id: R-URL-EMPTY-HOST
+    source_ref: "server.ts:533-552:return-550"
+    tool: mobile_open_url
+    arguments: {device: emulator-5554, url: "https://"}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-URL-EMPTY-HOST
+    expected_effects: [{method: openUrl, args: ["https://"]}]
+  - id: R-COERCE-SIGNED-RADIX
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: "+0x10", y: 20}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-SIGNED-RADIX
+  - id: R-COERCE-NESTED-ARRAY
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: [[5]], y: 20}
+    fake_setup: {driver_result: ok}
+    expected_golden_key: review.R-COERCE-NESTED-ARRAY
+    expected_effects: [{method: tap, args: [5, 20], arg_types: [number, number]}]
+  - id: R-MULTI-INVALID
+    source_ref: "server.ts:459-468:zod-coerce-number,zod-min"
+    tool: mobile_long_press_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: bad, y: bad, duration: 0}
+    fake_setup: null
+    expected_golden_key: review.R-MULTI-INVALID
+  - id: R-COERCE-UNDERSCORE
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: "1_000", y: 20}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-UNDERSCORE
+  - id: R-COERCE-LOWER-INFINITY
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: infinity, y: 20}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-LOWER-INFINITY
+  - id: R-COERCE-HUGE-INTEGER
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, y: 20}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-HUGE-INTEGER
+  - id: R-COERCE-HUGE-NEGATIVE-INTEGER
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: -10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, y: 20}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-HUGE-NEGATIVE-INTEGER
+  - id: R-COERCE-5000-DIGIT-POSITIVE
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, y: 20}
+    raw_decimal_integer: {field: x, digits: 5000, negative: false}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-5000-DIGIT-POSITIVE
+  - id: R-COERCE-5000-DIGIT-NEGATIVE
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, y: 20}
+    raw_decimal_integer: {field: x, digits: 5000, negative: true}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-5000-DIGIT-NEGATIVE
+  - id: R-COERCE-RADIX-OVERFLOW
+    source_ref: "server.ts:425-433:zod-coerce-number"
+    tool: mobile_click_on_screen_at_coordinates
+    arguments: {device: emulator-5554, x: "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", y: 20}
+    fake_setup: null
+    expected_golden_key: review.R-COERCE-RADIX-OVERFLOW
+  - id: R-RAW-STRING
+    source_ref: "sdk:mcp.js:input-validation"
+    tool: mobile_get_screen_size
+    raw_arguments: raw
+    fake_setup: null
+    expected_golden_key: review.R-RAW-STRING
+  - id: R-RAW-NUMBER
+    source_ref: "sdk:mcp.js:input-validation"
+    tool: mobile_get_screen_size
+    raw_arguments: 5
+    fake_setup: null
+    expected_golden_key: review.R-RAW-NUMBER
+  - id: R-RAW-BOOLEAN
+    source_ref: "sdk:mcp.js:input-validation"
+    tool: mobile_get_screen_size
+    raw_arguments: true
+    fake_setup: null
+    expected_golden_key: review.R-RAW-BOOLEAN
 source_coverage:
   validator: "scripts/validate_mobile_mcp_source_coverage.py"
+  backend_inventory_manifest:
+    python:drivers/android.py: {count: 34, sha256: 54d1e89f1996b724a2a60b2152527266bcec7d45aa880db6f0db108489dd5e2d}
+    python:drivers/ios.py: {count: 29, sha256: ad3ce4cf224b5303eade78475a0c325ff0b25970db772b67577051bbcc565081}
+    python:drivers/ios_simulator.py: {count: 27, sha256: 335a8d052174c8a67739dd213ff3892ba2c4e48ada44126388b73c97d49d5c94}
+    upstream:android.ts: {count: 35, sha256: b453d65dd0345032216e26c6845bd458f60122f7087b502b35789c547a45fec6}
+    upstream:ios.ts: {count: 27, sha256: 4cfed003ea45c7364fd0eb897340eaa91a0fbed102a23d0ba09647a19f6eb3d0}
+    upstream:mobile-device.ts: {count: 17, sha256: a4e5340ffb5dcab5c9acaffa9879dfaefb588168473ba5fbcd1f425dca0075b6}
+    upstream:webdriver-agent.ts: {count: 28, sha256: ab910eebc16611647b0dc6ca3d223559001bbe191420592cacf649634ba482ec}
   policy: "validator 必须解析固定源码/调用路径并输出 case→实际 caller/branch→disposition；每个 wire/call/validation_and_error case 必须映射实际 schema、guard、wrapper、callback return 或 backend branch；漏项、仅靠 source_ref 自称覆盖、重复 case id、越界 exception 均 exit 1"
   required_groups:
     - initialize

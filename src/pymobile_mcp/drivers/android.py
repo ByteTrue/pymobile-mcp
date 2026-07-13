@@ -13,7 +13,25 @@ import uiautomator2 as u2
 
 from pymobile_mcp.errors import DriverError
 
-from .base import AppInfo, BaseDriver, DeviceInfo, ScreenElement, ScreenElementRect, ScreenSize
+from .base import (
+    AppInfo,
+    BaseDriver,
+    DeviceInfo,
+    ScreenElement,
+    ScreenElementRect,
+    ScreenSize,
+)
+
+
+def android_swipe_argv(
+    start_x: float, start_y: float, end_x: float, end_y: float
+) -> list[str]:
+    return [
+        "input",
+        "swipe",
+        *(format(value, "g") for value in (start_x, start_y, end_x, end_y)),
+        "1000",
+    ]
 
 
 def list_android_devices() -> list[DeviceInfo]:
@@ -75,9 +93,12 @@ class AndroidDriver(BaseDriver):
         device = await self._connected()
         await asyncio.to_thread(device.long_click, x, y, duration)
 
-    async def swipe(self, start_x: float, start_y: float, end_x: float, end_y: float) -> None:
-        device = await self._connected()
-        await asyncio.to_thread(device.swipe, start_x, start_y, end_x, end_y)
+    async def swipe(
+        self, start_x: float, start_y: float, end_x: float, end_y: float
+    ) -> None:
+        await asyncio.to_thread(
+            self._adb().shell, android_swipe_argv(start_x, start_y, end_x, end_y)
+        )
 
     async def type_keys(self, text: str, submit: bool) -> None:
         device = await self._connected()
@@ -114,7 +135,6 @@ class AndroidDriver(BaseDriver):
     async def set_orientation(self, orientation: str) -> None:
         await asyncio.to_thread(self._set_orientation_sync, orientation)
 
-
     async def list_crashes(self) -> list[dict[str, Any]]:
         return await asyncio.to_thread(self._list_crashes_sync)
 
@@ -122,7 +142,9 @@ class AndroidDriver(BaseDriver):
         return await asyncio.to_thread(self._get_crash_sync, crash_id)
 
     def _list_crashes_sync(self) -> list[dict[str, Any]]:
-        entries = self._parse_dropbox_print(self._adb().shell(["dumpsys", "dropbox", "--print"]))
+        entries = self._parse_dropbox_print(
+            self._adb().shell(["dumpsys", "dropbox", "--print"])
+        )
         return [
             {
                 "id": entry["id"],
@@ -135,11 +157,15 @@ class AndroidDriver(BaseDriver):
         ]
 
     def _get_crash_sync(self, crash_id: str) -> str:
-        entries = self._parse_dropbox_print(self._adb().shell(["dumpsys", "dropbox", "--print"]))
+        entries = self._parse_dropbox_print(
+            self._adb().shell(["dumpsys", "dropbox", "--print"])
+        )
         for entry in entries:
             if entry["id"] == crash_id:
                 return entry["content"]
-        raise DriverError("android", f'Crash report "{crash_id}" not found', {"id": crash_id})
+        raise DriverError(
+            "android", f'Crash report "{crash_id}" not found', {"id": crash_id}
+        )
 
     # Tags that are usually crash/ANR-ish. Strictmode/boot noise is excluded by default.
     # ponytail: keep this allowlist simple; expand if real crash tags are missing.
@@ -159,10 +185,15 @@ class AndroidDriver(BaseDriver):
         "system_server_wtf",
     )
 
-
     @staticmethod
     def _dropbox_include_all_env() -> bool:
-        return os.environ.get("PYMOBILE_MCP_ANDROID_DROPBOX_ALL", "").strip() in {"1", "true", "TRUE", "yes", "YES"}
+        return os.environ.get("PYMOBILE_MCP_ANDROID_DROPBOX_ALL", "").strip() in {
+            "1",
+            "true",
+            "TRUE",
+            "yes",
+            "YES",
+        }
 
     @classmethod
     def _is_crashish_dropbox_tag(cls, tag: str) -> bool:
@@ -171,7 +202,9 @@ class AndroidDriver(BaseDriver):
         low = tag.lower()
         return "crash" in low or "anr" in low or "tombstone" in low
 
-    def _parse_dropbox_print(self, output: Any, *, include_all: bool = False) -> list[dict[str, Any]]:
+    def _parse_dropbox_print(
+        self, output: Any, *, include_all: bool = False
+    ) -> list[dict[str, Any]]:
         import re
 
         text = str(output)
@@ -189,7 +222,11 @@ class AndroidDriver(BaseDriver):
             if not match:
                 continue
             timestamp, tag, kind, size_s = match.groups()
-            if not include_all and not self._dropbox_include_all_env() and not self._is_crashish_dropbox_tag(tag):
+            if (
+                not include_all
+                and not self._dropbox_include_all_env()
+                and not self._is_crashish_dropbox_tag(tag)
+            ):
                 continue
             base_id = f"{timestamp}::{tag}"
             n = counts.get(base_id, 0)
@@ -239,12 +276,30 @@ class AndroidDriver(BaseDriver):
         adb = self._adb()
         if locale:
             try:
-                adb.shell(["cmd", "locale", "set-app-locales", package_name, "--locales", locale])
+                adb.shell(
+                    [
+                        "cmd",
+                        "locale",
+                        "set-app-locales",
+                        package_name,
+                        "--locales",
+                        locale,
+                    ]
+                )
             except Exception:
                 # Android < 13 has no set-app-locales; ignore like mobile-mcp.
                 pass
         try:
-            adb.shell(["monkey", "-p", package_name, "-c", "android.intent.category.LAUNCHER", "1"])
+            adb.shell(
+                [
+                    "monkey",
+                    "-p",
+                    package_name,
+                    "-c",
+                    "android.intent.category.LAUNCHER",
+                    "1",
+                ]
+            )
         except Exception as exc:
             raise DriverError(
                 "android",
@@ -253,8 +308,20 @@ class AndroidDriver(BaseDriver):
             ) from exc
 
     def _get_orientation_sync(self) -> str:
-        rotation = str(self._adb().shell(["settings", "get", "system", "user_rotation"])).strip()
+        rotation = str(
+            self._adb().shell(["settings", "get", "system", "user_rotation"])
+        ).strip()
         return "portrait" if rotation in {"0", "null", ""} else "landscape"
+
+    def _get_window_size_sync(self) -> tuple[int, int]:
+        if self._device is None:
+            raise DriverError(
+                "android",
+                f'Device "{self.device_id}" is not connected.',
+                {"device": self.device_id},
+            )
+        width, height = self._device.window_size()
+        return int(width), int(height)
 
     def _set_orientation_sync(self, orientation: str) -> None:
         value = "0" if orientation == "portrait" else "1"
@@ -273,53 +340,104 @@ class AndroidDriver(BaseDriver):
             ]
         )
 
+    async def start_recording(
+        self, remote_path: str, time_limit: int | float | None = None
+    ) -> Any:
+        return await asyncio.to_thread(
+            self._start_recording_sync, remote_path, time_limit
+        )
 
-    async def start_recording(self, remote_path: str, time_limit: int | None = None) -> Any:
-        return await asyncio.to_thread(self._start_recording_sync, remote_path, time_limit)
+    async def stop_recording(
+        self, process: Any, remote_path: str, local_path: Path
+    ) -> int:
+        return await asyncio.to_thread(
+            self._stop_recording_sync, process, remote_path, local_path
+        )
 
-    async def stop_recording(self, process: Any, remote_path: str, local_path: Path) -> int:
-        return await asyncio.to_thread(self._stop_recording_sync, process, remote_path, local_path)
-
-    def _start_recording_sync(self, remote_path: str, time_limit: int | None) -> Any:
+    def _start_recording_sync(
+        self, remote_path: str, time_limit: int | float | None
+    ) -> Any:
         import subprocess
 
-        cmd = ["adb", "-s", self.device_id, "shell", "screenrecord"]
-        if time_limit is not None:
-            cmd.extend(["--time-limit", str(time_limit)])
-        cmd.append(remote_path)
+        def launch(*, size: str | None = None) -> Any:
+            cmd = ["adb", "-s", self.device_id, "shell", "screenrecord"]
+            if size is not None:
+                cmd.extend(["--size", size])
+            if time_limit is not None:
+                cmd.extend(["--time-limit", str(time_limit)])
+            cmd.append(remote_path)
+            return subprocess.Popen(
+                cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+        def immediate_exit(process: Any) -> int | None:
+            try:
+                # Some physical encoders take over a second to report an
+                # unsupported default resolution (observed: 1.29s).
+                return process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                return None
+
         try:
             self._adb().shell(["rm", "-f", remote_path])
         except Exception:
             pass
-        return subprocess.Popen(
-            cmd,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        process = launch()
+        returncode = immediate_exit(process)
+        if returncode is None or returncode == 0:
+            return process
 
-    def _stop_recording_sync(self, process: Any, remote_path: str, local_path: Path) -> int:
+        try:
+            self._adb().shell(["rm", "-f", remote_path])
+        except Exception:
+            pass
+        width, height = self._get_window_size_sync()
+        size = "720x1280" if width <= height else "1280x720"
+        retry = launch(size=size)
+        retry_returncode = immediate_exit(retry)
+        if retry_returncode is not None and retry_returncode != 0:
+            raise DriverError(
+                "android",
+                f"screenrecord safe-size retry exited with code {retry_returncode}",
+                {
+                    "device": self.device_id,
+                    "size": size,
+                    "returncode": retry_returncode,
+                },
+            )
+        return retry
+
+    def _stop_recording_sync(
+        self, process: Any, remote_path: str, local_path: Path
+    ) -> int:
         import signal
+        import subprocess
         import time
 
-        # Prefer stopping the on-device screenrecord process; local adb may not
-        # forward SIGINT reliably and can hang if stdout pipes fill.
-        try:
-            self._adb().shell(["pkill", "-l", "INT", "screenrecord"])
-        except Exception:
-            try:
-                self._adb().shell(["killall", "-2", "screenrecord"])
-            except Exception:
-                pass
+        # SIGINT to the local adb process forwards Ctrl-C so screenrecord can
+        # finalize the MP4. Fall back to an on-device signal only if adb hangs.
         if process.poll() is None:
             process.send_signal(signal.SIGINT)
             try:
                 process.wait(timeout=5)
-            except Exception:
-                process.kill()
+            except subprocess.TimeoutExpired:
                 try:
-                    process.wait(timeout=3)
+                    self._adb().shell(["pkill", "-INT", "screenrecord"])
                 except Exception:
-                    pass
+                    try:
+                        self._adb().shell(["killall", "-2", "screenrecord"])
+                    except Exception:
+                        pass
+                try:
+                    process.wait(timeout=5)
+                except Exception:
+                    process.kill()
+                    try:
+                        process.wait(timeout=3)
+                    except Exception:
+                        pass
         # pull file
         local_path.parent.mkdir(parents=True, exist_ok=True)
         if local_path.exists():
@@ -336,7 +454,9 @@ class AndroidDriver(BaseDriver):
         except Exception:
             pass
         if not local_path.exists() or local_path.stat().st_size <= 0:
-            raise DriverError("android", f"Recording file was not produced at {local_path}")
+            raise DriverError(
+                "android", f"Recording file was not produced at {local_path}"
+            )
         return local_path.stat().st_size
 
     async def _connected(self) -> Any:

@@ -1,0 +1,32 @@
+{
+  "gate_id": "scope-gate",
+  "stage": "implementation.before_review",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "baseline": "4ce5dfcc3cbd932a17c904da72ea53485f37ba3d",
+      "allowed_prefixes": [
+        ".codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity",
+        "src/pymobile_mcp",
+        "tests",
+        "scripts",
+        "README.md",
+        "CHANGELOG.md",
+        "docs/regression-checklist.md",
+        "pyproject.toml"
+      ],
+      "changed_categories": [
+        "public MCP contract/runtime",
+        "Android/iOS/iOS Simulator drivers",
+        "upstream oracle and deterministic fixtures",
+        "unit/scenario/live tests",
+        "user documentation and regression checklist",
+        "CodeStable implementation/evidence artifacts"
+      ],
+      "out_of_scope_files": []
+    }
+  ],
+  "providers": {}
+}

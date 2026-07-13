@@ -1,0 +1,1011 @@
+{
+  "approved_exceptions": [
+    "EXC-REMOTE-FLEET-RUNTIME",
+    "EXC-IOS-SCREEN-RECORDING-RUNTIME"
+  ],
+  "bundle": {
+    "aggregate_sha256": "952c55cf10c45ce35857016a70639ea3cc4377b5bea31bd3b30cb57c06a1889c",
+    "algorithm": "\u5c55\u5f00 glob \u540e\u53ea\u53d6 regular files\uff1brepo-relative POSIX UTF-8 path \u5347\u5e8f\uff1b\u6bcf\u9879 {path,sha256}\uff1b\u5bf9\u65e0\u7a7a\u767d\u3001object keys \u6392\u5e8f\u7684 canonical JSON UTF-8 bytes \u8ba1\u7b97 aggregate SHA-256",
+    "entries": [
+      {
+        "path": ".codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-exceptions.yaml",
+        "sha256": "356b18cbf93ffd5a9e222e15c8b9a3c64f40fd334cd56bb67f83077fdd9cf82f"
+      },
+      {
+        "path": ".codestable/features/2026-07-12-mobile-mcp-black-box-contract-parity/mobile-mcp-black-box-contract-parity-scenarios.yaml",
+        "sha256": "2d20a07c1b44025f842de74adcbdbfe67c92b820cdde7ea6adb596c2e013720c"
+      },
+      {
+        "path": "scripts/assert_mobile_mcp_contract.py",
+        "sha256": "02fc36c19dba91f8c8d141441cc9d0cd17eec51b37317647a31e9472d02186d6"
+      },
+      {
+        "path": "scripts/capture_mobile_mcp_calls.py",
+        "sha256": "db595f470042f17f2e352dd2705b1f58827e4624365b5a7855504d292190c534"
+      },
+      {
+        "path": "scripts/capture_mobile_mcp_contract.py",
+        "sha256": "53375acac869cd65a7ffc8d42b825b08fa7d6d2c8c756f3f7a36991b5715605e"
+      },
+      {
+        "path": "scripts/compare_mobile_mcp_image_backends.py",
+        "sha256": "5bc00343d7492ca9ce0dcfec2b887aa92d86a70bafa6dccb1f5244db7d1fcec4"
+      },
+      {
+        "path": "scripts/contract_common.py",
+        "sha256": "eb9d387a9ef93b874eed824766ebd8d992918642f6dec8cd73b5f6993880ce74"
+      },
+      {
+        "path": "scripts/run_with_timeout.py",
+        "sha256": "fcd6c50594e67f8c0b37a6e671ea517cf5933cee41a8727f89819cf138d5a870"
+      },
+      {
+        "path": "scripts/validate_mobile_mcp_source_coverage.py",
+        "sha256": "9be2e1cc0b491cdb062cf71df58acb45c4c60580ed6b9b2918497fc4b9b893ce"
+      },
+      {
+        "path": "tests/fixtures/mobile_mcp/fake-bin/mobilecli",
+        "sha256": "d4eaedad418d886baeeb438b6d486a0b4db70350a82cfae19fa5044dd72eba55"
+      },
+      {
+        "path": "tests/fixtures/mobile_mcp/fakes/child-process-hook.cjs",
+        "sha256": "f0838ccc826e44e659b13ea6e73f1b898d0f7e15e9721a35a24655d73f41e499"
+      },
+      {
+        "path": "tests/fixtures/mobile_mcp/input-1080x2400.png",
+        "sha256": "877691a4577ab50295d4eebd3c7b9a04c75ba7194a52f6646b9af002321a6dc4"
+      },
+      {
+        "path": "tests/mobile_mcp_scenario_runner.py",
+        "sha256": "00a81610ff489549260c304c8a392341ec196c45007402508b3254a0be0da1a7"
+      },
+      {
+        "path": "tests/mobile_mcp_stdio_fixture_server.py",
+        "sha256": "9db1c331ca7629dc1baf88685d87c9165f718beb1d945b1e5aecc99c8861bd86"
+      }
+    ]
+  },
+  "contract_case_count_including_wire": 91,
+  "core_raw_stdio_case_count": 87,
+  "exception_ledger_sha256": "356b18cbf93ffd5a9e222e15c8b9a3c64f40fd334cd56bb67f83077fdd9cf82f",
+  "exceptions": [
+    {
+      "allowed_case_ids": [
+        "S-REMOTE-LIST",
+        "S-REMOTE-ALLOCATE-IOS",
+        "S-REMOTE-ALLOCATE-ANDROID",
+        "S-REMOTE-RELEASE"
+      ],
+      "approval": "approved",
+      "case_dispositions": {
+        "S-REMOTE-ALLOCATE-ANDROID": "approved_exception",
+        "S-REMOTE-ALLOCATE-IOS": "approved_exception",
+        "S-REMOTE-LIST": "approved_exception",
+        "S-REMOTE-RELEASE": "approved_exception"
+      },
+      "device_type": null,
+      "env": {
+        "MOBILEFLEET_ENABLE": "1"
+      },
+      "id": "EXC-REMOTE-FLEET-RUNTIME",
+      "platform": null,
+      "scope": "\u4ec5 MOBILEFLEET_ENABLE=1 \u4e0b remote fleet \u4e09\u5de5\u5177\u7684\u6210\u529f runtime\uff1b\u53d1\u73b0\u3001title\u3001description\u3001schema\u3001annotations \u5fc5\u987b\u5b8c\u5168\u4e00\u81f4",
+      "tools": [
+        "mobile_list_remote_devices",
+        "mobile_allocate_remote_device",
+        "mobile_release_remote_device"
+      ]
+    },
+    {
+      "allowed_case_ids": [
+        "S-START-REC-IOS",
+        "S-STOP-REC-IOS"
+      ],
+      "approval": "approved",
+      "case_dispositions": {
+        "S-START-REC-IOS": "approved_exception",
+        "S-STOP-REC-IOS": "approved_exception"
+      },
+      "device_type": "real",
+      "env": {},
+      "id": "EXC-IOS-SCREEN-RECORDING-RUNTIME",
+      "platform": "ios",
+      "scope": "iOS \u771f\u673a mobile_start_screen_recording / mobile_stop_screen_recording \u7684\u6210\u529f runtime\uff1b\u5de5\u5177\u53d1\u73b0\u548c schema \u5fc5\u987b\u5b8c\u5168\u4e00\u81f4",
+      "tools": [
+        "mobile_start_screen_recording",
+        "mobile_stop_screen_recording"
+      ]
+    }
+  ],
+  "expected_python_mcp_version": "1.28.1",
+  "mismatches": [],
+  "mode": "fleet",
+  "python_mcp_version": "1.28.1",
+  "raw_frame_count": 550,
+  "raw_stdio_case_count": 110,
+  "review_raw_stdio_case_count": 23,
+  "scenario_dispositions": {
+    "E-ACTIONABLE-PASSTHROUGH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-ALREADY-RECORDING": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-BAD-DIRECTION": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-DEVICE-NOT-FOUND": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-INVALID-LOCALE-ANDROID-LAUNCH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-INVALID-LOCALE-IOS-LAUNCH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-INVALID-PACKAGE-ANDROID-LAUNCH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-INVALID-PACKAGE-ANDROID-TERMINATE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-INVALID-PACKAGE-IOS-LAUNCH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-INVALID-PACKAGE-IOS-TERMINATE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-LONG-PRESS-TOO-HIGH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-LONG-PRESS-ZERO": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-MISSING-DEVICE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-MOBILECLI-UNAVAILABLE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-NO-RECORDING": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-NONCOERCIBLE-X": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-NONOBJECT-ARGUMENTS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-NULL-ARGUMENTS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-SAVE-BAD-EXTENSION": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-SAVE-UNSAFE-PATH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-SCREENSHOT-INVALID": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-SCREENSHOT-SCALING-FAIL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-SCREENSHOT-ZERO": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-START-BAD-EXTENSION": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-START-UNSAFE-PATH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-UNEXPECTED-DRIVER": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-UNKNOWN-TOOL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-UNSAFE-URL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "E-WRONG-BOOLEAN": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-5000-DIGIT-NEGATIVE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-5000-DIGIT-POSITIVE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-ARRAY-EMPTY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-ARRAY-ONE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-BOOL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-EMPTY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-HUGE-INTEGER": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-HUGE-NEGATIVE-INTEGER": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-INFINITY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-LOWER-INFINITY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-NESTED-ARRAY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-NULL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-RADIX-OVERFLOW": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-SIGNED-RADIX": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-SPACE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-COERCE-UNDERSCORE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-MULTI-INVALID": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-RAW-BOOLEAN": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-RAW-NUMBER": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-RAW-STRING": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-TIME-FRACTION": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-URL-EMPTY-HOST": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "R-URL-UPPERCASE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-CLICK-COERCE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-DOUBLE-TAP": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-ELEMENTS-EMPTY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-ELEMENTS-TWO": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-GET-CRASH": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-GET-ORIENTATION": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-INSTALL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-IOS-SIM-SCREEN-SIZE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LAUNCH-LOCALE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LAUNCH-NO-LOCALE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LIST-APPS-EMPTY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LIST-APPS-TWO": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LIST-CRASHES": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LIST-DEVICES-ANDROID-PHYSICAL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LIST-DEVICES-EMPTY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LIST-DEVICES-IOS-SIMULATOR": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LIST-DEVICES-NONEMPTY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LONG-PRESS-COERCE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-LONG-PRESS-DEFAULT": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-OPEN-CUSTOM": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-OPEN-HTTPS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-PRESS-BUTTON": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-REMOTE-ALLOCATE-ANDROID": {
+      "actual": null,
+      "disposition": "approved_exception",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-REMOTE-ALLOCATE-IOS": {
+      "actual": null,
+      "disposition": "approved_exception",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-REMOTE-LIST": {
+      "actual": null,
+      "disposition": "approved_exception",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-REMOTE-RELEASE": {
+      "actual": null,
+      "disposition": "approved_exception",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SAVE-SCREENSHOT": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SCREEN-SIZE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SET-ORIENTATION": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-START-REC-DEFAULT": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-START-REC-IOS": {
+      "actual": null,
+      "disposition": "approved_exception",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-START-REC-IOS-SIMULATOR": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-START-REC-TIME-COERCE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-START-REC-TIME-NEGATIVE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-START-REC-TIME-ZERO": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-STOP-REC-FILE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-STOP-REC-IOS": {
+      "actual": null,
+      "disposition": "approved_exception",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-STOP-REC-IOS-SIMULATOR": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-STOP-REC-MISSING": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-CENTER-X-ONLY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-CENTER-Y-ONLY": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-DEFAULT-ANDROID": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-DEFAULT-IOS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-DISTANCE-COERCE-ANDROID": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-DISTANCE-COERCE-IOS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-NEGATIVE-ANDROID": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-NEGATIVE-IOS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-ZERO-ANDROID": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-SWIPE-COORD-ZERO-IOS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-TAKE-JPEG-MAGICK": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-TAKE-JPEG-SIPS": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-TAKE-JPEG-SIPS-FALLBACK": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-TAKE-PNG": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-TERMINATE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-TYPE-FALSE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-TYPE-TRUE": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "S-UNINSTALL": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    },
+    "V-EXTRA-FIELD": {
+      "actual": null,
+      "disposition": "exact",
+      "effect_errors": [],
+      "expected": null,
+      "passed": true,
+      "raw_stdio": true
+    }
+  },
+  "status": "passed",
+  "tool_count": 26
+}

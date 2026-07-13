@@ -46,7 +46,7 @@ class DeviceNotFoundError(ToolError):
         super().__init__(
             "device_not_found",
             tool,
-            f'Device "{device}" not found. Use mobile_list_available_devices to see available devices.',
+            f'Device "{device}" not found. Use the mobile_list_available_devices tool to see available devices.',
             {"device": device},
         )
 

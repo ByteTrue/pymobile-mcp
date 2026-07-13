@@ -1,0 +1,40 @@
+{
+  "acceptance": {
+    "auditor_recommendation": "Accept",
+    "checks_passed": 19,
+    "checks_total": 19,
+    "dod_accept_001": "closed",
+    "execution": "report-created",
+    "pending_item": "none",
+    "report_created": true,
+    "status": "passed",
+    "user_confirmed": "2026-07-13"
+  },
+  "blocking": [],
+  "evidence": [
+    {"command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-001", "report": "evidence/pytest.json", "summary": "107 passed"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-002", "report": "evidence/capture-default.json", "summary": "23 tools"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-003", "report": "evidence/capture-fleet.json", "summary": "26 tools"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-004", "report": "evidence/capture-calls.json", "summary": "47 upstream call results; full bundle recorded"},
+    {"command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-005", "report": "evidence/assert-default.json", "summary": "23 tools / 106 scenarios"},
+    {"command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-006", "report": "evidence/assert-fleet.json", "summary": "26 tools / 110 scenarios"},
+    {"command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-007", "report": "evidence/source-coverage.json", "summary": "91 source-linked scenarios"},
+    {"command_provenance": "npx --yes --package npm@12.0.0 -c", "command_source": "checklist.dod.commands", "core": true, "exit_code": 0, "id": "CMD-008", "report": "evidence/image-backends.json", "summary": "3 image modes"}
+  ],
+  "gate_id": "dod-runner",
+  "implementation": {
+    "authorized_live_evidence": "16/16 passed across four device classes",
+    "bundle_sha256": "952c55cf10c45ce35857016a70639ea3cc4377b5bea31bd3b30cb57c06a1889c",
+    "steps_done": 8,
+    "steps_total": 8,
+    "tdd_evidence": "acceptance-found live-artifact regression: RED 1 failed on nonexistent report; GREEN 1 passed"
+  },
+  "qa_status": "passed",
+  "review_status": "passed",
+  "stage": "complete",
+  "status": "passed",
+  "warnings": [
+    "Destructive install/uninstall was not authorized or run and is not counted as passed",
+    "iOS real-device recording remains the approved exception"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "observed_at": "2026-07-12",
+  "device": {
+    "label": "ios-real-redacted",
+    "platform": "ios",
+    "type": "real",
+    "version": "26.5.2"
+  },
+  "policy": {
+    "exact_device_selector": true,
+    "per_script_timeout_seconds": 180,
+    "destructive_install_uninstall": "not-authorized",
+    "recording_exception": "EXC-IOS-SCREEN-RECORDING-RUNTIME"
+  },
+  "results": {
+    "ios_pmd3_wda_live_smoke.py": {
+      "status": "passed",
+      "screen_size": "402x874",
+      "element_count": 234
+    },
+    "ios_system_helpers_live_smoke.py": {
+      "status": "passed",
+      "screenshot_size_bytes": 3382376,
+      "open_url": "ok",
+      "press_home": "ok"
+    },
+    "ios_app_lifecycle_live_smoke.py": {
+      "status": "passed",
+      "app_count": 49,
+      "launched_and_terminated": "com.apple.Preferences"
+    },
+    "ios_app_recording_crash_live_smoke.py": {
+      "status": "passed",
+      "app_count": 49,
+      "recording": "approved unsupported_platform",
+      "crash_count": 51,
+      "sample_id": "redacted-real-crash-id",
+      "sample_read": "passed"
+    }
+  },
+  "history": {
+    "first_app_lifecycle_attempt": "failed because device auto-locked",
+    "final_app_lifecycle_attempt_after_unlock": "passed"
+  },
+  "summary": {
+    "passed": 4,
+    "blocked": 0,
+    "failed": 0,
+    "timed_out": 0
+  }
+}

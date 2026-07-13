@@ -58,6 +58,22 @@ def _ios_button_name(button: str) -> str:
     }
     return mapping.get(key, button)
 
+
+def wda_swipe_payload(start_x: float, start_y: float, end_x: float, end_y: float) -> dict[str, Any]:
+    return {
+        "actions": [{
+            "type": "pointer",
+            "id": "finger1",
+            "parameters": {"pointerType": "touch"},
+            "actions": [
+                {"type": "pointerMove", "duration": 0, "x": start_x, "y": start_y},
+                {"type": "pointerDown", "button": 0},
+                {"type": "pointerMove", "duration": 1000, "x": end_x, "y": end_y},
+                {"type": "pointerUp", "button": 0},
+            ],
+        }]
+    }
+
 async def _shared_userspace_rsd(device_id: str) -> Any:
     global _PROCESS_TUNNEL, _PROCESS_RSD, _PROCESS_TUNNEL_DEVICE
     async with _PROCESS_TUNNEL_LOCK:
@@ -212,6 +228,7 @@ class IOSDriver(BaseDriver):
         self._tunnel: Any | None = None
         self._client: Any | None = None
         self._session_id: str | None = None
+        self._fallback_session_ids: set[str] = set()
         self._xct_task: asyncio.Task[Any] | None = None
         self._connected = False
         self._lock = asyncio.Lock()
@@ -256,8 +273,10 @@ class IOSDriver(BaseDriver):
             return await self._fake_call("get_screen_size", ScreenSize(width=0, height=0))
         await self._ensure_connected()
         assert self._client is not None
-        value = await self._client.get_window_size(session_id=await self._session())
-        return ScreenSize(width=float(value.get("width", 0)), height=float(value.get("height", 0)), scale=1.0)
+        data = await self._client._request_json("GET", f"/session/{await self._session()}/wda/screen", None)
+        value = data.get("value", data)
+        screen = value.get("screenSize", value)
+        return ScreenSize(width=int(screen.get("width", 0)), height=int(screen.get("height", 0)), scale=float(value.get("scale") or 1.0))
 
     async def tap(self, x: float, y: float) -> None:
         if self._fake_wda is not None:
@@ -307,7 +326,9 @@ class IOSDriver(BaseDriver):
             return
         await self._ensure_connected()
         assert self._client is not None
-        await self._client.swipe(int(start_x), int(start_y), int(end_x), int(end_y), session_id=await self._session())
+        path = f"/session/{await self._session()}/actions"
+        await self._client._request_json("POST", path, wda_swipe_payload(start_x, start_y, end_x, end_y))
+        await self._client._request_json("DELETE", path, None)
 
     async def type_keys(self, text: str, submit: bool) -> None:
         if self._fake_wda is not None:
@@ -380,7 +401,19 @@ class IOSDriver(BaseDriver):
                 "shouldWaitForQuiescence": False,
             }
             payload = {"capabilities": {"alwaysMatch": caps}, "desiredCapabilities": caps}
-            await self._client._request_json("POST", "/session", payload)
+            data = await self._client._request_json("POST", "/session", payload)
+            fallback_session = data.get("sessionId")
+            if not fallback_session and isinstance(data.get("value"), dict):
+                fallback_session = data["value"].get("sessionId")
+            if fallback_session:
+                fallback_session = str(fallback_session)
+                self._fallback_session_ids.add(fallback_session)
+                try:
+                    await self._client._request_json("DELETE", f"/session/{fallback_session}", None)
+                except Exception:
+                    pass
+                else:
+                    self._fallback_session_ids.discard(fallback_session)
             return
         except Exception as exc:
             last_exc = exc
@@ -471,11 +504,11 @@ class IOSDriver(BaseDriver):
         except Exception as exc:
             raise DriverError("ios", f'Failed uninstalling app "{package_name}": {exc}', {"packageName": package_name}) from exc
 
-    async def start_recording(self, remote_path: str, time_limit: int | None = None):
+    async def start_recording(self, remote_path: str, time_limit: int | float | None = None):
         del remote_path, time_limit
         raise UnsupportedPlatformError(
             "mobile_start_screen_recording",
-            "iOS screen recording is not available through pure pymobiledevice3/WDA yet.",
+            "iOS screen recording is not available through pure pymobiledevice3/WDA yet",
             {"platform": "ios"},
         )
 
@@ -483,7 +516,7 @@ class IOSDriver(BaseDriver):
         del process, remote_path, local_path
         raise UnsupportedPlatformError(
             "mobile_stop_screen_recording",
-            "iOS screen recording is not available through pure pymobiledevice3/WDA yet.",
+            "iOS screen recording is not available through pure pymobiledevice3/WDA yet",
             {"platform": "ios"},
         )
 
@@ -607,13 +640,17 @@ class IOSDriver(BaseDriver):
             ) from exc
 
     async def _teardown_locked(self) -> None:
-        if self._xct_task is not None:
-            self._xct_task.cancel()
-            with suppress(asyncio.CancelledError):
-                await self._xct_task
-            self._xct_task = None
+        if self._client is not None:
+            for fallback_session in tuple(self._fallback_session_ids):
+                with suppress(Exception):
+                    await self._client._request_json("DELETE", f"/session/{fallback_session}", None)
+                self._fallback_session_ids.discard(fallback_session)
+        if self._client is not None and self._session_id is not None:
+            with suppress(Exception):
+                await self._client._request_json("DELETE", f"/session/{self._session_id}", None)
         self._session_id = None
-        # Keep process-wide userspace tunnel alive for subsequent MCP calls.
+        # The XCUITest task and process-wide userspace tunnel are shared by later calls.
+        self._xct_task = None
         self._client = None
         self._rsd = None
 

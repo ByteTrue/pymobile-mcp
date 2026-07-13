@@ -19,7 +19,7 @@ class ToolSpec:
     content_kind: Literal["text", "image"] = "text"
 
     def to_mcp_tool(self) -> Any:
-        from mcp.types import Tool
+        from mcp.types import Tool, ToolExecution
 
         return Tool(
             name=self.name,
@@ -27,6 +27,7 @@ class ToolSpec:
             description=self.description,
             inputSchema=self.input_schema,
             annotations=self.annotations or None,
+            execution=ToolExecution(taskSupport="forbidden"),
         )
 
 
@@ -47,12 +48,14 @@ def _enum(values: list[str], description: str) -> Schema:
 
 
 def _object(properties: dict[str, Schema], required: list[str]) -> Schema:
-    return {
+    schema: Schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": properties,
-        "required": required,
-        "additionalProperties": False,
     }
+    if required:
+        schema["required"] = required
+    return schema
 
 
 DEVICE = _string("The device identifier to use. Use mobile_list_available_devices to find which devices are available to you.")
@@ -61,6 +64,31 @@ COORDINATE_TOOLS = {
     "x": _number("The x coordinate on the screen, in pixels"),
     "y": _number("The y coordinate on the screen, in pixels"),
 }
+
+
+FLEET_TOOL_SPECS: tuple[ToolSpec, ...] = (
+    ToolSpec(
+        "mobile_list_remote_devices",
+        "List Remote Devices",
+        "List devices available in the remote fleet",
+        _object({}, []),
+        {"readOnlyHint": True},
+    ),
+    ToolSpec(
+        "mobile_allocate_remote_device",
+        "Allocate Remote Device",
+        "Reserve a device from the remote fleet",
+        _object({"platform": _enum(["ios", "android"], "The platform to allocate a device for")}, ["platform"]),
+        {"destructiveHint": True},
+    ),
+    ToolSpec(
+        "mobile_release_remote_device",
+        "Release Remote Device",
+        "Release a device back to the remote fleet",
+        _object({"device": _string("The device identifier to release back to the remote fleet")}, ["device"]),
+        {"destructiveHint": True},
+    ),
+)
 
 
 CORE_TOOL_SPECS: tuple[ToolSpec, ...] = (
@@ -136,21 +164,35 @@ CORE_TOOL_SPECS: tuple[ToolSpec, ...] = (
         "mobile_click_on_screen_at_coordinates",
         "Click Screen",
         "Click on the screen at given x,y coordinates. If clicking on an element, use the list_elements_on_screen tool to find the coordinates.",
-        _object(COORDINATE_TOOLS, ["device", "x", "y"]),
+        _object(
+            {"device": DEVICE, "x": _number("The x coordinate to click on the screen, in pixels"), "y": _number("The y coordinate to click on the screen, in pixels")},
+            ["device", "x", "y"],
+        ),
         {"destructiveHint": True},
     ),
     ToolSpec(
         "mobile_double_tap_on_screen",
         "Double Tap Screen",
         "Double-tap on the screen at given x,y coordinates.",
-        _object(COORDINATE_TOOLS, ["device", "x", "y"]),
+        _object(
+            {"device": DEVICE, "x": _number("The x coordinate to double-tap, in pixels"), "y": _number("The y coordinate to double-tap, in pixels")},
+            ["device", "x", "y"],
+        ),
         {"destructiveHint": True},
     ),
     ToolSpec(
         "mobile_long_press_on_screen_at_coordinates",
         "Long Press Screen",
         "Long press on the screen at given x,y coordinates. If long pressing on an element, use the list_elements_on_screen tool to find the coordinates.",
-        _object({**COORDINATE_TOOLS, "duration": _number("Duration of the long press in milliseconds. Defaults to 500ms.")}, ["device", "x", "y"]),
+        _object(
+            {
+                "device": DEVICE,
+                "x": _number("The x coordinate to long press on the screen, in pixels"),
+                "y": _number("The y coordinate to long press on the screen, in pixels"),
+                "duration": {**_number("Duration of the long press in milliseconds. Defaults to 500ms."), "minimum": 1, "maximum": 10000},
+            },
+            ["device", "x", "y"],
+        ),
         {"destructiveHint": True},
     ),
     ToolSpec(

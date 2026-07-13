@@ -1,0 +1,13 @@
+{
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "-q"
+  ],
+  "duration_seconds": 44.388,
+  "exit_code": 0,
+  "status": "passed",
+  "stderr": "",
+  "stdout": ".......................sss.............................................. [ 94%]\n....                                                                     [100%]\n73 passed, 3 skipped in 44.13s\n"
+}

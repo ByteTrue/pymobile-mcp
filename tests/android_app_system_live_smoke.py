@@ -18,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -30,9 +31,23 @@ def _payload(content: Any) -> dict[str, Any]:
 def _error_payload(content: Any) -> dict[str, Any] | None:
     if content[0].type != "text":
         return None
-    payload = json.loads(content[0].text)
-    return payload if payload.get("status") == "error" else None
+    text = content[0].text
+    if text.startswith(("Error:", "MCP error")) or text.endswith("Please fix the issue and try again."):
+        return {"message": text}
+    return None
 
+
+def _apps(content: Any) -> list[dict[str, str]]:
+    prefix = "Found these apps on device: "
+    return [{"appName": name, "packageName": package} for name, package in re.findall(r"([^,]+) \(([^)]+)\)", content[0].text.removeprefix(prefix))]
+
+
+def _orientation(content: Any) -> str:
+    return content[0].text.removeprefix("Current device orientation is ")
+
+
+def _saved_path(content: Any) -> Path:
+    return Path(content[0].text.removeprefix("Screenshot saved to: "))
 
 def _failed(reason: str, **extra: Any) -> int:
     print(json.dumps({"status": "failed", "reason": reason, **extra}, indent=2))
@@ -78,8 +93,8 @@ async def main() -> int:
                 return 2
 
             device_id = device["id"]
-            apps = _payload((await session.call_tool("mobile_list_apps", {"device": device_id})).content)
-            if not apps.get("apps"):
+            apps = _apps((await session.call_tool("mobile_list_apps", {"device": device_id})).content)
+            if not apps:
                 return _failed("list_apps returned empty", apps=apps)
 
             for tool, arguments in [
@@ -95,19 +110,18 @@ async def main() -> int:
             # invalid url must stay rejected without env override
             invalid = await session.call_tool("mobile_open_url", {"device": device_id, "url": "myapp://home"})
             invalid_payload = _error_payload(invalid.content)
-            if invalid_payload is None or invalid_payload.get("code") != "invalid_argument":
-                return _failed("custom scheme was not rejected", result=_payload(invalid.content))
+            if invalid_payload is None:
+                return _failed("custom scheme was not rejected", result=invalid.content[0].text)
 
-            orientation = _payload((await session.call_tool("mobile_get_orientation", {"device": device_id})).content)
-            if orientation.get("orientation") not in {"portrait", "landscape"}:
+            orientation = _orientation((await session.call_tool("mobile_get_orientation", {"device": device_id})).content)
+            if orientation not in {"portrait", "landscape"}:
                 return _failed("invalid orientation", orientation=orientation)
 
             save_to = Path("tmp-android-app-system-smoke.png")
             saved = await session.call_tool("mobile_save_screenshot", {"device": device_id, "saveTo": str(save_to)})
-            saved_payload = _payload(saved.content)
             if _error_payload(saved.content) is not None:
-                return _failed("save_screenshot failed", error=saved_payload)
-            path = Path(saved_payload["saveTo"])
+                return _failed("save_screenshot failed", error=saved.content[0].text)
+            path = _saved_path(saved.content)
             if not path.exists() or path.stat().st_size <= 0:
                 return _failed("saved screenshot missing", saveTo=str(path))
 
@@ -115,7 +129,7 @@ async def main() -> int:
             if _error_payload(unsafe.content) is None:
                 return _failed("unsafe saveTo was accepted")
 
-            package = apps["apps"][0]["packageName"]
+            package = apps[0]["packageName"]
             for tool, arguments in [
                 ("mobile_launch_app", {"device": device_id, "packageName": package}),
                 ("mobile_terminate_app", {"device": device_id, "packageName": package}),
@@ -148,8 +162,8 @@ async def main() -> int:
                     {
                         "status": "passed",
                         "device": device_id,
-                        "app_count": len(apps["apps"]),
-                        "orientation": orientation["orientation"],
+                        "app_count": len(apps),
+                        "orientation": orientation,
                         "saveTo": str(path),
                         "destructive": destructive,
                     },
