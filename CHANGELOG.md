@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.3.0 — 2026-07-13
+
+Black-box contract parity cut against pinned `mobile-mcp@c5d7d27`.
+
 - Docs: rewrite README install/MCP client quickstart and troubleshooting
 - CI: GitHub Actions unit tests on Python 3.11/3.12
 - Android: `PYMOBILE_MCP_ANDROID_DROPBOX_ALL=1` to include non-crash dropbox tags
@@ -9,6 +13,10 @@
 - iOS Simulator: native `simctl` discovery/app/system/recording with WDA UI; no go-ios/mobilecli runtime fallback
 - Contract verification: deterministic upstream raw-wire/call goldens, 91-scenario matrix, exception scope guard, image backend PSNR artifacts
 - Exceptions: remote-fleet success runtime and iOS real-device recording use user-approved exact Actionable responses
+
+### Known approved exceptions
+- Remote fleet success runtime without a Python fleet provider (documented Actionable response)
+- iOS real-device screen recording unsupported under pure userspace RSD (documented Actionable response)
 
 ## 0.2.0 — 2026-07-11
 

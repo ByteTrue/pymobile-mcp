@@ -1,4 +1,4 @@
-# Live regression checklist (v0.2.0)
+# Live regression checklist (v0.3.0)
 
 Use this after device reconnects, dependency bumps, or before tagging.
 
