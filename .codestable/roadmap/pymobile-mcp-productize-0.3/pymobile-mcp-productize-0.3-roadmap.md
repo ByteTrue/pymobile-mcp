@@ -1,7 +1,7 @@
 ---
 doc_type: roadmap
 slug: pymobile-mcp-productize-0.3
-status: active
+status: completed
 created: 2026-07-13
 last_reviewed: 2026-07-13
 tags: [mcp, mobile, release, productize, roadmap, v0.3]

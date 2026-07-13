@@ -1,11 +1,11 @@
 roadmap: "pymobile-mcp-productize-0.3"
-status: running
+status: complete
 baseline_ref: "d1fccc7ebce6514622045ea7a3be7b91e15aed78"
 driver_kind: none
 driver_id: ""
 handoff_reason: ""
 handoff_next: ""
-current_feature_index: 3
+current_feature_index: 4
 features:
   - slug: "release-0.3-black-box"
     roadmap_item: "release-0.3-black-box"
@@ -42,4 +42,4 @@ features:
     review: ".codestable/features/2026-07-13-exception-triage/exception-triage-review.md"
     qa: ".codestable/features/2026-07-13-exception-triage/exception-triage-qa.md"
     acceptance: ".codestable/features/2026-07-13-exception-triage/exception-triage-acceptance.md"
-    status: implementing
+    status: accepted

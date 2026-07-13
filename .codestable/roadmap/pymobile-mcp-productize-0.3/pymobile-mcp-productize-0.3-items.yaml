@@ -29,7 +29,7 @@ items:
   - slug: exception-triage
     description: fleet provider 与 iOS real recording 的 go/no-go 与触发条件；模板字段齐全；不实现 runtime
     depends_on: []
-    status: in-progress
+    status: done
     feature: 2026-07-13-exception-triage
     minimal_loop: false
     notes: core decision doc only; may spawn future roadmap

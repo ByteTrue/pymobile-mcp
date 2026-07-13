@@ -4,9 +4,9 @@ roadmap: pymobile-mcp-productize-0.3
 roadmap_item: exception-triage
 nature: non-functional
 current_summary:
-  stage: review
-  status: ready
-  note: docs-only triage; independent review pending then accept
+  stage: acceptance
+  status: passed
+  note: independent review passed
 steps:
 - action: Write docs/exception-triage-0.3.md for EXC-REMOTE-FLEET-RUNTIME with exact
     tools and cases
