@@ -21,7 +21,7 @@ items:
   - slug: pypi-publish
     description: 打通 PyPI 发布与 tag CI；成功或书面 blocked-by-env；不进入 core DoD
     depends_on: [release-0.3-black-box]
-    status: in-progress
+    status: done
     feature: 2026-07-13-pypi-publish
     minimal_loop: false
     notes: optional; blocked-by-env allowed; never core fail/pass

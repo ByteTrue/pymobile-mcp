@@ -4,47 +4,46 @@ roadmap: pymobile-mcp-productize-0.3
 roadmap_item: pypi-publish
 nature: non-functional
 current_summary:
-  stage: design
-  status: draft
-  note: epic_child_batch draft; YAML-safe commands
+  stage: acceptance
+  status: passed
+  note: optional blocked-by-env; independent review passed; not core fail
 steps:
-  - action: Precheck release-0.3-black-box accepted and version triple is 0.3.0
-    status: pending
-  - action: Assess package name and publish credentials readiness
-    status: pending
-  - action: If credentials available add separate tag-triggered publish workflow
-    status: pending
-  - action: Write status file for published or blocked-by-env outcome
-    status: pending
-  - action: On build/upload/install failure record status failed and fail acceptance
-    status: pending
-  - action: Ensure optional outcome does not rewrite core complete
-    status: pending
+- action: Precheck release-0.3-black-box accepted and version triple is 0.3.0
+  status: done
+- action: Assess package name and publish credentials readiness
+  status: done
+- action: If credentials available add separate tag-triggered publish workflow
+  status: done
+- action: Write status file for published or blocked-by-env outcome
+  status: done
+- action: On build/upload/install failure record status failed and fail acceptance
+  status: done
+- action: Ensure optional outcome does not rewrite core complete
+  status: done
 checks:
-  - item: precheck release-0.3 accepted and version 0.3.0
-    status: pending
-  - item: status file exists with published blocked-by-env or failed
-    status: pending
-  - item: published status includes install or index evidence for 0.3.0
-    status: pending
-  - item: missing token is blocked-by-env; build upload install errors are failed
-    status: pending
-  - item: core DoD artifacts not rewritten by optional outcome
-    status: pending
-  - item: no public API or schema change
-    status: pending
+- item: precheck release-0.3 accepted and version 0.3.0
+  status: passed
+- item: status file exists with published blocked-by-env or failed
+  status: passed
+- item: published status includes install or index evidence for 0.3.0
+  status: passed
+- item: missing token is blocked-by-env; build upload install errors are failed
+  status: passed
+- item: core DoD artifacts not rewritten by optional outcome
+  status: passed
+- item: no public API or schema change
+  status: passed
 dod:
   commands:
-    - id: CMD-001
-      command: python -m pytest
-      core: true
-    - id: CMD-PYPI-001
-      command: >
-        python -c 'from pathlib import Path; p=Path(".codestable/features/2026-07-13-pypi-publish/pypi-publish-status.md");
-        assert p.is_file(), "missing status file";
-        t=p.read_text().lower();
-        ok=("status: published" in t) or ("status: blocked-by-env" in t) or ("status: failed" in t);
-        assert ok, t;
-        pub="status: published" in t;
-        assert (not pub) or (("0.3.0" in t) and (("pip" in t) or ("index" in t) or ("install" in t)))'
-      core: false
+  - id: CMD-001
+    command: PATH=.venv/bin:$PATH python -m pytest
+    core: true
+  - id: CMD-PYPI-001
+    command: 'PATH=.venv/bin:$PATH python -c ''from pathlib import Path; p=Path(".codestable/features/2026-07-13-pypi-publish/pypi-publish-status.md");
+      assert p.is_file(), "missing status file"; t=p.read_text().lower(); ok=("status:
+      published" in t) or ("status: blocked-by-env" in t) or ("status: failed" in
+      t); assert ok, t; pub="status: published" in t; assert (not pub) or (("0.3.0"
+      in t) and (("pip" in t) or ("index" in t) or ("install" in t)))''
+
+      '
+    core: false

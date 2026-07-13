@@ -5,7 +5,7 @@ driver_kind: none
 driver_id: ""
 handoff_reason: ""
 handoff_next: ""
-current_feature_index: 2
+current_feature_index: 3
 features:
   - slug: "release-0.3-black-box"
     roadmap_item: "release-0.3-black-box"
@@ -33,7 +33,7 @@ features:
     review: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-review.md"
     qa: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-qa.md"
     acceptance: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-acceptance.md"
-    status: pending
+    status: accepted
   - slug: "exception-triage"
     roadmap_item: "exception-triage"
     feature_dir: ".codestable/features/2026-07-13-exception-triage"
@@ -42,4 +42,4 @@ features:
     review: ".codestable/features/2026-07-13-exception-triage/exception-triage-review.md"
     qa: ".codestable/features/2026-07-13-exception-triage/exception-triage-qa.md"
     acceptance: ".codestable/features/2026-07-13-exception-triage/exception-triage-acceptance.md"
-    status: pending
+    status: implementing

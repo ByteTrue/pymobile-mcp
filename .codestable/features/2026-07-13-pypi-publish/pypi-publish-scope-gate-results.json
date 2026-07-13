@@ -1,0 +1,25 @@
+{
+  "gate_id": "scope-gate",
+  "stage": "implementation",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "changed_files": [
+        ".codestable/features/2026-07-13-pypi-publish/pypi-publish-checklist.yaml",
+        ".codestable/roadmap/pymobile-mcp-productize-0.3/goal-state.yaml",
+        ".codestable/features/2026-07-13-pypi-publish/pypi-publish-status.md"
+      ],
+      "ignored_machine_artifacts": [
+        ".codestable/features/2026-07-13-pypi-publish/pypi-publish-dod-results.json"
+      ],
+      "allowed_prefixes": [
+        ".codestable/features/2026-07-13-pypi-publish",
+        ".codestable/features/2026-07-13-pypi-publish",
+        ".codestable/roadmap/pymobile-mcp-productize-0.3"
+      ]
+    }
+  ],
+  "providers": {}
+}
