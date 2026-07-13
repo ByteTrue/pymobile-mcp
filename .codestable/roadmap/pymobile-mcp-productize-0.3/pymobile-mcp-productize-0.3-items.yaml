@@ -1,0 +1,35 @@
+roadmap: pymobile-mcp-productize-0.3
+created: 2026-07-13
+
+items:
+  - slug: release-0.3-black-box
+    description: 发布 v0.3.0，沉淀 black-box parity 与四端证据为正式 cut，并写清两项 approved exception
+    depends_on: []
+    status: pending
+    feature: null
+    minimal_loop: true
+    notes: version/CHANGELOG/GitHub Release/README; no runtime feature work
+
+  - slug: oracle-upgrade-playbook
+    description: 固化 mobile-mcp pin 升级与 deterministic bundle 刷新 SOP（capture、hash、CMD-001~008、最小 live）
+    depends_on: [release-0.3-black-box]
+    status: pending
+    feature: null
+    minimal_loop: false
+    notes: docs-only; must be executable dry-run commands, not prose-only
+
+  - slug: pypi-publish
+    description: 打通 PyPI 发布与 tag CI；若 token/包名阻塞则记录 blocked-by-env 且不阻塞 git release
+    depends_on: [release-0.3-black-box]
+    status: pending
+    feature: null
+    minimal_loop: false
+    notes: optional distribution; may exit blocked without failing whole roadmap
+
+  - slug: exception-triage
+    description: 对 remote fleet provider 与 iOS real recording 做 go/no-go 决策与触发条件，不实现 runtime
+    depends_on: []
+    status: pending
+    feature: null
+    minimal_loop: false
+    notes: decision doc only; may spawn future roadmap, not implement providers
