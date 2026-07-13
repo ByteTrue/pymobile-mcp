@@ -1,0 +1,26 @@
+{
+  "gate_id": "scope-gate",
+  "stage": "implementation",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "changed_files": [
+        ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-checklist.yaml",
+        ".codestable/roadmap/pymobile-mcp-productize-0.3/goal-state.yaml",
+        "docs/oracle-upgrade-playbook.md"
+      ],
+      "ignored_machine_artifacts": [
+        ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-dod-results.json"
+      ],
+      "allowed_prefixes": [
+        ".codestable/features/2026-07-13-oracle-upgrade-playbook",
+        "docs",
+        ".codestable/features/2026-07-13-oracle-upgrade-playbook",
+        ".codestable/roadmap/pymobile-mcp-productize-0.3"
+      ]
+    }
+  ],
+  "providers": {}
+}

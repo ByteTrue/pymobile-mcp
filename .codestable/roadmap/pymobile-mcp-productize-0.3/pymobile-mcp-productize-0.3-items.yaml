@@ -13,10 +13,10 @@ items:
   - slug: oracle-upgrade-playbook
     description: 固化 mobile-mcp pin 维护/升级 SOP（no-op vs re-capture、CMD-001~008、exit 0/1/2、现有 scripts 入口）
     depends_on: []
-    status: in-progress
+    status: done
     feature: 2026-07-13-oracle-upgrade-playbook
     minimal_loop: false
-    notes: core docs; hang scripts/*; MOBILE_MCP_SOURCE env; link black-box feature evidence commands
+    notes: core docs; hang scripts/*; PYMOBILE_MCP_UPSTREAM_SOURCE; link black-box feature evidence commands; accepted 2026-07-13
 
   - slug: pypi-publish
     description: 打通 PyPI 发布与 tag CI；成功或书面 blocked-by-env；不进入 core DoD

@@ -5,7 +5,7 @@ driver_kind: none
 driver_id: ""
 handoff_reason: ""
 handoff_next: ""
-current_feature_index: 1
+current_feature_index: 2
 features:
   - slug: "release-0.3-black-box"
     roadmap_item: "release-0.3-black-box"
@@ -24,7 +24,7 @@ features:
     review: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-review.md"
     qa: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-qa.md"
     acceptance: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-acceptance.md"
-    status: pending
+    status: accepted
   - slug: "pypi-publish"
     roadmap_item: "pypi-publish"
     feature_dir: ".codestable/features/2026-07-13-pypi-publish"
