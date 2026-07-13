@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Packaging: published `0.3.0` to PyPI via Trusted Publisher (`.github/workflows/publish.yml`)
+
 ## 0.3.0 — 2026-07-13
 
 Black-box contract parity cut against pinned `mobile-mcp@c5d7d27`.

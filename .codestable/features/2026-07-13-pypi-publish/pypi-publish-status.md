@@ -2,33 +2,27 @@
 doc_type: pypi-publish-status
 feature: 2026-07-13-pypi-publish
 version: 0.3.0
-status: blocked-by-env
-timestamp: 2026-07-13T19:40:00+08:00
+status: published
+timestamp: 2026-07-13T22:20:00+08:00
 ---
 
 # pypi-publish status
 
 ```yaml
-status: blocked-by-env
+status: published
 version: 0.3.0
-reason: "No PyPI credentials in this environment (PYPI_API_TOKEN unset) and Trusted Publisher / OIDC upload was not configured for an automated publish run. Optional distribution path remains blocked without changing core release completeness."
-timestamp: 2026-07-13T19:40:00+08:00
+reason: "Trusted Publisher OIDC publish succeeded via GitHub Actions workflow publish.yml"
+timestamp: 2026-07-13T22:20:00+08:00
 evidence: |
-  - release-0.3-black-box accepted; version triple pyproject/__version__/tag = 0.3.0
-  - env check: PYPI_API_TOKEN empty
-  - no interactive PyPI login / Trusted Publisher publish executed
-  - package name pymobile-mcp remains free of runtime/schema changes in this feature
-  - optional outcome must not rewrite core DoD or goal complete aggregation
+  - Pending publisher: project pymobile-mcp, ByteTrue/pymobile-mcp, workflow publish.yml, Environment (Any)
+  - Workflow: https://github.com/ByteTrue/pymobile-mcp/actions/runs/29257502460 (success)
+  - PyPI JSON: https://pypi.org/pypi/pymobile-mcp/json → version 0.3.0
+  - pip index versions pymobile-mcp → Available versions: 0.3.0
+  - pip install --dry-run pymobile-mcp==0.3.0 → Would install pymobile-mcp-0.3.0
+  - Project page: https://pypi.org/project/pymobile-mcp/
 ```
 
 ## Classification
 
-- missing token / unconfigured Trusted Publisher → **blocked-by-env** (not `failed`)
-- no build/upload/install was attempted, so status is not `failed`
-- core complete remains independent of this optional feature
-
-## Next actions (outside 0.3 core)
-
-1. Configure GitHub Environment Trusted Publisher for `pymobile-mcp` on PyPI, or set `PYPI_API_TOKEN` secret
-2. Add/enable tag-triggered `.github/workflows/publish.yml` when credentials exist
-3. Re-run publish for `v0.3.0` or next tag and update this file to `status: published` with pip index/install evidence
+- published via Trusted Publisher (no long-lived API token)
+- optional feature outcome no longer blocked-by-env

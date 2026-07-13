@@ -53,6 +53,12 @@ pip install -e ".[dev]"
 python -m pytest -q
 ```
 
+### From PyPI
+
+```bash
+pip install pymobile-mcp==0.3.0
+```
+
 ### From GitHub (no local clone of tooling)
 
 ```bash
