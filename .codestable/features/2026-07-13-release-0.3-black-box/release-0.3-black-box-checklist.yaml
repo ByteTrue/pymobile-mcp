@@ -1,0 +1,67 @@
+feature: 2026-07-13-release-0.3-black-box
+created: 2026-07-13
+roadmap: pymobile-mcp-productize-0.3
+roadmap_item: release-0.3-black-box
+nature: non-functional
+current_summary:
+  stage: design
+  status: draft
+  note: epic_child_batch draft; YAML-safe commands
+steps:
+  - action: Bump pyproject.toml and __init__.__version__ to 0.3.0
+    status: pending
+  - action: Move entire CHANGELOG Unreleased into section 0.3.0; leave Unreleased empty
+    status: pending
+  - action: Update README current release and install ref to v0.3.0
+    status: pending
+  - action: Update docs/regression-checklist.md version header to v0.3.0
+    status: pending
+  - action: Create annotated git tag v0.3.0
+    status: pending
+  - action: Create GitHub Release v0.3.0 with black-box parity and two approved exceptions
+    status: pending
+  - action: Run CMD-001 CMD-REL-001 CMD-REL-002 CMD-BUNDLE-001
+    status: pending
+checks:
+  - item: pyproject version equals __version__ equals 0.3.0
+    status: pending
+  - item: git tag v0.3.0 and GitHub Release v0.3.0 exist
+    status: pending
+  - item: Release body mentions black-box parity, fleet exception, recording exception
+    status: pending
+  - item: CHANGELOG has 0.3.0 section and Unreleased is empty of pre-0.3 notes
+    status: pending
+  - item: README and regression-checklist point to 0.3.0
+    status: pending
+  - item: pytest exit 0
+    status: pending
+  - item: bundle-manifest.json not dirty
+    status: pending
+  - item: no runtime or schema contract changes in release diff
+    status: pending
+dod:
+  commands:
+    - id: CMD-001
+      command: python -m pytest
+      core: true
+    - id: CMD-REL-001
+      command: >
+        python -c 'import tomllib, pathlib; from pymobile_mcp import __version__;
+        v=tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"];
+        assert v == __version__ == "0.3.0", (v, __version__)'
+      core: true
+    - id: CMD-REL-002
+      command: >
+        git rev-parse -q --verify refs/tags/v0.3.0
+        && gh release view v0.3.0 --json tagName,body
+        --jq ".tagName + \"\\n\" + .body"
+        | python -c 'import sys; t=sys.stdin.read().lower();
+        assert "0.3.0" in t;
+        assert ("black-box" in t) or ("parity" in t);
+        assert "fleet" in t;
+        assert "recording" in t'
+      core: true
+    - id: CMD-BUNDLE-001
+      command: >
+        python -c 'import subprocess; out=subprocess.check_output(["git","status","--porcelain","--","tests/fixtures/mobile_mcp/bundle-manifest.json"], text=True); assert out.strip()=="", out'
+      core: true

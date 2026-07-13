@@ -1,0 +1,49 @@
+feature: 2026-07-13-exception-triage
+created: 2026-07-13
+roadmap: pymobile-mcp-productize-0.3
+roadmap_item: exception-triage
+nature: non-functional
+current_summary:
+  stage: design
+  status: draft
+  note: epic_child_batch draft; YAML-safe commands
+steps:
+  - action: Write docs/exception-triage-0.3.md for EXC-REMOTE-FLEET-RUNTIME with exact tools and cases
+    status: pending
+  - action: Write EXC-IOS-SCREEN-RECORDING-RUNTIME section with platform ios device_type real
+    status: pending
+  - action: Fill decision trigger ledger_narrowing future_roadmap_slug for each case
+    status: pending
+  - action: Confirm docs-only allowlist and no exceptions.yaml mutation
+    status: pending
+  - action: Run CMD-001 and CMD-TRIAGE-001
+    status: pending
+checks:
+  - item: both EXC cases present with decision enum
+    status: pending
+  - item: template fields complete
+    status: pending
+  - item: bound to exact ledger tools and cases
+    status: pending
+  - item: docs-only allowlist respected
+    status: pending
+  - item: no fleet provider or iOS real recording implementation
+    status: pending
+dod:
+  commands:
+    - id: CMD-001
+      command: python -m pytest
+      core: true
+    - id: CMD-TRIAGE-001
+      command: >
+        python -c 'from pathlib import Path; p=Path("docs/exception-triage-0.3.md");
+        assert p.is_file(), p; t=p.read_text();
+        assert "EXC-REMOTE-FLEET-RUNTIME" in t;
+        assert "EXC-IOS-SCREEN-RECORDING-RUNTIME" in t;
+        assert "mobile_list_remote_devices" in t;
+        assert "mobile_allocate_remote_device" in t;
+        assert "mobile_release_remote_device" in t;
+        assert "S-REMOTE-LIST" in t;
+        assert "S-START-REC-IOS" in t;
+        assert "decision:" in t.lower()'
+      core: true

@@ -1,0 +1,49 @@
+feature: 2026-07-13-oracle-upgrade-playbook
+created: 2026-07-13
+roadmap: pymobile-mcp-productize-0.3
+roadmap_item: oracle-upgrade-playbook
+nature: non-functional
+current_summary:
+  stage: design
+  status: draft
+  note: epic_child_batch draft; YAML-safe commands
+steps:
+  - action: Write docs/oracle-upgrade-playbook.md with no-op and pin-upgrade sections
+    status: pending
+  - action: Document five scripts, exit codes 0/1/2, blocked not pass, approved_exception disposition rules
+    status: pending
+  - action: Document sanitized full command templates with required flags and PYMOBILE_MCP_UPSTREAM_SOURCE
+    status: pending
+  - action: Link black-box feature command table and pin provenance; forbid absolute /Users paths
+    status: pending
+  - action: Run CMD-001 and CMD-ORACLE-001
+    status: pending
+checks:
+  - item: playbook distinguishes no-op vs full re-capture
+    status: pending
+  - item: lists existing scripts without new abstraction
+    status: pending
+  - item: exit 0/1/2 and blocked not pass documented
+    status: pending
+  - item: no hard-coded absolute /Users upstream path
+    status: pending
+  - item: playbook documents required flags per script
+    status: pending
+  - item: CMD-ORACLE-001 dry-run passed
+    status: pending
+dod:
+  commands:
+    - id: CMD-001
+      command: python -m pytest
+      core: true
+    - id: CMD-ORACLE-001
+      command: >
+        python -c 'from pathlib import Path; req=["scripts/capture_mobile_mcp_contract.py","scripts/capture_mobile_mcp_calls.py","scripts/assert_mobile_mcp_contract.py","scripts/validate_mobile_mcp_source_coverage.py","scripts/compare_mobile_mcp_image_backends.py"];
+        missing=[p for p in req if not Path(p).is_file()]; assert not missing, missing;
+        pb=Path("docs/oracle-upgrade-playbook.md"); assert pb.is_file(), pb;
+        text=pb.read_text();
+        assert "PYMOBILE_MCP_UPSTREAM_SOURCE" in text;
+        assert "/Users/" not in text;
+        for flag in ["--source","--mode","--expected-revision","--scenarios","--bundle-manifest","blocked"]:
+            assert flag in text, flag'
+      core: true

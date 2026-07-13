@@ -5,31 +5,31 @@ items:
   - slug: release-0.3-black-box
     description: 发布 v0.3.0；版本三元一致；CHANGELOG/README/regression-checklist 切割；GitHub Release 写清 black-box 与两项 exception
     depends_on: []
-    status: pending
-    feature: null
+    status: in-progress
+    feature: 2026-07-13-release-0.3-black-box
     minimal_loop: true
     notes: core; pyproject+__version__+tag/Release; Unreleased→0.3.0; no runtime feature work
 
   - slug: oracle-upgrade-playbook
     description: 固化 mobile-mcp pin 维护/升级 SOP（no-op vs re-capture、CMD-001~008、exit 0/1/2、现有 scripts 入口）
     depends_on: []
-    status: pending
-    feature: null
+    status: in-progress
+    feature: 2026-07-13-oracle-upgrade-playbook
     minimal_loop: false
     notes: core docs; hang scripts/*; MOBILE_MCP_SOURCE env; link black-box feature evidence commands
 
   - slug: pypi-publish
     description: 打通 PyPI 发布与 tag CI；成功或书面 blocked-by-env；不进入 core DoD
     depends_on: [release-0.3-black-box]
-    status: pending
-    feature: null
+    status: in-progress
+    feature: 2026-07-13-pypi-publish
     minimal_loop: false
     notes: optional; blocked-by-env allowed; never core fail/pass
 
   - slug: exception-triage
     description: fleet provider 与 iOS real recording 的 go/no-go 与触发条件；模板字段齐全；不实现 runtime
     depends_on: []
-    status: pending
-    feature: null
+    status: in-progress
+    feature: 2026-07-13-exception-triage
     minimal_loop: false
     notes: core decision doc only; may spawn future roadmap
