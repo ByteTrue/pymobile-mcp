@@ -1,0 +1,45 @@
+roadmap: "pymobile-mcp-productize-0.3"
+status: ready-to-dispatch
+baseline_ref: "d1fccc7ebce6514622045ea7a3be7b91e15aed78"
+driver_kind: none
+driver_id: ""
+handoff_reason: ""
+handoff_next: ""
+current_feature_index: 0
+features:
+  - slug: "release-0.3-black-box"
+    roadmap_item: "release-0.3-black-box"
+    feature_dir: ".codestable/features/2026-07-13-release-0.3-black-box"
+    design: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-design.md"
+    checklist: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-checklist.yaml"
+    review: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-review.md"
+    qa: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-qa.md"
+    acceptance: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-acceptance.md"
+    status: pending
+  - slug: "oracle-upgrade-playbook"
+    roadmap_item: "oracle-upgrade-playbook"
+    feature_dir: ".codestable/features/2026-07-13-oracle-upgrade-playbook"
+    design: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-design.md"
+    checklist: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-checklist.yaml"
+    review: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-review.md"
+    qa: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-qa.md"
+    acceptance: ".codestable/features/2026-07-13-oracle-upgrade-playbook/oracle-upgrade-playbook-acceptance.md"
+    status: pending
+  - slug: "pypi-publish"
+    roadmap_item: "pypi-publish"
+    feature_dir: ".codestable/features/2026-07-13-pypi-publish"
+    design: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-design.md"
+    checklist: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-checklist.yaml"
+    review: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-review.md"
+    qa: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-qa.md"
+    acceptance: ".codestable/features/2026-07-13-pypi-publish/pypi-publish-acceptance.md"
+    status: pending
+  - slug: "exception-triage"
+    roadmap_item: "exception-triage"
+    feature_dir: ".codestable/features/2026-07-13-exception-triage"
+    design: ".codestable/features/2026-07-13-exception-triage/exception-triage-design.md"
+    checklist: ".codestable/features/2026-07-13-exception-triage/exception-triage-checklist.yaml"
+    review: ".codestable/features/2026-07-13-exception-triage/exception-triage-review.md"
+    qa: ".codestable/features/2026-07-13-exception-triage/exception-triage-qa.md"
+    acceptance: ".codestable/features/2026-07-13-exception-triage/exception-triage-acceptance.md"
+    status: pending

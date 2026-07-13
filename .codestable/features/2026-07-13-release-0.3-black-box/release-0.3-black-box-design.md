@@ -1,7 +1,7 @@
 ---
 doc_type: feature-design
 slug: release-0.3-black-box
-status: draft
+status: approved
 created: 2026-07-13
 roadmap: pymobile-mcp-productize-0.3
 roadmap_item: release-0.3-black-box

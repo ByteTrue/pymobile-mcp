@@ -1,7 +1,7 @@
 ---
 doc_type: feature-design
 slug: oracle-upgrade-playbook
-status: draft
+status: approved
 created: 2026-07-13
 roadmap: pymobile-mcp-productize-0.3
 roadmap_item: oracle-upgrade-playbook

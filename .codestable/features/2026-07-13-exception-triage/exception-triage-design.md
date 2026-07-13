@@ -1,7 +1,7 @@
 ---
 doc_type: feature-design
 slug: exception-triage
-status: draft
+status: approved
 created: 2026-07-13
 roadmap: pymobile-mcp-productize-0.3
 roadmap_item: exception-triage
