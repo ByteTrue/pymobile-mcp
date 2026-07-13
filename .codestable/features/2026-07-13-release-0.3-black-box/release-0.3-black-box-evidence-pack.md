@@ -1,0 +1,175 @@
+---
+doc_type: feature-evidence-pack
+feature: release-0.3-black-box
+status: generated
+---
+
+# release-0.3-black-box evidence pack
+
+## 1. Scope
+
+- Design: `.codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-design.md`
+- Checklist: `.codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-checklist.yaml`
+
+## 2. DoD Results
+
+```json
+{
+  "gate_id": "dod-runner",
+  "stage": "implementation",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "command": "python -m pytest",
+      "exit_code": 0,
+      "stdout": "============================= test session starts ==============================\nplatform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0\nrootdir: /Users/byte/workspace/projects/pymobile-mcp\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, anyio-4.14.1, asyncio-1.4.0\nasyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function\ncollected 107 items\n\ntests/test_all_devices_live_smoke.py ........                            [  7%]\ntests/test_black_box_contract.py ...............................         [ 36%]\ntests/test_contract_registry.py ........................................ [ 73%]\n.......                                                                  [ 80%]\ntests/test_driver_qa_fixes.py ..................                         [ 97%]\ntests/test_ios_live_smoke_support.py ...                                 [100%]\n\n============================= 107 passed in 3.96s ==============================\n",
+      "stderr": "",
+      "id": "CMD-001",
+      "core": true,
+      "failure_handling": null
+    },
+    {
+      "command": "python -c 'import tomllib, pathlib; from pymobile_mcp import __version__; v=tomllib.loads(pathlib.Path(\"pyproject.toml\").read_text())[\"project\"][\"version\"]; assert v == __version__ == \"0.3.0\", (v, __version__)'\n",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "id": "CMD-REL-001",
+      "core": true,
+      "failure_handling": null
+    },
+    {
+      "command": "git rev-parse -q --verify refs/tags/v0.3.0 && gh release view v0.3.0 --json tagName,body --jq \".tagName + \\\"\\\\n\\\" + .body\" | python -c 'import sys; t=sys.stdin.read().lower(); assert \"0.3.0\" in t; assert (\"black-box\" in t) or (\"parity\" in t); assert \"fleet\" in t; assert \"recording\" in t'\n",
+      "exit_code": 0,
+      "stdout": "b2dc167a4611b273c3318d138848632b3ce64bd9\n",
+      "stderr": "",
+      "id": "CMD-REL-002",
+      "core": true,
+      "failure_handling": null
+    },
+    {
+      "command": "python -c 'import subprocess; out=subprocess.check_output([\"git\",\"status\",\"--porcelain\",\"--\",\"tests/fixtures/mobile_mcp/bundle-manifest.json\"], text=True); assert out.strip()==\"\", out'\n",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "id": "CMD-BUNDLE-001",
+      "core": true,
+      "failure_handling": null
+    }
+  ],
+  "providers": {}
+}
+```
+
+## 3. Validation Commands
+
+Extracted from checklist `dod.commands`; see DoD Results for command status.
+
+## 4. Scope And Cleanliness
+
+Design bytes: 1454
+Checklist bytes: 2560
+
+## 5. Residual Risks
+
+- none
+
+## 6. Provider Signals
+
+```json
+{
+  "archguard": {
+    "status": "skipped",
+    "reason": "archguard collection disabled",
+    "warnings": []
+  },
+  "meta_cc": {
+    "status": "skipped",
+    "reason": "meta-cc collection disabled",
+    "warnings": []
+  }
+}
+```
+
+## 7. Gate Results
+
+```json
+{
+  "gates": [
+    {
+      "gate_id": "scope-gate",
+      "stage": "implementation",
+      "status": "passed",
+      "blocking": [],
+      "warnings": [],
+      "evidence": [
+        {
+          "changed_files": [
+            ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-checklist.yaml",
+            ".codestable/roadmap/pymobile-mcp-productize-0.3/goal-state.yaml"
+          ],
+          "ignored_machine_artifacts": [],
+          "allowed_prefixes": [
+            ".codestable/features/2026-07-13-release-0.3-black-box",
+            "pyproject.toml",
+            "src/pymobile_mcp/__init__.py",
+            "CHANGELOG.md",
+            "README.md",
+            "docs/regression-checklist.md",
+            ".codestable/features/2026-07-13-release-0.3-black-box",
+            ".codestable/roadmap/pymobile-mcp-productize-0.3"
+          ]
+        }
+      ],
+      "providers": {}
+    },
+    {
+      "gate_id": "dod-runner",
+      "stage": "implementation",
+      "status": "passed",
+      "blocking": [],
+      "warnings": [],
+      "evidence": [
+        {
+          "command": "python -m pytest",
+          "exit_code": 0,
+          "stdout": "============================= test session starts ==============================\nplatform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0\nrootdir: /Users/byte/workspace/projects/pymobile-mcp\nconfigfile: pyproject.toml\nplugins: cov-7.1.0, anyio-4.14.1, asyncio-1.4.0\nasyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function\ncollected 107 items\n\ntests/test_all_devices_live_smoke.py ........                            [  7%]\ntests/test_black_box_contract.py ...............................         [ 36%]\ntests/test_contract_registry.py ........................................ [ 73%]\n.......                                                                  [ 80%]\ntests/test_driver_qa_fixes.py ..................                         [ 97%]\ntests/test_ios_live_smoke_support.py ...                                 [100%]\n\n============================= 107 passed in 3.96s ==============================\n",
+          "stderr": "",
+          "id": "CMD-001",
+          "core": true,
+          "failure_handling": null
+        },
+        {
+          "command": "python -c 'import tomllib, pathlib; from pymobile_mcp import __version__; v=tomllib.loads(pathlib.Path(\"pyproject.toml\").read_text())[\"project\"][\"version\"]; assert v == __version__ == \"0.3.0\", (v, __version__)'\n",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "id": "CMD-REL-001",
+          "core": true,
+          "failure_handling": null
+        },
+        {
+          "command": "git rev-parse -q --verify refs/tags/v0.3.0 && gh release view v0.3.0 --json tagName,body --jq \".tagName + \\\"\\\\n\\\" + .body\" | python -c 'import sys; t=sys.stdin.read().lower(); assert \"0.3.0\" in t; assert (\"black-box\" in t) or (\"parity\" in t); assert \"fleet\" in t; assert \"recording\" in t'\n",
+          "exit_code": 0,
+          "stdout": "b2dc167a4611b273c3318d138848632b3ce64bd9\n",
+          "stderr": "",
+          "id": "CMD-REL-002",
+          "core": true,
+          "failure_handling": null
+        },
+        {
+          "command": "python -c 'import subprocess; out=subprocess.check_output([\"git\",\"status\",\"--porcelain\",\"--\",\"tests/fixtures/mobile_mcp/bundle-manifest.json\"], text=True); assert out.strip()==\"\", out'\n",
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "id": "CMD-BUNDLE-001",
+          "core": true,
+          "failure_handling": null
+        }
+      ],
+      "providers": {}
+    }
+  ]
+}
+```

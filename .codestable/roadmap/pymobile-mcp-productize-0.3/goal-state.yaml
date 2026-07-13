@@ -1,11 +1,11 @@
 roadmap: "pymobile-mcp-productize-0.3"
-status: ready-to-dispatch
+status: running
 baseline_ref: "d1fccc7ebce6514622045ea7a3be7b91e15aed78"
 driver_kind: none
 driver_id: ""
 handoff_reason: ""
 handoff_next: ""
-current_feature_index: 0
+current_feature_index: 1
 features:
   - slug: "release-0.3-black-box"
     roadmap_item: "release-0.3-black-box"
@@ -15,7 +15,7 @@ features:
     review: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-review.md"
     qa: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-qa.md"
     acceptance: ".codestable/features/2026-07-13-release-0.3-black-box/release-0.3-black-box-acceptance.md"
-    status: pending
+    status: accepted
   - slug: "oracle-upgrade-playbook"
     roadmap_item: "oracle-upgrade-playbook"
     feature_dir: ".codestable/features/2026-07-13-oracle-upgrade-playbook"

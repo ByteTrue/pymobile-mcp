@@ -5,7 +5,7 @@ items:
   - slug: release-0.3-black-box
     description: 发布 v0.3.0；版本三元一致；CHANGELOG/README/regression-checklist 切割；GitHub Release 写清 black-box 与两项 exception
     depends_on: []
-    status: in-progress
+    status: done
     feature: 2026-07-13-release-0.3-black-box
     minimal_loop: true
     notes: core; pyproject+__version__+tag/Release; Unreleased→0.3.0; no runtime feature work
