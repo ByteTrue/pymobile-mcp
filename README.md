@@ -10,6 +10,7 @@ Public contract: fixed upstream `mobile-mcp@c5d7d27` — **23 tools by default**
 
 [![CI](https://github.com/ByteTrue/pymobile-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ByteTrue/pymobile-mcp/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/ByteTrue/pymobile-mcp?display_name=tag)](https://github.com/ByteTrue/pymobile-mcp/releases/latest)
+[![PyPI](https://img.shields.io/pypi/v/pymobile-mcp.svg)](https://pypi.org/project/pymobile-mcp/)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/downloads/)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
@@ -35,7 +36,7 @@ Current release: **0.3.0** · [Changelog](CHANGELOG.md) · [Live regression chec
 
 ## Install
 
-### From a git checkout (recommended while pre-PyPI)
+### From a git checkout (development)
 
 ```bash
 git clone https://github.com/ByteTrue/pymobile-mcp.git

@@ -10,13 +10,12 @@ authors = [
     {name = "ByteTrue"}
 ]
 readme = "README.md"
-license = {text = "GPL-3.0"}
+license = "GPL-3.0-only"
 requires-python = ">=3.10"
 keywords = ["mcp", "mobile", "automation", "android", "ios", "uiautomator2", "pymobiledevice3"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

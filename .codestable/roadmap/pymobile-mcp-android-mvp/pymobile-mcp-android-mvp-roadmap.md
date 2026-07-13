@@ -1,9 +1,9 @@
 ---
 doc_type: roadmap
 slug: pymobile-mcp-android-mvp
-status: active
+status: completed
 created: 2026-07-07
-last_reviewed: 2026-07-07
+last_reviewed: 2026-07-13
 tags: [mcp, mobile, android, ios, roadmap]
 related_requirements: []
 related_architecture: []

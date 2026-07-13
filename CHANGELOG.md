@@ -2,9 +2,11 @@
 
 ## Unreleased
 
-- Packaging: published `0.3.0` to PyPI via Trusted Publisher (`.github/workflows/publish.yml`)
+- Packaging: add root `LICENSE` (GPL-3.0), SPDX license field, PyPI badge; mark android-mvp roadmap completed
 
 ## 0.3.0 — 2026-07-13
+
+- Packaging: published `0.3.0` to PyPI via Trusted Publisher (`.github/workflows/publish.yml`)
 
 Black-box contract parity cut against pinned `mobile-mcp@c5d7d27`.
 
