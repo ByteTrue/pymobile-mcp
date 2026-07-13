@@ -3,33 +3,33 @@ created: 2026-07-13
 
 items:
   - slug: release-0.3-black-box
-    description: 发布 v0.3.0，沉淀 black-box parity 与四端证据为正式 cut，并写清两项 approved exception
+    description: 发布 v0.3.0；版本三元一致；CHANGELOG/README/regression-checklist 切割；GitHub Release 写清 black-box 与两项 exception
     depends_on: []
     status: pending
     feature: null
     minimal_loop: true
-    notes: version/CHANGELOG/GitHub Release/README; no runtime feature work
+    notes: core; pyproject+__version__+tag/Release; Unreleased→0.3.0; no runtime feature work
 
   - slug: oracle-upgrade-playbook
-    description: 固化 mobile-mcp pin 升级与 deterministic bundle 刷新 SOP（capture、hash、CMD-001~008、最小 live）
-    depends_on: [release-0.3-black-box]
-    status: pending
-    feature: null
-    minimal_loop: false
-    notes: docs-only; must be executable dry-run commands, not prose-only
-
-  - slug: pypi-publish
-    description: 打通 PyPI 发布与 tag CI；若 token/包名阻塞则记录 blocked-by-env 且不阻塞 git release
-    depends_on: [release-0.3-black-box]
-    status: pending
-    feature: null
-    minimal_loop: false
-    notes: optional distribution; may exit blocked without failing whole roadmap
-
-  - slug: exception-triage
-    description: 对 remote fleet provider 与 iOS real recording 做 go/no-go 决策与触发条件，不实现 runtime
+    description: 固化 mobile-mcp pin 维护/升级 SOP（no-op vs re-capture、CMD-001~008、exit 0/1/2、现有 scripts 入口）
     depends_on: []
     status: pending
     feature: null
     minimal_loop: false
-    notes: decision doc only; may spawn future roadmap, not implement providers
+    notes: core docs; hang scripts/*; MOBILE_MCP_SOURCE env; link black-box feature evidence commands
+
+  - slug: pypi-publish
+    description: 打通 PyPI 发布与 tag CI；成功或书面 blocked-by-env；不进入 core DoD
+    depends_on: [release-0.3-black-box]
+    status: pending
+    feature: null
+    minimal_loop: false
+    notes: optional; blocked-by-env allowed; never core fail/pass
+
+  - slug: exception-triage
+    description: fleet provider 与 iOS real recording 的 go/no-go 与触发条件；模板字段齐全；不实现 runtime
+    depends_on: []
+    status: pending
+    feature: null
+    minimal_loop: false
+    notes: core decision doc only; may spawn future roadmap
