@@ -1,10 +1,10 @@
 feature: release-0.3.1
-status: ready
+status: passed
 baseline_ref: 5ebcf2c15d8da960186929707d3c091aab5745a9
-stage: release
-review_reason: "Independent pre-release review returned READY; no metadata or artifact findings"
+stage: complete
+review_reason: "v0.3.1 published: CI, Trusted Publisher, GitHub Release, PyPI artifacts, and fresh install passed"
 handoff_next: ""
-review_next: "Commit release metadata and fast-forward origin/main"
+review_next: "Final post-publish audit and scoped evidence commit"
 design: .codestable/features/2026-07-20-release-0.3.1/release-0.3.1-design.md
 checklist: .codestable/features/2026-07-20-release-0.3.1/release-0.3.1-checklist.yaml
 review: .codestable/features/2026-07-20-release-0.3.1/release-0.3.1-review.md

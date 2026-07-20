@@ -2,8 +2,8 @@ feature: release-0.3.1
 created: 2026-07-20
 nature: non-functional
 current_summary:
-  stage: implementation
-  status: running
+  stage: acceptance
+  status: passed
 steps:
 - action: Bump package version metadata to 0.3.1
   status: done
@@ -12,19 +12,19 @@ steps:
 - action: Run tests, build, artifact inspection, and independent review
   status: done
 - action: Fast-forward main and create annotated tag plus GitHub Release
-  status: pending
+  status: done
 - action: Verify Trusted Publisher, PyPI, and fresh install smoke
-  status: pending
+  status: done
 checks:
 - item: version metadata equals 0.3.1
   status: passed
 - item: tests and build pass
   status: passed
 - item: main tag and GitHub Release align
-  status: pending
+  status: passed
 - item: PyPI 0.3.1 has wheel and sdist
-  status: pending
+  status: passed
 - item: fresh install reports 0.3.1 and CLI help succeeds
-  status: pending
+  status: passed
 - item: workspace is clean
   status: pending
