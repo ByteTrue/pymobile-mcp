@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import math
-import os
+import platform
 import shutil
 import subprocess
 import tempfile
@@ -44,7 +44,7 @@ def screenshot(data: bytes, scale: float) -> ImageContent:
 
 
 def _sips_available() -> bool:
-    return os.uname().sysname == "Darwin" and Path("/usr/bin/sips").is_file()
+    return platform.system() == "Darwin" and Path("/usr/bin/sips").is_file()
 
 
 def _scaling_available() -> bool:

@@ -177,7 +177,7 @@ Current live evidence passes on Android physical, Android emulator, iOS Simulato
 | `PYMOBILE_MCP_IOS_DEVICE` | pin iOS UDID |
 | `PYMOBILE_MCP_IOS_ACTIONS=1` | enable interaction steps in iOS core smoke |
 | `PYMOBILE_MCP_WDA_XCTRUNNER` | WDA runner bundle id (default `com.byte.WebDriverAgentRunner.xctrunner`) |
-| `PYMOBILE_MCP_WDA_HOST` / `PYMOBILE_MCP_WDA_PORT` | legacy WDA HTTP endpoint knobs (userspace path prefers in-process service client) |
+| `PYMOBILE_MCP_WDA_PORT` | WDA port used by the in-process userspace RSD service client (default `8100`; not a remote WDA URL) |
 | `PYMOBILE_MCP_IOS_IPA` + `PYMOBILE_MCP_IOS_DESTRUCTIVE=1` | allow iOS install/uninstall smoke |
 | `NO_PROXY=*` | recommended for iOS USB / usbmux |
 

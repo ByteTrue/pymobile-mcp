@@ -64,9 +64,8 @@ Covers: start/stop screenrecord → host mp4; list/get crash via dropbox.
 
 ## iOS (need paired device + installed WDA runner)
 
-Default runner: `com.byte.WebDriverAgentRunner.xctrunner`  
-Override: `PYMOBILE_MCP_WDA_XCTRUNNER`, `PYMOBILE_MCP_IOS_DEVICE`.
-
+Overrides: `PYMOBILE_MCP_WDA_XCTRUNNER`, `PYMOBILE_MCP_WDA_PORT`, and `PYMOBILE_MCP_IOS_DEVICE`.
+The port is used by the in-process userspace RSD service client; remote WDA host URLs are not supported.
 ### I1. Core UI (pmd3 userspace + WDA)
 ```bash
 PATH=.venv/bin:$PATH python tests/ios_pmd3_wda_live_smoke.py

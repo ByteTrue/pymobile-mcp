@@ -1,0 +1,41 @@
+feature: 2026-07-20-ios-gray-feedback
+created: 2026-07-20
+nature: functional
+current_summary:
+  stage: acceptance
+  status: passed
+  note: independent review, QA round 2, and acceptance audit passed; hardware live remains residual risk
+steps:
+- id: STEP-001
+  action: Add a Windows screenshot regression test and replace os.uname with a cross-platform platform check
+  status: done
+- id: STEP-002
+  action: Add an iOS core live-smoke child environment regression test and inherit the parent environment
+  status: done
+- id: STEP-003
+  action: Remove unsupported WDA_HOST claims from iOS core smoke output and user documentation
+  status: done
+- id: STEP-004
+  action: Run focused validation and full pytest
+  status: done
+checks:
+- id: CHECK-001
+  item: Windows screenshot falls back without os.uname failure
+  status: passed
+- id: CHECK-002
+  item: iOS core smoke passes WDA_XCTRUNNER and other parent environment settings to MCP
+  status: passed
+- id: CHECK-003
+  item: WDA_HOST is not advertised as a supported remote endpoint
+  status: passed
+- id: CHECK-004
+  item: focused and full test suites pass
+  status: passed
+dod:
+  commands:
+  - id: CMD-FOCUSED
+    command: PATH=.venv/bin:$PATH python -m pytest tests/test_gray_feedback.py
+    core: true
+  - id: CMD-ALL
+    command: PATH=.venv/bin:$PATH python -m pytest
+    core: true

@@ -1,0 +1,13 @@
+feature: ios-gray-feedback
+status: passed
+baseline_ref: b0efa9b1e6b8a56344ca6ac7495d98e26ba7431e
+stage: complete
+driver_kind: none
+review_reason: "Independent review, QA round 2, and acceptance audit passed; hardware live remains explicit non-core residual risk"
+handoff_next: ""
+review_next: "Scoped commit and final audit"
+design: .codestable/features/2026-07-20-ios-gray-feedback/ios-gray-feedback-design.md
+checklist: .codestable/features/2026-07-20-ios-gray-feedback/ios-gray-feedback-checklist.yaml
+review: .codestable/features/2026-07-20-ios-gray-feedback/ios-gray-feedback-review.md
+qa: .codestable/features/2026-07-20-ios-gray-feedback/ios-gray-feedback-qa.md
+acceptance: .codestable/features/2026-07-20-ios-gray-feedback/ios-gray-feedback-acceptance.md

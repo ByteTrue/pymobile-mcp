@@ -2,7 +2,8 @@
 
 Requires:
 - a paired iOS device visible to pymobiledevice3 usbmux, and
-- WebDriverAgent reachable at PYMOBILE_MCP_WDA_HOST:PYMOBILE_MCP_WDA_PORT (default 127.0.0.1:8100)
+- WebDriverAgent runner installed on the device (override bundle id with
+  PYMOBILE_MCP_WDA_XCTRUNNER)
 
 Without that environment this script exits 2 with status=blocked.
 """
@@ -29,11 +30,13 @@ async def main() -> int:
     from mcp.client.session import ClientSession
     from mcp.client.stdio import StdioServerParameters, stdio_client
 
+    env = dict(os.environ)
+    env["PYTHONPATH"] = "src"
     params = StdioServerParameters(
         command=sys.executable,
         args=["-m", "pymobile_mcp.cli", "run"],
         cwd=str(Path.cwd()),
-        env={"PYTHONPATH": "src"},
+        env=env,
     )
     async with stdio_client(params) as (read_stream, write_stream):
         async with ClientSession(read_stream, write_stream) as session:
@@ -58,7 +61,10 @@ async def main() -> int:
                             "reason": "no authorized iOS device via pymobiledevice3 usbmux",
                             "devices": devices_payload.get("devices", []),
                             "wda": {
-                                "host": os.environ.get("PYMOBILE_MCP_WDA_HOST", "127.0.0.1"),
+                                "xctrunner": os.environ.get(
+                                    "PYMOBILE_MCP_WDA_XCTRUNNER",
+                                    "com.byte.WebDriverAgentRunner.xctrunner",
+                                ),
                                 "port": os.environ.get("PYMOBILE_MCP_WDA_PORT", "8100"),
                             },
                         },

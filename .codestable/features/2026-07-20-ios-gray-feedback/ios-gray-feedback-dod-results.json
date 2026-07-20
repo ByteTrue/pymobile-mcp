@@ -1,0 +1,31 @@
+{
+  "gate_id": "dod-runner",
+  "stage": "implementation",
+  "status": "passed",
+  "blocking": [],
+  "warnings": [],
+  "evidence": [
+    {
+      "id": "CMD-FOCUSED",
+      "command": "uv run --extra dev python -m pytest tests/test_gray_feedback.py -q",
+      "exit_code": 0,
+      "stdout": "3 passed in 1.00s",
+      "core": true
+    },
+    {
+      "id": "CMD-ALL",
+      "command": "uv run --extra dev python -m pytest",
+      "exit_code": 0,
+      "stdout": "110 passed in 4.42s",
+      "core": true
+    },
+    {
+      "id": "DIFF-CHECK",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "stdout": "",
+      "core": true
+    }
+  ],
+  "providers": {}
+}
