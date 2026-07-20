@@ -14,7 +14,7 @@ Public contract: fixed upstream `mobile-mcp@c5d7d27` — **23 tools by default**
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/downloads/)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
-Current release: **0.3.0** · [Changelog](CHANGELOG.md) · [Live regression checklist](docs/regression-checklist.md)
+Current release: **0.3.1** · [Changelog](CHANGELOG.md) · [Live regression checklist](docs/regression-checklist.md)
 
 ## Features
 
@@ -57,13 +57,13 @@ python -m pytest -q
 ### From PyPI
 
 ```bash
-pip install pymobile-mcp==0.3.0
+pip install pymobile-mcp==0.3.1
 ```
 
 ### From GitHub (no local clone of tooling)
 
 ```bash
-pip install "git+https://github.com/ByteTrue/pymobile-mcp.git@v0.3.0"
+pip install "git+https://github.com/ByteTrue/pymobile-mcp.git@v0.3.1"
 ```
 
 > [!TIP]

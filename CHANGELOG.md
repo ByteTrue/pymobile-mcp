@@ -2,11 +2,14 @@
 
 ## Unreleased
 
-- Packaging: add root `LICENSE` (GPL-3.0), SPDX license field, PyPI badge; mark android-mvp roadmap completed
+## 0.3.1 — 2026-07-20
+
+- Windows: fix screenshot backend detection where `os.uname()` is unavailable; preserve the original PNG when no scaler is installed
+- iOS: forward the live-smoke parent environment so custom WDA runner, port, and device settings reach the MCP subprocess
+- iOS: stop advertising unsupported remote `PYMOBILE_MCP_WDA_HOST`; document `PYMOBILE_MCP_WDA_PORT` as the userspace RSD service-client port
+- Packaging: add root `LICENSE` (GPL-3.0), SPDX license field, and PyPI badge; mark the Android MVP roadmap completed
 
 ## 0.3.0 — 2026-07-13
-
-- Packaging: published `0.3.0` to PyPI via Trusted Publisher (`.github/workflows/publish.yml`)
 
 Black-box contract parity cut against pinned `mobile-mcp@c5d7d27`.
 
